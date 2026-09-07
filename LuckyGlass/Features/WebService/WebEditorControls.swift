@@ -54,7 +54,7 @@ struct WebFormSection<Content: View>: View {
     @ViewBuilder var content: () -> Content
 
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
+        RoundedRectangle(cornerRadius: LuckyTheme.Radius.panel, style: .continuous)
     }
 
     var body: some View {
@@ -151,7 +151,7 @@ struct WebField: View {
     private var raw: JSONValue? { data[field] }
 
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
+        RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
     }
 
     /// `Array.isArray(raw) ? raw.join("\n") : String(raw ?? "")`.
@@ -246,7 +246,7 @@ struct WebNumberInput: View {
     }
 
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
+        RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
     }
 
     var body: some View {
@@ -365,7 +365,7 @@ struct WebChoices: View {
 
     private func pill(_ option: WebOption) -> some View {
         let selected = option.value == current
-        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
         return Button {
             write(field, .string(option.value))
         } label: {

@@ -290,7 +290,8 @@ struct TunnelScreen: View {
                     Button {
                         Task { await loadList() }
                     } label: {
-                        LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
+                        Image(systemName: LuckySymbol.refresh)
+                            .font(.system(size: 15, weight: .semibold))
                     }
                     .disabled(fetching)
                     .accessibilityLabel("刷新")
@@ -546,7 +547,7 @@ extension TunnelScreen {
                       tone: LuckyTone = .brand,
                       action: @escaping () -> Void) -> some View {
         ServiceActionButton(title: title, symbol: symbol, tone: tone, fill: .soft, height: 42,
-                            radius: 12, disabled: disabled, action: action)
+                            radius: LuckyTheme.Radius.row, disabled: disabled, action: action)
     }
 }
 

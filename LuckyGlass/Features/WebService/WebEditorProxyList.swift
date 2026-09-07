@@ -60,7 +60,7 @@ extension WebEditorProxyList {
     /// full-strength accent border, a 17pt glyph and a 13/800 label, where the shared control would
     /// draw a 45% border, 13pt and 12/500.
     private var footer: some View {
-        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
         return Button(action: add) {
             HStack(spacing: 7) {
                 LuckyIconTile(symbol: "plus", size: 28, glyph: 13)
@@ -93,7 +93,7 @@ extension WebEditorProxyList {
     private func card(_ index: Int, _ proxy: JSONValue) -> some View {
         let id = draftId(index)
         let open = expandedProxyId == id
-        let shape = RoundedRectangle(cornerRadius: 14, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: LuckyTheme.Radius.panel, style: .continuous)
         return VStack(alignment: .leading, spacing: LuckyTheme.Space.m) {
             head(index, proxy, id, open)
             if open { expansion(index, proxy, id) }

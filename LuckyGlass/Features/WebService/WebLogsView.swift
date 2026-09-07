@@ -141,7 +141,7 @@ extension WebLogRow {
             .padding(.horizontal, 11)
             .frame(minHeight: 36)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: LuckyTheme.Radius.row, style: .continuous)
                     .fill(LuckyTheme.dangerSoft)
             )
         }

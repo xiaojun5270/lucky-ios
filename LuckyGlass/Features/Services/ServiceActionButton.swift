@@ -31,7 +31,7 @@ struct ServiceActionButton: View {
     var tone: LuckyTone = .brand
     var fill: Fill = .soft
     var height: CGFloat = 40
-    var radius: CGFloat = 8
+    var radius: CGFloat = LuckyTheme.Radius.row
     /// `flex: 1` in the original. `false` is a control sized by its own content.
     var expands: Bool = true
     var disabled: Bool = false

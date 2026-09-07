@@ -153,7 +153,8 @@ extension DockerScreen {
                     Button {
                         Task { await refresh() }
                     } label: {
-                        LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
+                        Image(systemName: LuckySymbol.refresh)
+                            .font(.system(size: 15, weight: .semibold))
                     }
                     .disabled(pageRefreshing)
                     .accessibilityLabel("刷新")
@@ -273,7 +274,8 @@ extension DockerScreen {
             .padding(.vertical, LuckyTheme.Space.s)
             .frame(minHeight: 40, alignment: .leading)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(LuckyTheme.successSoft, in: .rect(cornerRadius: 10))
+            .background(LuckyTheme.successSoft,
+                        in: .rect(cornerRadius: LuckyTheme.Radius.row))
     }
 
     /// §6's `selectDockerView(key)`. Leaving a view clears the search box and the log drawer;

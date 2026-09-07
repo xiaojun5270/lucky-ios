@@ -87,15 +87,23 @@ extension WebCgiCard {
     }
 
     private var verbs: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             Spacer(minLength: 0)
-            WebIconButton(symbol: "pencil", name: "编辑", text: nil, tint: LuckyTheme.accent) {
+            WebInlineActionButton(title: "编辑", symbol: "pencil", prominent: true) {
                 edit(item, key)
             }
-            WebIconButton(symbol: LuckySymbol.delete, name: "删除", text: nil,
-                          tint: LuckyTheme.danger, disabled: busy) {
-                remove(key, name)
+            Menu {
+                Button(role: .destructive) {
+                    remove(key, name)
+                } label: {
+                    Label("删除 CGI 实例", systemImage: LuckySymbol.delete)
+                }
+                .disabled(busy)
+            } label: {
+                LuckyIconTile(symbol: "ellipsis", size: 36, glyph: 15, tone: .idle)
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("CGI 更多操作")
         }
     }
 }

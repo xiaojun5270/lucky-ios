@@ -92,26 +92,37 @@ extension WebGroupCard {
         }
     }
 
-    /// `justifyContent: "flex-end"`. Four of these fit one line at every width the app supports, so
-    /// the row is an `HStack` behind a spacer where §12's seven needed a `LuckyWrap`.
+    /// Editing stays visible; ordering and deletion are secondary commands in the overflow menu.
     private var verbs: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             Spacer(minLength: 0)
-            WebIconButton(symbol: "arrow.up", name: "上移", text: nil,
-                          disabled: busy || index == 0) {
-                move(index, -1)
-            }
-            WebIconButton(symbol: "arrow.down", name: "下移", text: nil,
-                          disabled: busy || index == total - 1) {
-                move(index, 1)
-            }
-            WebIconButton(symbol: "pencil", name: "编辑", text: nil, tint: LuckyTheme.accent) {
+            WebInlineActionButton(title: "编辑", symbol: "pencil", prominent: true) {
                 edit(item, key)
             }
-            WebIconButton(symbol: LuckySymbol.delete, name: "删除", text: nil,
-                          tint: LuckyTheme.danger, disabled: busy) {
-                remove(key, name)
+            Menu {
+                Button {
+                    move(index, -1)
+                } label: {
+                    Label("上移", systemImage: "arrow.up")
+                }
+                .disabled(busy || index == 0)
+                Button {
+                    move(index, 1)
+                } label: {
+                    Label("下移", systemImage: "arrow.down")
+                }
+                .disabled(busy || index == total - 1)
+                Button(role: .destructive) {
+                    remove(key, name)
+                } label: {
+                    Label("删除分组", systemImage: LuckySymbol.delete)
+                }
+                .disabled(busy)
+            } label: {
+                LuckyIconTile(symbol: "ellipsis", size: 36, glyph: 15, tone: .idle)
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("分组更多操作")
         }
     }
 }

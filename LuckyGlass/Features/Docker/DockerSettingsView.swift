@@ -40,7 +40,7 @@ struct DockerSettingsView: View {
             // in hand, and an editor opened over an empty record would save an empty record.
             if config != nil {
                 ServiceActionButton(title: "编辑设置", symbol: LuckySymbol.settings, fill: .solid,
-                                    height: 46, radius: 12, glyph: 17) {
+                                    height: 46, radius: LuckyTheme.Radius.row, glyph: 17) {
                     actions.editConfig()
                 }
             }
@@ -63,7 +63,8 @@ struct DockerSettingsView: View {
             // 清理未使用资源 stays in the scroll rather than moving to a glass bar: it is the last
             // thing in the page and it opens a five-switch form, not a one-tap action.
             ServiceActionButton(title: "清理未使用资源", symbol: "exclamationmark.shield",
-                                tone: .danger, fill: .soft, height: 46, radius: 12, glyph: 17) {
+                                tone: .danger, fill: .soft, height: 46,
+                                radius: LuckyTheme.Radius.row, glyph: 17) {
                 actions.prune()
             }
         }
@@ -87,18 +88,19 @@ extension DockerSettingsView {
             ])))
             HStack(spacing: LuckyTheme.Space.s) {
                 ServiceActionButton(title: "添加分组", symbol: LuckySymbol.add, fill: .tinted,
-                                    height: 44, radius: 12, glyph: 15) {
+                                    height: 44, radius: LuckyTheme.Radius.row, glyph: 15) {
                     actions.createGroup()
                 }
                 // `borderColor: primary, backgroundColor: card` — the same tinted border over the
                 // card fill, which `.card` draws with a neutral label; the accent belongs to the
                 // border here, and the label follows the design system rather than the border.
                 ServiceActionButton(title: "编辑分组", symbol: LuckySymbol.edit, fill: .card,
-                                    height: 44, radius: 12, glyph: 15) {
+                                    height: 44, radius: LuckyTheme.Radius.row, glyph: 15) {
                     actions.updateGroup()
                 }
                 ServiceActionButton(title: "删除分组", symbol: LuckySymbol.delete, tone: .danger,
-                                    fill: .tinted, height: 44, radius: 12, glyph: 15) {
+                                    fill: .tinted, height: 44,
+                                    radius: LuckyTheme.Radius.row, glyph: 15) {
                     actions.removeGroup()
                 }
             }
@@ -121,7 +123,8 @@ extension DockerSettingsView {
         panel(title: "镜像升级", symbol: DockerView.images.symbol) {
             StructuredDataView(value: payload["imageUpgrades"] ?? .null)
             ServiceActionButton(title: "清除升级状态", symbol: LuckySymbol.delete, tone: .danger,
-                                fill: .soft, height: 44, radius: 12, glyph: 15) {
+                                fill: .soft, height: 44,
+                                radius: LuckyTheme.Radius.row, glyph: 15) {
                 actions.clearUpgrades()
             }
         }
@@ -137,11 +140,12 @@ extension DockerSettingsView {
             StructuredDataView(value: mirrorList)
             HStack(spacing: LuckyTheme.Space.s) {
                 ServiceActionButton(title: "添加", symbol: LuckySymbol.add, fill: .tinted,
-                                    height: 44, radius: 12, glyph: 15) {
+                                    height: 44, radius: LuckyTheme.Radius.row, glyph: 15) {
                     actions.addMirror()
                 }
                 ServiceActionButton(title: "删除", symbol: LuckySymbol.delete, tone: .danger,
-                                    fill: .tinted, height: 44, radius: 12, glyph: 15) {
+                                    fill: .tinted, height: 44,
+                                    radius: LuckyTheme.Radius.row, glyph: 15) {
                     actions.removeMirror()
                 }
             }

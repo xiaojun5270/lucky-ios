@@ -252,7 +252,8 @@ extension ServiceAdvancedSheet {
             HStack(spacing: LuckyTheme.Space.s) {
                 AdvancedField(placeholder: "选项，如 enable", text: $option, height: 40,
                               font: LuckyTheme.Text.caption)
-                ServiceActionButton(title: "应用选项", fill: .soft, height: 40, radius: 10,
+                ServiceActionButton(title: "应用选项", fill: .soft, height: 40,
+                                    radius: LuckyTheme.Radius.row,
                                     expands: false, disabled: busy) {
                     changeRecordOption(entry, index)
                 }
@@ -283,7 +284,8 @@ extension ServiceAdvancedSheet {
                 .accessibilityLabel("IP 类型 \(ipType)")
                 AdvancedField(placeholder: "输入获取 IP 的命令", text: $command)
                 ServiceActionButton(title: actionBusy == "test-command" ? "测试中" : "测试",
-                                    fill: .solid, height: 44, radius: 11, expands: false,
+                                    fill: .solid, height: 44,
+                                    radius: LuckyTheme.Radius.row, expands: false,
                                     disabled: busy) { testCommand() }
             }
         }
@@ -297,7 +299,7 @@ extension ServiceAdvancedSheet {
                 .foregroundStyle(LuckyTheme.textSecondary)
             ServiceActionButton(title: actionBusy == "test-webhook" ? "发送中..." : "发送测试",
                                 symbol: "arrow.triangle.branch", fill: .soft, height: 44,
-                                radius: 11, disabled: busy) { testWebhook() }
+                                radius: LuckyTheme.Radius.row, disabled: busy) { testWebhook() }
         }
     }
 
@@ -383,7 +385,8 @@ extension ServiceAdvancedSheet {
             if ServiceRecord.isAcmeIssuing(current) {
                 ServiceActionButton(
                     title: actionBusy == "cancel-acme" ? "取消中..." : "取消 ACME 签发",
-                    symbol: "xmark", tone: .danger, fill: .soft, height: 44, radius: 11,
+                    symbol: "xmark", tone: .danger, fill: .soft, height: 44,
+                    radius: LuckyTheme.Radius.row,
                     disabled: busy
                 ) { confirmCancelAcme() }
             } else {
@@ -399,7 +402,7 @@ extension ServiceAdvancedSheet {
         LuckyCard(spacing: LuckyTheme.Space.s) {
             advancedHeader("运行日志", symbol: LuckySymbol.logs)
             ServiceActionButton(title: "查看分页日志", symbol: LuckySymbol.logs, fill: .soft,
-                                height: 44, radius: 11) { showLogs() }
+                                height: 44, radius: LuckyTheme.Radius.row) { showLogs() }
         }
     }
 }

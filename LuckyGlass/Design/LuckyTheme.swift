@@ -62,12 +62,12 @@ enum LuckyTheme {
     /// radius minus the padding between them, which `ConcentricRectangle` derives from the
     /// container shape — these constants are the *outer* values.
     enum Radius {
-        static let hero: CGFloat = 20
-        static let card: CGFloat = 8
-        static let panel: CGFloat = 8
-        static let row: CGFloat = 7
-        static let chip: CGFloat = 6
-        static let field: CGFloat = 7
+        static let hero: CGFloat = 28
+        static let card: CGFloat = 20
+        static let panel: CGFloat = 16
+        static let row: CGFloat = 14
+        static let chip: CGFloat = 10
+        static let field: CGFloat = 14
         /// Floor passed to `.concentric(minimum:)` so a nested corner never collapses to a square.
         static let concentricFloor: CGFloat = 8
     }
@@ -89,14 +89,14 @@ enum LuckyTheme {
         static let stack: CGFloat = 14
         /// Inner padding of a card, and therefore the concentric inset of anything drawn inside
         /// one.
-        static let cardInset: CGFloat = 15
+        static let cardInset: CGFloat = 18
     }
 
     // MARK: - Typography
 
     /// A compact system face keeps dense labels quiet; code and paths retain a monospaced face.
     enum Text {
-        static let hero = Font.system(size: 30, weight: .bold, design: .default)
+        static let hero = Font.system(size: 28, weight: .bold, design: .default)
         static let title = Font.system(size: 21, weight: .bold, design: .default)
         static let sectionTitle = Font.system(size: 13, weight: .bold, design: .default)
         static let cardTitle = Font.system(size: 16, weight: .semibold, design: .default)

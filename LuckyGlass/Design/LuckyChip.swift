@@ -49,7 +49,7 @@ struct LuckyChip: View {
         .padding(.horizontal, LuckyTheme.Space.s)
         .padding(.vertical, 5)
         .background {
-            let shape = RoundedRectangle(cornerRadius: LuckyTheme.Radius.chip, style: .continuous)
+            let shape = Capsule(style: .continuous)
             if filled {
                 shape.fill(tone.tint)
             } else {
@@ -81,12 +81,11 @@ struct LuckyMethodBadge: View {
     var body: some View {
         Text(method.rawValue)
             .font(.system(size: compact ? 9 : 10, weight: .heavy, design: .rounded))
-            .kerning(0.3)
             .foregroundStyle(Color.white)
             .padding(.horizontal, compact ? 5 : 6)
             .padding(.vertical, compact ? 2 : 3)
             .background(
-                RoundedRectangle(cornerRadius: 6, style: .continuous).fill(method.tone.tint)
+                RoundedRectangle(cornerRadius: 8, style: .continuous).fill(method.tone.tint)
             )
             .accessibilityLabel("\(method.rawValue) 请求")
     }

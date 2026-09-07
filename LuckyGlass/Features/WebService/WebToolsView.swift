@@ -39,20 +39,23 @@ extension WebToolsView {
                 .foregroundStyle(LuckyTheme.textPrimary)
             HStack(spacing: LuckyTheme.Space.s) {
                 ServiceActionButton(title: "读取轻量列表", symbol: "list.bullet.rectangle",
-                                    tone: .brand, fill: .tinted, height: 40, radius: 10) {
+                                    tone: .brand, fill: .tinted, height: 40,
+                                    radius: LuckyTheme.Radius.row) {
                     Task { await lite() }
                 }
                 // The original leaves this live and lets it answer `{}` while the tip read is still
                 // in flight; disabling it instead keeps the drawer from opening on an empty record.
                 ServiceActionButton(title: "查看提示信息", symbol: "info.circle",
-                                    tone: .brand, fill: .tinted, height: 40, radius: 10,
+                                    tone: .brand, fill: .tinted, height: 40,
+                                    radius: LuckyTheme.Radius.row,
                                     disabled: loading, action: showTips)
             }
             if hasTipVersion {
                 // `typeof tips.data?.version === "string"` — no version, no button, and a numeric
                 // one would not be sent either.
                 ServiceActionButton(title: "标记当前提示为已读", symbol: "checkmark.circle",
-                                    tone: .brand, fill: .plain, height: 38, radius: 10,
+                                    tone: .brand, fill: .plain, height: 38,
+                                    radius: LuckyTheme.Radius.row,
                                     disabled: busy, action: markTip)
             }
         }
@@ -64,7 +67,8 @@ extension WebToolsView {
                 .font(LuckyTheme.Text.bodyMedium)
                 .foregroundStyle(LuckyTheme.textPrimary)
             ServiceActionButton(title: "填写请求参数", symbol: LuckySymbol.edit, tone: .brand,
-                                fill: .solid, height: 40, radius: 10, action: template)
+                                fill: .solid, height: 40,
+                                radius: LuckyTheme.Radius.row, action: template)
         }
     }
 

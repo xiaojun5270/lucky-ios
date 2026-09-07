@@ -85,7 +85,7 @@ struct DockerVolumesView: View {
                 DockerCountChip(count: items.count)
             }
             ServiceActionButton(title: "导入数据卷", symbol: LuckySymbol.upload, fill: .tinted,
-                                height: 44, radius: 12, glyph: 17) {
+                                height: 44, radius: LuckyTheme.Radius.row, glyph: 17) {
                 importVolume()
             }
         }

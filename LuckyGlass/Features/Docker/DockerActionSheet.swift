@@ -66,7 +66,8 @@ struct DockerActionSheet: View {
                     Button {
                         close()
                     } label: {
-                        LuckyIconTile(symbol: "xmark", size: 28, glyph: 12, tone: .idle)
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
                     }
                     .accessibilityLabel("关闭")
                 }
@@ -89,7 +90,9 @@ private struct DockerActionRow: View {
     var item: DockerActionItem
     var close: () -> Void
 
-    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: 12, style: .continuous) }
+    private var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: LuckyTheme.Radius.panel, style: .continuous)
+    }
 
     var body: some View {
         Button {

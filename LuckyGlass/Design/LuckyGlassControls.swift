@@ -229,14 +229,14 @@ struct LuckyGlassMenuPicker<Value: Hashable>: View {
         } label: {
             HStack(spacing: LuckyTheme.Space.xs) {
                 if let symbol = current?.symbol {
-                    LuckyIconTile(symbol: symbol, size: 24, glyph: 11, tone: tone)
+                    LuckyIconTile(symbol: symbol, size: 20, glyph: 9, tone: tone)
                 }
-                Text(current?.title ?? title).font(LuckyTheme.Text.button).lineLimit(1)
+                Text(current?.title ?? title).font(LuckyTheme.Text.captionMedium).lineLimit(1)
                 Image(systemName: "chevron.up.chevron.down").font(.system(size: 10, weight: .bold))
             }
             .foregroundStyle(LuckyTheme.textPrimary)
-            .padding(.horizontal, LuckyTheme.Space.l)
-            .padding(.vertical, 10)
+            .padding(.horizontal, LuckyTheme.Space.m)
+            .padding(.vertical, 8)
             // Glass goes on the label rather than through `buttonStyle`: a `Menu` does not reliably
             // forward a button style to its label on iOS, and the shape here must be exact.
             .glassEffect(.regular, in: .capsule)

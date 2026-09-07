@@ -52,7 +52,7 @@ struct LuckyWorkspaceHeader<Trailing: View>: View {
     @ViewBuilder var trailing: () -> Trailing
 
     var body: some View {
-        VStack(alignment: .leading, spacing: LuckyTheme.Space.m) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: LuckyTheme.Space.m) {
                 VStack(alignment: .leading, spacing: 5) {
                     Text(eyebrow)
@@ -72,13 +72,9 @@ struct LuckyWorkspaceHeader<Trailing: View>: View {
                 Spacer(minLength: LuckyTheme.Space.s)
                 trailing()
             }
-            HStack(spacing: 0) {
-                Rectangle().fill(LuckyTheme.accent).frame(width: 72)
-                Rectangle().fill(LuckyTheme.info).frame(width: 34)
-                Rectangle().fill(LuckyTheme.warning).frame(width: 18)
-                Rectangle().fill(LuckyTheme.hairline)
-            }
-            .frame(height: 3)
+            Capsule(style: .continuous)
+                .fill(LuckyTheme.accent)
+                .frame(width: 48, height: 4)
         }
         .accessibilityElement(children: .contain)
     }

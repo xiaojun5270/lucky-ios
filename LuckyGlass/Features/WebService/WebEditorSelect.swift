@@ -33,7 +33,7 @@ struct WebSelect: View {
     }
 
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
+        RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
     }
 
     var body: some View {
@@ -143,7 +143,7 @@ struct WebListenTypes: View {
 
 extension WebListenTypes {
     private func pill(_ label: String, _ value: String, _ selected: Bool) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
         return Button {
             toggle(value)
         } label: {
@@ -220,7 +220,7 @@ struct WebPortStepper: View {
 
 extension WebPortStepper {
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
+        RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
     }
 
     /// `selectTextOnFocus` has no SwiftUI equivalent; the field keeps the caret where it is tapped.

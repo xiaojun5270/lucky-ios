@@ -37,7 +37,8 @@ extension WebSettingsView {
                 .lineSpacing(4)
                 .fixedSize(horizontal: false, vertical: true)
             ServiceActionButton(title: "编辑全部设置", symbol: "doc.badge.gearshape",
-                                tone: .brand, fill: .solid, height: 42, radius: 10,
+                                tone: .brand, fill: .solid, height: 42,
+                                radius: LuckyTheme.Radius.row,
                                 action: edit)
         }
     }

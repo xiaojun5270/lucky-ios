@@ -74,13 +74,9 @@ struct LoginScreen: View {
                         .foregroundStyle(LuckyTheme.textSecondary)
                 }
             }
-            HStack(spacing: 0) {
-                Rectangle().fill(LuckyTheme.accent).frame(width: 86)
-                Rectangle().fill(LuckyTheme.info).frame(width: 42)
-                Rectangle().fill(LuckyTheme.warning).frame(width: 22)
-                Rectangle().fill(LuckyTheme.hairline)
-            }
-            .frame(height: 3)
+            Capsule(style: .continuous)
+                .fill(LuckyTheme.accent)
+                .frame(width: 48, height: 4)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

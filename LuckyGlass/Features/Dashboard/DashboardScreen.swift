@@ -92,7 +92,7 @@ private struct DashboardHostPanel: View {
     var body: some View {
         LuckyCard(padding: 0, spacing: 0) {
             HStack(spacing: LuckyTheme.Space.m) {
-                LuckyIconTile(symbol: "server.rack", size: 44, glyph: 20, tone: .brand)
+                LuckyIconTile(symbol: "server.rack", size: 42, glyph: 19, tone: .brand)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("主机状态")
                         .font(.system(size: 18, weight: .bold))
@@ -106,7 +106,7 @@ private struct DashboardHostPanel: View {
                           tone: connected ? .ok : .warning,
                           symbol: connected ? "checkmark" : "arrow.clockwise")
             }
-            .padding(LuckyTheme.Space.l)
+            .padding(LuckyTheme.Space.cardInset)
 
             LuckyHairline()
 
@@ -125,7 +125,7 @@ private struct DashboardHostPanel: View {
     }
 
     private func metric(_ label: String, _ value: String, tone: LuckyTone) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .center, spacing: 4) {
             Text(label)
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(LuckyTheme.textTertiary)
@@ -137,7 +137,7 @@ private struct DashboardHostPanel: View {
                 .minimumScaleFactor(0.65)
         }
         .padding(.horizontal, LuckyTheme.Space.m)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .center)
         .accessibilityElement(children: .combine)
     }
 
@@ -156,7 +156,7 @@ private struct DashboardRouteButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                LuckyIconTile(symbol: symbol, size: 34, glyph: 15, tone: tone)
+                LuckyIconTile(symbol: symbol, size: 36, glyph: 16, tone: tone)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(LuckyTheme.Text.captionMedium)
                     Text(detail)
@@ -167,11 +167,11 @@ private struct DashboardRouteButton: View {
                 .foregroundStyle(LuckyTheme.textPrimary)
                 Spacer(minLength: 0)
             }
-            .padding(10)
-            .frame(maxWidth: .infinity, minHeight: 58, alignment: .leading)
-            .background(LuckyTheme.surface, in: .rect(cornerRadius: LuckyTheme.Radius.row))
+            .padding(12)
+            .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
+            .background(LuckyTheme.surface, in: .rect(cornerRadius: LuckyTheme.Radius.panel))
             .overlay {
-                RoundedRectangle(cornerRadius: LuckyTheme.Radius.row, style: .continuous)
+                RoundedRectangle(cornerRadius: LuckyTheme.Radius.panel, style: .continuous)
                     .strokeBorder(LuckyTheme.hairline, lineWidth: LuckyTheme.strokeWidth)
             }
         }
@@ -253,9 +253,9 @@ private struct ReverseProxyCard: View {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.white)
-                        .frame(width: 30, height: 30)
+                        .frame(width: 36, height: 36)
                         .background(
-                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
                                 .fill(LuckyTheme.idle)
                         )
                 }
@@ -273,9 +273,9 @@ private struct ReverseProxyCard: View {
             portsMasked.toggle()
         } label: {
             Image(systemName: portsMasked ? "eye" : "eye.slash")
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(Color.white)
-                .frame(width: 40, height: 40)
+                .frame(width: 36, height: 36)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(portsMasked ? LuckyTheme.accent : LuckyTheme.idle)
@@ -299,6 +299,7 @@ private struct ReverseProxyCard: View {
         }
         .frame(minHeight: 66)
         .background(ConcentricRectangle().fill(LuckyTheme.surfaceRaised))
+        .clipShape(.rect(cornerRadius: LuckyTheme.Radius.panel))
     }
 
     private func statColumn(_ label: String, _ value: String, tint: Color,
@@ -360,7 +361,10 @@ private struct ReverseProxyCard: View {
                 .foregroundStyle(LuckyTheme.textTertiary)
                 .lineLimit(1)
         }
-        .frame(minHeight: 34)
+        .padding(10)
+        .frame(minHeight: 44)
+        .background(LuckyTheme.surfaceRaised,
+                    in: .rect(cornerRadius: LuckyTheme.Radius.row))
         .accessibilityElement(children: .combine)
     }
 }
@@ -387,18 +391,16 @@ struct DashboardScreen: View {
     private var active: Bool { navigator.selection == .dashboard && phase == .active }
 
     var body: some View {
-        LuckyPage(spacing: 22, refresh: { await refreshAll() }) {
+        LuckyPage(spacing: 18, refresh: { await refreshAll() }) {
             DashboardLiveReader { statusStore in
                 LuckyWorkspaceHeader(
                     eyebrow: "实时工作台",
                     title: "运行总览",
                     subtitle: "资源、网络与服务状态"
                 ) {
-                    LuckyStatusDot(tone: statusStore.connected ? .ok : .warning,
-                                   pulsing: statusStore.connected, size: 10)
-                        .padding(12)
-                        .background(LuckyTheme.surface, in: .circle)
-                        .overlay(Circle().strokeBorder(LuckyTheme.hairline, lineWidth: 1))
+                    LuckyChip(text: statusStore.connected ? "实时" : "连接中",
+                              tone: statusStore.connected ? .ok : .warning,
+                              symbol: statusStore.connected ? "waveform.path.ecg" : "arrow.clockwise")
                 }
                 if !statusStore.error.isEmpty, statusStore.data == nil {
                     LuckyErrorCard(message: statusStore.error)

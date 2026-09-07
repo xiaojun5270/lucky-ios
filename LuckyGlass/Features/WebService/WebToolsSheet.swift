@@ -45,7 +45,8 @@ struct WebToolsSheet: View {
                     Button {
                         close()
                     } label: {
-                        LuckyIconTile(symbol: "xmark", size: 28, glyph: 12, tone: .idle)
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
                     }
                     .accessibilityLabel("关闭更多操作")
                 }
@@ -117,7 +118,7 @@ private struct WebToolsRow: View {
     var action: () -> Void
 
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
+        RoundedRectangle(cornerRadius: LuckyTheme.Radius.panel, style: .continuous)
     }
 
     var body: some View {

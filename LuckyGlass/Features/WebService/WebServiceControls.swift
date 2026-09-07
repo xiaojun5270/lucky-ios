@@ -44,7 +44,7 @@ struct WebIconButton: View {
     var action: () -> Void
 
     private var shape: RoundedRectangle {
-        RoundedRectangle(cornerRadius: 10, style: .continuous)
+        RoundedRectangle(cornerRadius: LuckyTheme.Radius.row, style: .continuous)
     }
 
     var body: some View {
@@ -65,6 +65,48 @@ struct WebIconButton: View {
         .disabled(disabled)
         .opacity(disabled ? 0.4 : 1)
         .accessibilityLabel(name)
+    }
+}
+
+/// A restrained inline command for card footers. Only the primary action is filled; secondary
+/// actions use a quiet bordered surface so a row of controls keeps a clear hierarchy.
+struct WebInlineActionButton: View {
+    var title: String
+    var symbol: String
+    var tone: LuckyTone = .brand
+    var prominent: Bool = false
+    var disabled: Bool = false
+    var action: () -> Void
+
+    private var shape: Capsule { Capsule(style: .continuous) }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if prominent {
+                    Image(systemName: symbol)
+                        .font(.system(size: 12, weight: .semibold))
+                } else {
+                    LuckyIconTile(symbol: symbol, size: 22, glyph: 10, tone: tone)
+                }
+                Text(title)
+                    .font(.system(size: 12, weight: .semibold))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(prominent ? Color.white : LuckyTheme.textPrimary)
+            .padding(.horizontal, prominent ? 14 : 10)
+            .frame(minHeight: 36)
+            .background(shape.fill(prominent ? tone.tint : LuckyTheme.surface))
+            .overlay(
+                shape.strokeBorder(prominent ? Color.clear : LuckyTheme.hairline,
+                                   lineWidth: LuckyTheme.strokeWidth)
+            )
+            .contentShape(shape)
+        }
+        .buttonStyle(.plain)
+        .disabled(disabled)
+        .opacity(disabled ? 0.4 : 1)
+        .accessibilityLabel(title)
     }
 }
 

@@ -39,7 +39,8 @@ struct ServiceSheet<Content: View, Actions: View>: View {
                     Button {
                         close()
                     } label: {
-                        LuckyIconTile(symbol: "xmark", size: 28, glyph: 12, tone: .idle)
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
                     }
                     .accessibilityLabel("关闭")
                 }

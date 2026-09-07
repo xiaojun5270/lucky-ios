@@ -184,7 +184,7 @@ struct ContainerStatsGrid: View {
         }
         .frame(minHeight: 54)
         .padding(LuckyTheme.Space.s)
-        .background(LuckyTheme.surfaceRaised, in: .rect(cornerRadius: 12))
+        .background(LuckyTheme.surfaceRaised, in: .rect(cornerRadius: LuckyTheme.Radius.row))
     }
 
     private func cell(_ metric: Metric) -> some View {
@@ -261,9 +261,10 @@ struct DockerIconButton: View {
             .padding(.horizontal, 10)
             .frame(minWidth: 64, minHeight: 42)
             .frame(maxWidth: fluid ? .infinity : nil)
-            .background(LuckyTheme.surfaceRaised, in: .rect(cornerRadius: 12))
+            .background(LuckyTheme.surfaceRaised,
+                        in: .rect(cornerRadius: LuckyTheme.Radius.row))
             .overlay {
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: LuckyTheme.Radius.row)
                     .stroke(LuckyTheme.hairline, lineWidth: 1)
             }
         }
@@ -294,9 +295,10 @@ struct ContainerCommandButton: View {
             .foregroundStyle(LuckyTheme.textPrimary)
             .frame(maxWidth: .infinity)
             .frame(minHeight: 42)
-            .background(LuckyTheme.surfaceRaised, in: .rect(cornerRadius: 12))
+            .background(LuckyTheme.surfaceRaised,
+                        in: .rect(cornerRadius: LuckyTheme.Radius.row))
             .overlay {
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: LuckyTheme.Radius.row)
                     .stroke(LuckyTheme.hairline, lineWidth: 1)
             }
         }

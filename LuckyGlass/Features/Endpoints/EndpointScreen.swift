@@ -564,7 +564,7 @@ struct EndpointScreen: View {
     /// The picker row. Its border turns success-tinted once a file is held, so the state reads at a
     /// glance even when the name is elided.
     private var fileRow: some View {
-        let shape = RoundedRectangle(cornerRadius: 11, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
         return Button {
             inputError = ""
             picking = true

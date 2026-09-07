@@ -118,18 +118,21 @@ extension ComposeCreateEditor {
     private var tools: some View {
         LuckyTileGrid(minimum: 132, spacing: LuckyTheme.Space.s) {
             ServiceActionButton(title: "导入文件", symbol: LuckySymbol.upload, fill: .tinted,
-                                height: 44, radius: 12, disabled: busy, glyph: 16) {
+                                height: 44, radius: LuckyTheme.Radius.row,
+                                disabled: busy, glyph: 16) {
                 inputError = ""
                 picking = true
             }
             // lucide `ClipboardPaste`. The web branch's secure-context check has no counterpart:
             // `UIPasteboard` is always readable, though iOS may ask the user first.
             ServiceActionButton(title: "粘贴 YAML", symbol: "doc.on.clipboard", fill: .tinted,
-                                height: 44, radius: 12, disabled: busy, glyph: 16) {
+                                height: 44, radius: LuckyTheme.Radius.row,
+                                disabled: busy, glyph: 16) {
                 paste()
             }
             ServiceActionButton(title: "使用模板", symbol: "doc.text", fill: .tinted,
-                                height: 44, radius: 12, disabled: busy, glyph: 16) {
+                                height: 44, radius: LuckyTheme.Radius.row,
+                                disabled: busy, glyph: 16) {
                 loadTemplate()
             }
         }
@@ -196,7 +199,8 @@ extension ComposeCreateEditor {
         }
         .padding(LuckyTheme.Space.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LuckyTheme.accentSoft, in: .rect(cornerRadius: 12))
+        .background(LuckyTheme.accentSoft,
+                    in: .rect(cornerRadius: LuckyTheme.Radius.row))
     }
 }
 
@@ -324,7 +328,8 @@ struct DockerDetailViewer: View {
                     Button {
                         close()
                     } label: {
-                        LuckyIconTile(symbol: "xmark", size: 28, glyph: 12, tone: .idle)
+                        Image(systemName: "xmark")
+                            .font(.system(size: 14, weight: .semibold))
                     }
                     .accessibilityLabel("关闭详情")
                 }
@@ -363,6 +368,7 @@ struct DockerDetailViewer: View {
         .padding(.horizontal, LuckyTheme.Space.m)
         .frame(minHeight: 44)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LuckyTheme.accentSoft, in: .rect(cornerRadius: 12))
+        .background(LuckyTheme.accentSoft,
+                    in: .rect(cornerRadius: LuckyTheme.Radius.row))
     }
 }

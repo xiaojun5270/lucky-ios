@@ -114,7 +114,7 @@ extension TunnelFieldRow {
     }
 
     private func chipBackground(_ selected: Bool) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
         return shape
             .fill(selected ? LuckyTone.brand.fill : LuckyTheme.surface)
             .overlay(shape.strokeBorder(selected ? LuckyTheme.accent : LuckyTheme.hairline,

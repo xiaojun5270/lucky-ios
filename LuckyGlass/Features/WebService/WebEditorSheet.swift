@@ -525,7 +525,7 @@ extension WebEditorSheet {
     /// 应用到所有子规则. Drawn rather than a `ServiceActionButton(fill: .tinted)`: §21.1 gives it a
     /// full-strength accent border over the plain card fill, where the shared control tints both.
     private var wafButton: some View {
-        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
         return Button(action: applyWafToAllProxies) {
             HStack(spacing: 7) {
                 LuckyIconTile(symbol: "checkmark.shield", size: 28, glyph: 12)

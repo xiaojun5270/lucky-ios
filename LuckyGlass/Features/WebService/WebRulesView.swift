@@ -50,8 +50,8 @@ struct WebRulesView: View {
 
 // MARK: - 规则卡片
 
-/// §12.1 — one `Panel` per rule: a disclosure header, the enable switch with its own sentence, the
-/// seven verbs, and the sub-rules underneath when this is the open one.
+/// One rule panel: disclosure header, enable state and the primary edit action. Less frequent
+/// commands live in a menu so the card does not become a toolbar.
 private struct WebRuleCard: View {
     var item: LuckyListItem
     var index: Int
@@ -76,10 +76,9 @@ private struct WebRuleCard: View {
     }
 
     var body: some View {
-        LuckyCard(spacing: LuckyTheme.Space.m) {
+        LuckyCard(spacing: 14) {
             header
             status
-            verbs
             if isOpen { expansion }
         }
     }
@@ -124,64 +123,85 @@ extension WebRuleCard {
     /// The switch and its sentence are the entire status derivation — no pill, no TLS badge, no
     /// protocol badge.
     private var status: some View {
-        HStack(spacing: LuckyTheme.Space.s) {
+        HStack(spacing: 10) {
             WebEnableSwitch(isOn: enabled, disabled: busy, name: "启用规则") { on in
                 actions.setEnabled(key, on)
             }
             .fixedSize()
-            Text(enabled ? "规则已启用" : "规则已停用")
-                .font(.system(size: 11, weight: .bold, design: .rounded))
+            Text(enabled ? "已启用" : "已停用")
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(LuckyTheme.textSecondary)
             Spacer(minLength: 0)
-        }
-    }
-}
-
-extension WebRuleCard {
-    /// §12.1's second row. The original splits the seven into a left and a right cluster with
-    /// `space-between`; seven of them never fit one phone-width line, so they wrap in source order
-    /// instead — which puts 上移 / 下移 first either way.
-    private var verbs: some View {
-        LuckyWrap(spacing: 6, lineSpacing: 6) {
-            WebIconButton(symbol: "arrow.up", name: "上移", text: nil,
-                          disabled: busy || index == 0) {
-                actions.move(index, -1)
-            }
-            WebIconButton(symbol: "arrow.down", name: "下移", text: nil,
-                          disabled: busy || index == total - 1) {
-                actions.move(index, 1)
-            }
-            WebIconButton(symbol: "list.number", name: "子规则排序", text: "排序",
-                          disabled: busy || subs.count < 2) {
-                actions.order(WebOrderRequest(key: key, name: name, keys: subKeys))
-            }
-            WebIconButton(symbol: "ellipsis", name: "规则更多操作", text: "更多") {
-                actions.tools(WebToolsTarget(ruleKey: key, ruleName: name))
-            }
-            WebIconButton(symbol: LuckySymbol.copy, name: "复制规则", text: nil,
-                          tint: LuckyTheme.accent) {
-                actions.edit(key, true)
-            }
-            WebIconButton(symbol: "pencil", name: "编辑", text: nil, tint: LuckyTheme.accent) {
+            WebInlineActionButton(title: "编辑", symbol: "pencil", prominent: true) {
                 actions.edit(key, false)
             }
-            WebIconButton(symbol: LuckySymbol.delete, name: "删除", text: nil,
-                          tint: LuckyTheme.danger, disabled: busy) {
-                actions.remove(key, name)
-            }
+            moreMenu
         }
+        .padding(10)
+        .background(LuckyTheme.surfaceRaised,
+                    in: .rect(cornerRadius: LuckyTheme.Radius.row))
+    }
+
+    private var moreMenu: some View {
+        Menu {
+            Section("顺序") {
+                Button {
+                    actions.move(index, -1)
+                } label: {
+                    Label("上移", systemImage: "arrow.up")
+                }
+                .disabled(busy || index == 0)
+                Button {
+                    actions.move(index, 1)
+                } label: {
+                    Label("下移", systemImage: "arrow.down")
+                }
+                .disabled(busy || index == total - 1)
+                Button {
+                    actions.order(WebOrderRequest(key: key, name: name, keys: subKeys))
+                } label: {
+                    Label("子规则排序", systemImage: "list.number")
+                }
+                .disabled(busy || subs.count < 2)
+            }
+            Section("规则") {
+                Button {
+                    actions.edit(key, true)
+                } label: {
+                    Label("复制规则", systemImage: LuckySymbol.copy)
+                }
+                Button {
+                    actions.tools(WebToolsTarget(ruleKey: key, ruleName: name))
+                } label: {
+                    Label("更多操作", systemImage: "wrench.and.screwdriver")
+                }
+                Button(role: .destructive) {
+                    actions.remove(key, name)
+                } label: {
+                    Label("删除规则", systemImage: LuckySymbol.delete)
+                }
+                .disabled(busy)
+            }
+        } label: {
+            LuckyIconTile(symbol: "ellipsis", size: 36, glyph: 15, tone: .idle)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("规则更多操作")
     }
 
     /// The 排序 payload. `keyOf` again, so a sub-rule with no key of its own is ordered by the
     /// position it currently holds — which is what the sheet then shows.
     private var subKeys: [String] { subs.enumerated().map { WebRecord.key($1, $0) } }
+}
 
+extension WebRuleCard {
     /// §12.2 — only for the open rule.
     private var expansion: some View {
         VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
             LuckyHairline()
             ServiceActionButton(title: "添加子规则", symbol: LuckySymbol.add, tone: .brand,
-                                fill: .tinted, height: 38, radius: 10) {
+                                fill: .tinted, height: 40,
+                                radius: LuckyTheme.Radius.row) {
                 actions.editSub(key, nil)
             }
             if subs.isEmpty {
@@ -276,24 +296,33 @@ extension WebSubRuleCard {
     }
 
     private var verbs: some View {
-        LuckyWrap(spacing: 6, lineSpacing: 6) {
-            WebIconButton(symbol: LuckySymbol.copy, name: "复制完整网址", text: "复制网址",
-                          tint: LuckyTheme.accent) {
+        HStack(spacing: 8) {
+            WebInlineActionButton(title: "复制网址", symbol: LuckySymbol.copy) {
                 actions.copyURL(rule, sub)
             }
-            WebIconButton(symbol: "ellipsis", name: "子规则更多操作", text: "更多") {
-                actions.tools(WebToolsTarget(ruleKey: parentKey, ruleName: parentName,
-                                             subKey: key, subName: name,
-                                             fileService: fileService))
-            }
-            WebIconButton(symbol: "pencil", name: "编辑子规则", text: "编辑",
-                          tint: LuckyTheme.accent) {
+            WebInlineActionButton(title: "编辑", symbol: "pencil", prominent: true) {
                 actions.editSub(parentKey, key)
             }
-            WebIconButton(symbol: LuckySymbol.delete, name: "删除子规则", text: "删除",
-                          tint: LuckyTheme.danger, disabled: busy) {
-                actions.removeSub(parentKey, key, name)
+            Spacer(minLength: 0)
+            Menu {
+                Button {
+                    actions.tools(WebToolsTarget(ruleKey: parentKey, ruleName: parentName,
+                                                 subKey: key, subName: name,
+                                                 fileService: fileService))
+                } label: {
+                    Label("更多操作", systemImage: "wrench.and.screwdriver")
+                }
+                Button(role: .destructive) {
+                    actions.removeSub(parentKey, key, name)
+                } label: {
+                    Label("删除子规则", systemImage: LuckySymbol.delete)
+                }
+                .disabled(busy)
+            } label: {
+                LuckyIconTile(symbol: "ellipsis", size: 34, glyph: 14, tone: .idle)
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("子规则更多操作")
         }
     }
 }

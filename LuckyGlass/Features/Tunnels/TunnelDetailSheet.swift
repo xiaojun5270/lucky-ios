@@ -123,7 +123,8 @@ extension TunnelDetailSheet {
         let floor = itemKey.isEmpty ? 1 : 0
         return HStack(spacing: LuckyTheme.Space.s) {
             ServiceActionButton(title: page == 1 && !itemKey.isEmpty ? "最新日志" : "上一页",
-                                symbol: "arrow.up", fill: .soft, height: 42, radius: 12,
+                                symbol: "arrow.up", fill: .soft, height: 42,
+                                radius: LuckyTheme.Radius.row,
                                 disabled: page <= floor || fetching) {
                 setPage(page - 1)
             }
@@ -132,7 +133,8 @@ extension TunnelDetailSheet {
                 .foregroundStyle(LuckyTheme.textSecondary)
                 .frame(minWidth: 34)
             ServiceActionButton(title: page == 0 ? "历史日志" : "下一页",
-                                symbol: "arrow.down", fill: .soft, height: 42, radius: 12,
+                                symbol: "arrow.down", fill: .soft, height: 42,
+                                radius: LuckyTheme.Radius.row,
                                 disabled: fetching || (page > 0 && count < 100)) {
                 setPage(page + 1)
             }
@@ -239,6 +241,6 @@ extension TunnelDetailSheet {
     private func verb(_ title: String, _ symbol: String, tone: LuckyTone = .brand,
                       action: @escaping () -> Void) -> some View {
         ServiceActionButton(title: title, symbol: symbol, tone: tone, fill: .soft, height: 42,
-                            radius: 12, disabled: pending, action: action)
+                            radius: LuckyTheme.Radius.row, disabled: pending, action: action)
     }
 }

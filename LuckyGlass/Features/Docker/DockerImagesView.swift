@@ -77,14 +77,17 @@ extension DockerImagesView {
                                symbol: DockerView.images.symbol) {
                 DockerCountChip(count: entries.count)
             }
-            ServiceActionButton(title: "构建", symbol: "wrench.and.screwdriver", fill: .tinted,
-                                height: 44, radius: 12, glyph: 16) {
-                actions.build()
-            }
-            ServiceActionButton(title: "镜像高级工具", symbol: "wrench.and.screwdriver",
-                                fill: .card, height: 44, radius: 12,
-                                name: "打开镜像高级工具", glyph: 16) {
-                actions.tools()
+            HStack(spacing: LuckyTheme.Space.s) {
+                ServiceActionButton(title: "构建", symbol: "hammer", fill: .solid,
+                                    height: 44, radius: LuckyTheme.Radius.row, glyph: 15) {
+                    actions.build()
+                }
+                ServiceActionButton(title: "高级工具", symbol: "wrench.and.screwdriver",
+                                    fill: .card, height: 44,
+                                    radius: LuckyTheme.Radius.row,
+                                    name: "打开镜像高级工具", glyph: 15) {
+                    actions.tools()
+                }
             }
             HStack(spacing: LuckyTheme.Space.s) {
                 upgradeButton
@@ -97,7 +100,8 @@ extension DockerImagesView {
     /// 升级状态 with nothing selected, 检测所选 with a selection, 处理中 while either runs.
     private var upgradeButton: some View {
         ServiceActionButton(title: upgradeTitle, symbol: LuckySymbol.refresh, fill: .tinted,
-                            height: 44, radius: 12, disabled: batch.actionBusy,
+                            height: 44, radius: LuckyTheme.Radius.row,
+                            disabled: batch.actionBusy,
                             busy: batch.upgradeChecking, name: upgradeName, glyph: 16) {
             actions.upgrade()
         }
@@ -118,7 +122,8 @@ extension DockerImagesView {
     /// VoiceOver announce it as a toggle rather than reading two unrelated labels.
     private var modeButton: some View {
         ServiceActionButton(title: batch.mode ? "退出批量" : "批量操作", symbol: "checklist",
-                            fill: batch.mode ? .tinted : .card, height: 44, radius: 12,
+                            fill: batch.mode ? .tinted : .card, height: 44,
+                            radius: LuckyTheme.Radius.row,
                             disabled: batch.pending || batch.upgradeChecking, glyph: 16) {
             actions.toggleMode()
         }
@@ -143,16 +148,18 @@ extension DockerImagesView {
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LuckyTheme.surfaceRaised, in: .rect(cornerRadius: 14))
+        .background(LuckyTheme.surfaceRaised,
+                    in: .rect(cornerRadius: LuckyTheme.Radius.panel))
         .overlay {
-            RoundedRectangle(cornerRadius: 14)
+            RoundedRectangle(cornerRadius: LuckyTheme.Radius.panel)
                 .stroke(LuckyTheme.hairline, lineWidth: LuckyTheme.strokeWidth)
         }
     }
 
     private var selectAllButton: some View {
         ServiceActionButton(title: batch.allVisibleSelected ? "取消全选" : "全选",
-                            symbol: "checklist", fill: .muted, height: 44, radius: 11,
+                            symbol: "checklist", fill: .muted, height: 44,
+                            radius: LuckyTheme.Radius.row,
                             disabled: batch.visibleCount == 0 || batch.actionBusy,
                             name: batch.allVisibleSelected
                                 ? "取消选择当前显示的全部镜像"
@@ -166,7 +173,7 @@ extension DockerImagesView {
     /// "look through the packages".
     private var scanButton: some View {
         ServiceActionButton(title: scanTitle, symbol: "magnifyingglass.circle", fill: .muted,
-                            height: 44, radius: 11,
+                            height: 44, radius: LuckyTheme.Radius.row,
                             disabled: batch.visibleCount == 0 || batch.actionBusy,
                             busy: batch.scanChecking,
                             name: batch.scanChecking ? "正在检查未使用镜像" : "选择当前显示的未使用镜像",
@@ -186,7 +193,7 @@ extension DockerImagesView {
     private var deleteButton: some View {
         ServiceActionButton(title: deleteTitle, symbol: LuckySymbol.delete,
                             tone: batch.validCount > 0 ? .danger : .idle,
-                            fill: .muted, height: 44, radius: 11,
+                            fill: .muted, height: 44, radius: LuckyTheme.Radius.row,
                             disabled: batch.validCount == 0 || batch.actionBusy,
                             busy: batch.deleteProgress != nil,
                             name: "删除已选择的 \(batch.validCount) 个镜像", glyph: 15,
@@ -285,9 +292,8 @@ private struct DockerImageCard: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    /// The four row verbs. `flexWrap` in the original; four buttons of minimum 64 pt and a 7 pt gap
-    /// come to 277 pt, which fits the card interior on the narrowest supported phone, so the wrap
-    /// never triggers and an `HStack` sharing the width equally is the truer reading.
+    /// Details and tagging are common actions. Inspection tools and deletion live in the menu so
+    /// every image card keeps one compact command row.
     private var verbs: some View {
         HStack(spacing: 7) {
             DockerIconButton(symbol: LuckySymbol.search, label: "详情",
@@ -298,14 +304,22 @@ private struct DockerImageCard: View {
                              tint: LuckyTheme.accent, fluid: true) {
                 actions.tag(entry.id)
             }
-            DockerIconButton(symbol: "ellipsis", label: "更多",
-                             tint: LuckyTheme.info, fluid: true) {
-                actions.menu(DockerImageMenu(key: entry.id, name: name))
+            Menu {
+                Button {
+                    actions.menu(DockerImageMenu(key: entry.id, name: name))
+                } label: {
+                    Label("更多操作", systemImage: "wrench.and.screwdriver")
+                }
+                Button(role: .destructive) {
+                    actions.remove(entry.id, name)
+                } label: {
+                    Label("删除镜像", systemImage: LuckySymbol.delete)
+                }
+            } label: {
+                LuckyIconTile(symbol: "ellipsis", size: 42, glyph: 17, tone: .idle)
             }
-            DockerIconButton(symbol: LuckySymbol.delete, label: "删除",
-                             tint: LuckyTheme.danger, fluid: true) {
-                actions.remove(entry.id, name)
-            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("镜像更多操作")
         }
     }
 }

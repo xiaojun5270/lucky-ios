@@ -139,7 +139,7 @@ struct LuckyFunctionIcon: View {
     var color: Color = LuckyTheme.accent
 
     var body: some View {
-        RoundedRectangle(cornerRadius: size * 0.31, style: .continuous)
+        RoundedRectangle(cornerRadius: size * 0.36, style: .continuous)
             .fill(color)
             .frame(width: size, height: size)
             .overlay(

@@ -115,7 +115,8 @@ struct ServiceDetailScreen: View {
                     Button {
                         Task { await refresh() }
                     } label: {
-                        LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
+                        Image(systemName: LuckySymbol.refresh)
+                            .font(.system(size: 15, weight: .semibold))
                     }
                     .disabled(fetching || logsFetching)
                     .accessibilityLabel("刷新")
@@ -301,7 +302,8 @@ struct ServiceDetailScreen: View {
     private var logControls: some View {
         HStack(spacing: LuckyTheme.Space.s) {
             if logKey != nil {
-                ServiceActionButton(title: "查看模块日志", fill: .muted, height: 36, radius: 9,
+                ServiceActionButton(title: "查看模块日志", fill: .muted, height: 36,
+                                    radius: LuckyTheme.Radius.row,
                                     expands: false) {
                     logKey = nil
                     logPage = 1
@@ -311,7 +313,7 @@ struct ServiceDetailScreen: View {
                                 symbol: LuckySymbol.restart,
                                 tone: logMode == .recent ? .brand : .idle,
                                 fill: logMode == .recent ? .soft : .muted,
-                                height: 36, radius: 9, expands: false) {
+                                height: 36, radius: LuckyTheme.Radius.row, expands: false) {
                 logMode = logMode == .recent ? .page : .recent
                 logPage = 1
             }
@@ -451,7 +453,7 @@ struct ServiceDetailScreen: View {
     private func secondaryVerbs(_ item: LuckyListItem, key: String, name: String) -> some View {
         if kind == .ddns || kind == .ssl {
             ServiceActionButton(title: "更多操作", symbol: "ellipsis", tone: .idle, fill: .muted,
-                                height: 38, radius: 9) {
+                                height: 38, radius: LuckyTheme.Radius.row) {
                 advanced = ServiceAdvancedRequest(key: key, name: name, item: item)
             }
         }

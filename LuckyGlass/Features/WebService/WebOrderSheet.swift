@@ -77,11 +77,11 @@ extension WebOrderSheet {
                 .padding(.horizontal, 10)
                 .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
                 .background(
-                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    RoundedRectangle(cornerRadius: LuckyTheme.Radius.row, style: .continuous)
                         .fill(LuckyTheme.surfaceRaised)
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    RoundedRectangle(cornerRadius: LuckyTheme.Radius.row, style: .continuous)
                         .strokeBorder(LuckyTheme.hairline, lineWidth: LuckyTheme.strokeWidth)
                 )
             arrow("arrow.up", name: "上移子规则", disabled: index == 0) { move(index, -1) }

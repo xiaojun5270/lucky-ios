@@ -24,9 +24,10 @@ struct LuckyCard<Content: View>: View {
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(shape.fill(LuckyTheme.surface))
+            .clipShape(shape)
             .overlay(
                 shape.strokeBorder(
-                    tone?.tint.opacity(0.60) ?? LuckyTheme.hairline,
+                    tone?.tint.opacity(0.42) ?? LuckyTheme.hairline,
                     lineWidth: LuckyTheme.strokeWidth
                 )
             )
@@ -79,13 +80,13 @@ struct LuckySectionHeader<Trailing: View>: View {
     @ViewBuilder var trailing: () -> Trailing
 
     var body: some View {
-        HStack(alignment: .center, spacing: LuckyTheme.Space.m) {
+        HStack(alignment: .center, spacing: 10) {
             if let symbol {
-                LuckyIconTile(symbol: symbol, size: 30, glyph: 13)
+                LuckyIconTile(symbol: symbol, size: 28, glyph: 12)
             }
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.system(size: 17, weight: .bold))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(LuckyTheme.textPrimary)
                     .textCase(nil)
                 if let subtitle, !subtitle.isEmpty {

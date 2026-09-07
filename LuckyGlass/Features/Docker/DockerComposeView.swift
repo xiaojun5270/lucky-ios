@@ -141,7 +141,8 @@ struct DockerComposeView: View {
                 DockerCountChip(count: items.count)
             }
             ServiceActionButton(title: "扫描项目", symbol: LuckySymbol.search, fill: .tinted,
-                                height: 46, radius: 12, name: "扫描 Compose 项目", glyph: 17) {
+                                height: 46, radius: LuckyTheme.Radius.row,
+                                name: "扫描 Compose 项目", glyph: 17) {
                 scan()
             }
         }

@@ -7,7 +7,7 @@ struct SettingsScreen: View {
     @State private var confirming = false
 
     var body: some View {
-        LuckyPage(spacing: 22) {
+        LuckyPage(spacing: 18) {
             LuckyWorkspaceHeader(
                 eyebrow: "系统偏好",
                 title: "连接与安全",

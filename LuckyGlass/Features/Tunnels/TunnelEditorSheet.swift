@@ -58,7 +58,7 @@ struct TunnelEditorSheet: View {
             if webhookVisible {
                 ServiceActionButton(title: testing ? "测试中" : "测试 Webhook",
                                     symbol: LuckySymbol.send, fill: .tinted, height: 42,
-                                    radius: 12, disabled: busy) {
+                                    radius: LuckyTheme.Radius.row, disabled: busy) {
                     Task { await test() }
                 }
             }
