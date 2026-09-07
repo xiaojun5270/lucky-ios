@@ -33,7 +33,7 @@ struct LogsScreen: View {
                 Button {
                     Task { await poll() }
                 } label: {
-                    Image(systemName: LuckySymbol.refresh)
+                    LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
                 }
                 .disabled(fetching)
                 .accessibilityLabel("刷新")

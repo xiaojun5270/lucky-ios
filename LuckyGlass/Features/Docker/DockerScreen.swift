@@ -153,7 +153,7 @@ extension DockerScreen {
                     Button {
                         Task { await refresh() }
                     } label: {
-                        Image(systemName: LuckySymbol.refresh)
+                        LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
                     }
                     .disabled(pageRefreshing)
                     .accessibilityLabel("刷新")

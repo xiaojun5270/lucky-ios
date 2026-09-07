@@ -66,7 +66,7 @@ struct DockerActionSheet: View {
                     Button {
                         close()
                     } label: {
-                        Image(systemName: "xmark")
+                        LuckyIconTile(symbol: "xmark", size: 28, glyph: 12, tone: .idle)
                     }
                     .accessibilityLabel("关闭")
                 }
@@ -99,8 +99,7 @@ private struct DockerActionRow: View {
             item.action()
         } label: {
             HStack(spacing: 9) {
-                Image(systemName: item.symbol)
-                    .font(.system(size: 17, weight: .semibold))
+                LuckyFunctionIcon(symbol: item.symbol, size: 30, glyph: 13, color: item.tint)
                 Text(item.label)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .lineLimit(1)
@@ -108,7 +107,7 @@ private struct DockerActionRow: View {
             }
             // The label takes the icon's colour too, which is what makes 删除容器 read as a warning
             // at a glance rather than only on inspection.
-            .foregroundStyle(item.tint)
+            .foregroundStyle(LuckyTheme.textPrimary)
             .padding(.horizontal, 11)
             .frame(maxWidth: .infinity, minHeight: 48)
             .background(shape.fill(LuckyTheme.surfaceRaised))

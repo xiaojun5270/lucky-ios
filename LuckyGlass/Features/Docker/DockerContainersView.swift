@@ -119,11 +119,7 @@ private struct DockerContainerCard: View {
             }
             // The 34×34 ellipsis affordance. The whole row is the button, so this only has to look
             // like one.
-            Image(systemName: "ellipsis")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(LuckyTheme.textSecondary)
-                .frame(width: 34, height: 34)
-                .background(LuckyTheme.surfaceRaised, in: .rect(cornerRadius: 11))
+            LuckyIconTile(symbol: "ellipsis", size: 34, glyph: 16, tone: .idle)
         }
         .frame(minHeight: 54)
     }

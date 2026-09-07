@@ -80,7 +80,7 @@ struct WebServiceScreen: View {
                     Button {
                         Task { await refresh() }
                     } label: {
-                        Image(systemName: LuckySymbol.refresh)
+                        LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
                     }
                     .disabled(fetching || logsFetching)
                     .accessibilityLabel("刷新")
@@ -870,6 +870,5 @@ extension WebServiceScreen {
             }
     }
 }
-
 
 

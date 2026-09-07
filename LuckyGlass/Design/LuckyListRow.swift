@@ -36,11 +36,7 @@ struct LuckyListRow<Trailing: View>: View {
         LuckyCard(spacing: LuckyTheme.Space.s) {
             HStack(alignment: .center, spacing: LuckyTheme.Space.m) {
                 if let symbol {
-                    Image(systemName: symbol)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(tone.tint)
-                        .frame(width: 34, height: 34)
-                        .background(ConcentricRectangle().fill(tone.fill))
+                    LuckyIconTile(symbol: symbol, size: 36, glyph: 16, tone: tone)
                 }
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: LuckyTheme.Space.xs) {
@@ -69,7 +65,12 @@ struct LuckyListRow<Trailing: View>: View {
                 if showsChevron {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(LuckyTheme.textTertiary)
+                        .foregroundStyle(Color.white)
+                        .frame(width: 24, height: 24)
+                        .background(
+                            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                .fill(LuckyTheme.idle)
+                        )
                 }
             }
             if !chips.isEmpty {

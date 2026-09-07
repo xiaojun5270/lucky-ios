@@ -62,9 +62,8 @@ struct SslDropdown: View {
                         .foregroundStyle(LuckyTheme.textPrimary)
                         .lineLimit(1)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(open ? LuckyTheme.accent : LuckyTheme.textTertiary)
+                    LuckyFunctionIcon(symbol: "chevron.down", size: 24, glyph: 10,
+                                      color: open ? LuckyTheme.accent : LuckyTheme.idle)
                         .rotationEffect(.degrees(open ? 180 : 0))
                 }
                 .padding(.horizontal, LuckyTheme.Space.m)
@@ -110,17 +109,17 @@ struct SslDropdown: View {
                 HStack(spacing: LuckyTheme.Space.s) {
                     Text(option.label)
                         .font(selected ? LuckyTheme.Text.bodyMedium : LuckyTheme.Text.body)
-                        .foregroundStyle(selected ? LuckyTheme.accent : LuckyTheme.textPrimary)
+                        .foregroundStyle(selected ? Color.white : LuckyTheme.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if selected {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(LuckyTheme.accent)
+                            .foregroundStyle(Color.white)
                     }
                 }
                 .padding(.horizontal, LuckyTheme.Space.m)
                 .frame(minHeight: 42)
-                .background(selected ? LuckyTheme.accentSoft : Color.clear)
+                .background(selected ? LuckyTheme.accent : Color.clear)
                 .contentShape(Rectangle())
             }
         }
@@ -350,9 +349,8 @@ extension SslCertificateAddSheet {
                 }
             } label: {
                 HStack(spacing: LuckyTheme.Space.s) {
-                    Image(systemName: symbol)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(loaded ? LuckyTheme.success : LuckyTheme.accent)
+                    LuckyFunctionIcon(symbol: symbol, size: 28, glyph: 12,
+                                      color: loaded ? LuckyTheme.success : LuckyTheme.accent)
                     Text(fileBusy == slot ? "正在读取..." : (name.isEmpty ? placeholder : name))
                         .font(LuckyTheme.Text.body)
                         .foregroundStyle(name.isEmpty ? LuckyTheme.textSecondary

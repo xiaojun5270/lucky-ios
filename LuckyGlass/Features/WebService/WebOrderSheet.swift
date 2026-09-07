@@ -96,14 +96,8 @@ extension WebOrderSheet {
     private func arrow(_ symbol: String, name: String, disabled: Bool,
                        action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(disabled ? LuckyTheme.textTertiary : LuckyTheme.accent)
-                .frame(width: 36, height: 36)
-                .background(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(disabled ? LuckyTheme.surfaceSunken : LuckyTheme.accentSoft)
-                )
+            LuckyFunctionIcon(symbol: symbol, size: 36, glyph: 16,
+                              color: disabled ? LuckyTheme.idle : LuckyTheme.accent)
         }
         .buttonStyle(.plain)
         .disabled(disabled)

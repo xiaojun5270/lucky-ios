@@ -61,9 +61,7 @@ struct WebFormSection<Content: View>: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: LuckyTheme.Space.s) {
                 if let symbol {
-                    Image(systemName: symbol)
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(LuckyTheme.accent)
+                    LuckyIconTile(symbol: symbol, size: 28, glyph: 12)
                 }
                 Text(title)
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
@@ -93,9 +91,7 @@ struct WebSecurityHeading: View {
             LuckyHairline()
                 .padding(.vertical, LuckyTheme.Space.hair)
             HStack(spacing: 7) {
-                Image(systemName: "checkmark.shield")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.accent)
+                LuckyIconTile(symbol: "checkmark.shield", size: 26, glyph: 11)
                 Text("安全设置")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(LuckyTheme.textPrimary)

@@ -45,13 +45,13 @@ struct LuckyChip: View {
                 .font(LuckyTheme.Text.captionMedium)
                 .lineLimit(1)
         }
-        .foregroundStyle(tone.tint)
+        .foregroundStyle(filled ? Color.white : tone.tint)
         .padding(.horizontal, LuckyTheme.Space.s)
         .padding(.vertical, 5)
         .background {
             let shape = RoundedRectangle(cornerRadius: LuckyTheme.Radius.chip, style: .continuous)
             if filled {
-                shape.fill(tone.fill)
+                shape.fill(tone.tint)
             } else {
                 shape.strokeBorder(tone.tint.opacity(0.45), lineWidth: LuckyTheme.strokeWidth)
             }
@@ -82,11 +82,11 @@ struct LuckyMethodBadge: View {
         Text(method.rawValue)
             .font(.system(size: compact ? 9 : 10, weight: .heavy, design: .rounded))
             .kerning(0.3)
-            .foregroundStyle(method.tone.tint)
+            .foregroundStyle(Color.white)
             .padding(.horizontal, compact ? 5 : 6)
             .padding(.vertical, compact ? 2 : 3)
             .background(
-                RoundedRectangle(cornerRadius: 6, style: .continuous).fill(method.tone.fill)
+                RoundedRectangle(cornerRadius: 6, style: .continuous).fill(method.tone.tint)
             )
             .accessibilityLabel("\(method.rawValue) 请求")
     }
@@ -102,10 +102,10 @@ struct LuckyCountBadge: View {
         Text("\(count)")
             .font(.system(size: 11, weight: .bold, design: .rounded))
             .monospacedDigit()
-            .foregroundStyle(tone.tint)
+            .foregroundStyle(Color.white)
             .padding(.horizontal, 7)
             .padding(.vertical, 2)
-            .background(Capsule(style: .continuous).fill(tone.fill))
+            .background(Capsule(style: .continuous).fill(tone.tint))
             .contentTransition(.numericText())
     }
 }

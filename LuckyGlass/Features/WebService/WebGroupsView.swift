@@ -77,9 +77,7 @@ extension WebGroupCard {
     /// `marginTop` of its own.
     private var header: some View {
         HStack(alignment: .center, spacing: 10) {
-            Image(systemName: WebPane.groups.symbol)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(LuckyTheme.accent)
+            LuckyIconTile(symbol: WebPane.groups.symbol, size: 32, glyph: 14)
             VStack(alignment: .leading, spacing: 0) {
                 Text(name)
                     .font(LuckyTheme.Text.cardTitle)

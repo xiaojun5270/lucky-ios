@@ -44,11 +44,7 @@ struct LuckyDisclosureCard<Content: View>: View {
     private var header: some View {
         HStack(spacing: LuckyTheme.Space.m) {
             if let symbol {
-                Image(systemName: symbol)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(tone.tint)
-                    .frame(width: 30, height: 30)
-                    .background(ConcentricRectangle().fill(tone.fill))
+                LuckyIconTile(symbol: symbol, size: 32, glyph: 14, tone: tone)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -66,7 +62,12 @@ struct LuckyDisclosureCard<Content: View>: View {
             if let count { LuckyCountBadge(count: count, tone: tone) }
             Image(systemName: "chevron.down")
                 .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(LuckyTheme.textTertiary)
+                .foregroundStyle(Color.white)
+                .frame(width: 24, height: 24)
+                .background(
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(LuckyTheme.idle)
+                )
                 .rotationEffect(.degrees(expanded ? 0 : -90))
         }
         .contentShape(.rect)

@@ -55,7 +55,7 @@ struct ServiceActionButton: View {
                         .controlSize(.mini)
                         .tint(label)
                 } else if let symbol {
-                    Image(systemName: symbol).font(.system(size: glyph, weight: .semibold))
+                    actionIcon(symbol)
                 }
                 Text(title)
                     .font(LuckyTheme.Text.captionMedium)
@@ -77,6 +77,16 @@ struct ServiceActionButton: View {
 
     private var shape: RoundedRectangle {
         RoundedRectangle(cornerRadius: radius, style: .continuous)
+    }
+
+    @ViewBuilder
+    private func actionIcon(_ symbol: String) -> some View {
+        switch fill {
+        case .solid:
+            Image(systemName: symbol).font(.system(size: glyph, weight: .semibold))
+        default:
+            LuckyIconTile(symbol: symbol, size: 23, glyph: min(glyph, 11), tone: tone)
+        }
     }
 
     private var label: Color {

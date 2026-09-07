@@ -132,12 +132,12 @@ extension WebLogRow {
             disconnect(clientKey)
         } label: {
             HStack(spacing: 5) {
-                Image(systemName: "nosign").font(.system(size: 13, weight: .semibold))
+                LuckyIconTile(symbol: "nosign", size: 24, glyph: 11, tone: .danger)
                 Text("断开客户端")
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .lineLimit(1)
             }
-            .foregroundStyle(LuckyTheme.danger)
+            .foregroundStyle(LuckyTheme.textPrimary)
             .padding(.horizontal, 11)
             .frame(minHeight: 36)
             .background(

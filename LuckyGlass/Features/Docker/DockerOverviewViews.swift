@@ -204,11 +204,7 @@ private struct DockerSummaryTile: View {
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
-                Image(systemName: symbol)
-                    .font(.system(size: 19, weight: .semibold))
-                    .foregroundStyle(tint)
-                    .frame(width: 38, height: 38)
-                    .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(fill))
+                LuckyFunctionIcon(symbol: symbol, size: 38, glyph: 18, color: tint)
                 HStack(alignment: .firstTextBaseline, spacing: LuckyTheme.Space.xs) {
                     Text(value)
                         .font(LuckyTheme.Text.metricSmall)

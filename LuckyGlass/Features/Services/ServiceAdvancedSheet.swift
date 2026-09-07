@@ -169,9 +169,7 @@ extension ServiceAdvancedSheet {
     func advancedHeader(_ title: String, symbol: String, trailing: String = "",
                         trailingSymbol: String = "") -> some View {
         HStack(spacing: LuckyTheme.Space.s) {
-            Image(systemName: symbol)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(LuckyTheme.accent)
+            LuckyIconTile(symbol: symbol, size: 28, glyph: 12)
             Text(title)
                 .font(LuckyTheme.Text.cardTitle)
                 .foregroundStyle(LuckyTheme.textPrimary)
@@ -311,16 +309,19 @@ extension ServiceAdvancedSheet {
                 withAnimation(LuckyTheme.Motion.snap) { clientsOpen.toggle() }
             } label: {
                 HStack(spacing: LuckyTheme.Space.s) {
-                    Image(systemName: "wifi")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(LuckyTheme.accent)
+                    LuckyIconTile(symbol: "wifi", size: 30, glyph: 13)
                     Text("odhcpd 客户端")
                         .font(LuckyTheme.Text.cardTitle)
                         .foregroundStyle(LuckyTheme.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Image(systemName: clientsOpen ? "chevron.up" : "chevron.down")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(LuckyTheme.textSecondary)
+                        .foregroundStyle(Color.white)
+                        .frame(width: 24, height: 24)
+                        .background(
+                            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                .fill(LuckyTheme.idle)
+                        )
                 }
                 .frame(minHeight: 42)
             }
@@ -355,9 +356,7 @@ extension ServiceAdvancedSheet {
         VStack(alignment: .leading, spacing: 0) {
             if index > 0 { LuckyHairline() }
             HStack(spacing: LuckyTheme.Space.s) {
-                Image(systemName: "person.2")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.textSecondary)
+                LuckyIconTile(symbol: "person.2", size: 26, glyph: 11, tone: .idle)
                 Text(ServiceRecord.pick(client, ["Hostname", "hostname", "Name", "name",
                                                  "IP", "ip"], "客户端"))
                     .font(LuckyTheme.Text.label)
@@ -636,11 +635,8 @@ struct AdvancedIconButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: glyph, weight: .semibold))
-                .foregroundStyle(disabled ? LuckyTheme.textTertiary : color)
-                .frame(width: size, height: size)
-                .background(shape.fill(fill))
+            LuckyFunctionIcon(symbol: symbol, size: size, glyph: glyph,
+                              color: disabled ? LuckyTheme.idle : color)
                 .contentShape(shape)
         }
         .buttonStyle(.plain)

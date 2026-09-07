@@ -45,7 +45,7 @@ struct WebToolsSheet: View {
                     Button {
                         close()
                     } label: {
-                        Image(systemName: "xmark")
+                        LuckyIconTile(symbol: "xmark", size: 28, glyph: 12, tone: .idle)
                     }
                     .accessibilityLabel("关闭更多操作")
                 }
@@ -123,10 +123,7 @@ private struct WebToolsRow: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Image(systemName: symbol)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(tone.tint)
-                    .frame(width: 24)
+                LuckyIconTile(symbol: symbol, size: 30, glyph: 13, tone: tone)
                 Text(title)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(LuckyTheme.textPrimary)

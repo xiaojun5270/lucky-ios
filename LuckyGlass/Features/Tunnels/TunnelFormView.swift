@@ -199,11 +199,11 @@ extension TunnelForm {
             advanced.toggle()
         } label: {
             HStack(spacing: LuckyTheme.Space.s) {
-                Image(systemName: advanced ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 12, weight: .semibold))
+                LuckyIconTile(symbol: advanced ? "chevron.up" : "chevron.down",
+                              size: 24, glyph: 10)
                 Text("高级设置").font(LuckyTheme.Text.label)
             }
-            .foregroundStyle(LuckyTheme.accent)
+            .foregroundStyle(LuckyTheme.textPrimary)
             .frame(minHeight: 44, alignment: .leading)
         }
         .buttonStyle(.plain)

@@ -114,8 +114,8 @@ enum LuckySymbol {
     }
 }
 
-/// `<IconTile>` from `src/components/lucky-ui.tsx`: a rounded square of the tone's fill with the
-/// glyph in the tone's tint. The leading element of almost every row and panel header.
+/// A saturated icon plate with a white glyph. This is the visual anchor for every internal
+/// function; App Icon and brand artwork remain independent assets.
 ///
 /// Not glass, deliberately — a list screen can show thirty of these, and thirty glass plates inside
 /// a scroll view is the exact pitfall the design system exists to avoid.
@@ -126,14 +126,28 @@ struct LuckyIconTile: View {
     var tone: LuckyTone = .brand
 
     var body: some View {
+        LuckyFunctionIcon(symbol: symbol, size: size, glyph: glyph, color: tone.tint)
+    }
+}
+
+/// The colour-based variant is used by controls whose colour is supplied directly instead of via
+/// `LuckyTone` (for example container actions derived from their current state).
+struct LuckyFunctionIcon: View {
+    var symbol: String
+    var size: CGFloat = 38
+    var glyph: CGFloat = 18
+    var color: Color = LuckyTheme.accent
+
+    var body: some View {
         RoundedRectangle(cornerRadius: size * 0.31, style: .continuous)
-            .fill(tone.fill)
+            .fill(color)
             .frame(width: size, height: size)
             .overlay(
                 Image(systemName: symbol)
                     .font(.system(size: glyph, weight: .semibold))
-                    .foregroundStyle(tone.tint)
+                    .foregroundStyle(Color.white)
             )
+            .shadow(color: color.opacity(0.18), radius: 3, y: 2)
             .accessibilityHidden(true)
     }
 }

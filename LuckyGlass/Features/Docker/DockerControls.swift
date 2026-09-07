@@ -93,9 +93,12 @@ struct ContainerArtwork: View {
                     .scaledToFit()
                     .frame(width: size - 6, height: size - 6)
             } else {
-                Image(systemName: LuckySymbol.docker)
-                    .font(.system(size: (size * 0.45).rounded(), weight: .semibold))
-                    .foregroundStyle(running ? LuckyTheme.accent : LuckyTheme.idleSoft)
+                LuckyFunctionIcon(
+                    symbol: LuckySymbol.docker,
+                    size: size,
+                    glyph: (size * 0.45).rounded(),
+                    color: running ? LuckyTheme.accent : LuckyTheme.idle
+                )
             }
         }
         .frame(width: size, height: size)
@@ -109,7 +112,7 @@ struct ContainerArtwork: View {
     /// The fallback tints itself by state; the image sits on the plain raised surface.
     private var background: Color {
         if image != nil { return LuckyTheme.surfaceRaised }
-        return running ? LuckyTheme.accentSoft : LuckyTheme.surfaceRaised
+        return LuckyTheme.surfaceRaised
     }
 
     private func resolve() async {
@@ -187,8 +190,8 @@ struct ContainerStatsGrid: View {
     private func cell(_ metric: Metric) -> some View {
         VStack(spacing: LuckyTheme.Space.xs) {
             HStack(spacing: LuckyTheme.Space.xs) {
-                Image(systemName: metric.symbol)
-                    .font(.system(size: 12, weight: .bold))
+                LuckyFunctionIcon(symbol: metric.symbol, size: 21, glyph: 9,
+                                  color: metric.tint)
                 Text(metric.label)
                     .font(.system(size: 10, weight: .semibold))
             }
@@ -249,13 +252,12 @@ struct DockerIconButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 5) {
-                Image(systemName: symbol)
-                    .font(.system(size: 16, weight: .semibold))
+                LuckyFunctionIcon(symbol: symbol, size: 26, glyph: 12, color: tint)
                 Text(label)
                     .font(.system(size: 11, weight: .bold))
                     .lineLimit(1)
             }
-            .foregroundStyle(tint)
+            .foregroundStyle(LuckyTheme.textPrimary)
             .padding(.horizontal, 10)
             .frame(minWidth: 64, minHeight: 42)
             .frame(maxWidth: fluid ? .infinity : nil)
@@ -284,13 +286,12 @@ struct ContainerCommandButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 5) {
-                Image(systemName: symbol)
-                    .font(.system(size: 15, weight: .semibold))
+                LuckyFunctionIcon(symbol: symbol, size: 26, glyph: 12, color: tint)
                 Text(label)
                     .font(.system(size: 12, weight: .bold))
                     .lineLimit(1)
             }
-            .foregroundStyle(tint)
+            .foregroundStyle(LuckyTheme.textPrimary)
             .frame(maxWidth: .infinity)
             .frame(minHeight: 42)
             .background(LuckyTheme.surfaceRaised, in: .rect(cornerRadius: 12))

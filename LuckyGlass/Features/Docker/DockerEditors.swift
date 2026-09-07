@@ -324,7 +324,7 @@ struct DockerDetailViewer: View {
                     Button {
                         close()
                     } label: {
-                        Image(systemName: "xmark")
+                        LuckyIconTile(symbol: "xmark", size: 28, glyph: 12, tone: .idle)
                     }
                     .accessibilityLabel("关闭详情")
                 }

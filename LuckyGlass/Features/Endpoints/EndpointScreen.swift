@@ -162,10 +162,10 @@ private struct QueryArrayForm: View {
                 value.append(JSONObject([("key", .string("")), ("value", .string(""))]))
             } label: {
                 HStack(spacing: 6) {
-                    Image(systemName: LuckySymbol.add).font(.system(size: 15, weight: .semibold))
+                    LuckyIconTile(symbol: LuckySymbol.add, size: 24, glyph: 11)
                     Text("添加查询参数").font(LuckyTheme.Text.captionMedium)
                 }
-                .foregroundStyle(LuckyTheme.accent)
+                .foregroundStyle(LuckyTheme.textPrimary)
                 .frame(maxWidth: .infinity, minHeight: 40)
                 .background(
                     RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
@@ -188,14 +188,7 @@ private struct QueryArrayForm: View {
                 guard value.indices.contains(index) else { return }
                 value.remove(at: index)
             } label: {
-                Image(systemName: LuckySymbol.delete)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.danger)
-                    .frame(width: 38, height: 38)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(LuckyTheme.dangerSoft)
-                    )
+                LuckyIconTile(symbol: LuckySymbol.delete, size: 38, glyph: 15, tone: .danger)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("删除查询参数")
@@ -253,14 +246,7 @@ private struct RootArrayForm: View {
                 guard value.indices.contains(index) else { return }
                 value.remove(at: index)
             } label: {
-                Image(systemName: LuckySymbol.delete)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.danger)
-                    .frame(width: 36, height: 36)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(LuckyTheme.dangerSoft)
-                    )
+                LuckyIconTile(symbol: LuckySymbol.delete, size: 36, glyph: 14, tone: .danger)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("删除数组项")
@@ -316,11 +302,10 @@ private struct RootArrayForm: View {
                     value.append(initial)
                 } label: {
                     HStack(spacing: 5) {
-                        Image(systemName: LuckySymbol.add)
-                            .font(.system(size: 14, weight: .semibold))
+                        LuckyIconTile(symbol: LuckySymbol.add, size: 22, glyph: 10)
                         Text("\(label)项").font(LuckyTheme.Text.captionMedium).lineLimit(1)
                     }
-                    .foregroundStyle(LuckyTheme.accent)
+                    .foregroundStyle(LuckyTheme.textPrimary)
                     .frame(maxWidth: .infinity, minHeight: 38)
                     .background(
                         RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
@@ -444,9 +429,8 @@ struct EndpointScreen: View {
     private func identity(_ endpoint: LuckyEndpointDefinition) -> some View {
         LuckyCard(spacing: 9) {
             HStack(alignment: .top, spacing: 9) {
-                Image(systemName: "point.topleft.down.to.point.bottomright.curvepath")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.accent)
+                LuckyIconTile(symbol: "point.topleft.down.to.point.bottomright.curvepath",
+                              size: 30, glyph: 13)
                 Text(endpoint.path)
                     .font(LuckyTheme.Text.code)
                     .foregroundStyle(LuckyTheme.textPrimary)
@@ -492,15 +476,14 @@ struct EndpointScreen: View {
 
     private var dangerBanner: some View {
         HStack(alignment: .top, spacing: 9) {
-            Image(systemName: LuckySymbol.danger)
-                .font(.system(size: 16, weight: .semibold))
+            LuckyIconTile(symbol: LuckySymbol.danger, size: 30, glyph: 13, tone: .danger)
             Text("高风险请求，执行前会再次确认。")
                 .font(LuckyTheme.Text.caption)
                 .lineSpacing(3)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .foregroundStyle(LuckyTheme.danger)
+        .foregroundStyle(LuckyTheme.textPrimary)
         .padding(LuckyTheme.Space.m)
         .background(
             RoundedRectangle(cornerRadius: LuckyTheme.Radius.row, style: .continuous)
@@ -560,23 +543,14 @@ struct EndpointScreen: View {
     private var filePanel: some View {
         LuckyCard(spacing: 10) {
             HStack(spacing: LuckyTheme.Space.s) {
-                Image(systemName: LuckySymbol.upload)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.accent)
+                LuckyIconTile(symbol: LuckySymbol.upload, size: 28, glyph: 12)
                 Text("上传文件")
                     .font(LuckyTheme.Text.label)
                     .foregroundStyle(LuckyTheme.textPrimary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if selectedFile != nil {
                     Button { selectedFile = nil } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundStyle(LuckyTheme.danger)
-                            .frame(width: 32, height: 32)
-                            .background(
-                                RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                    .fill(LuckyTheme.dangerSoft)
-                            )
+                        LuckyIconTile(symbol: "xmark", size: 32, glyph: 13, tone: .danger)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("移除文件")
@@ -596,9 +570,9 @@ struct EndpointScreen: View {
             picking = true
         } label: {
             HStack(spacing: LuckyTheme.Space.s) {
-                Image(systemName: LuckySymbol.upload)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(selectedFile == nil ? LuckyTheme.accent : LuckyTheme.success)
+                LuckyFunctionIcon(symbol: LuckySymbol.upload, size: 28, glyph: 12,
+                                  color: selectedFile == nil
+                                      ? LuckyTheme.accent : LuckyTheme.success)
                 Text(selectedFile?.caption ?? "选择文件")
                     .font(LuckyTheme.Text.caption)
                     .foregroundStyle(selectedFile == nil

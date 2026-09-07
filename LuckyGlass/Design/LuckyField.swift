@@ -43,8 +43,8 @@ struct LuckyTextField: View {
                     Button {
                         revealed.toggle()
                     } label: {
-                        Image(systemName: revealed ? "eye.slash" : "eye")
-                            .font(.system(size: 13, weight: .semibold))
+                        LuckyIconTile(symbol: revealed ? "eye.slash" : "eye", size: 24,
+                                      glyph: 11, tone: .idle)
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(LuckyTheme.textTertiary)
@@ -53,7 +53,7 @@ struct LuckyTextField: View {
                     Button {
                         text = ""
                     } label: {
-                        Image(systemName: "xmark.circle.fill").font(.system(size: 14))
+                        LuckyIconTile(symbol: "xmark", size: 24, glyph: 10, tone: .idle)
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(LuckyTheme.textTertiary)
@@ -107,9 +107,7 @@ struct LuckyFieldLabel: View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: LuckyTheme.Space.xs) {
                 if let symbol {
-                    Image(systemName: symbol)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle((tone ?? .brand).tint)
+                    LuckyIconTile(symbol: symbol, size: 21, glyph: 9, tone: tone ?? .brand)
                 }
                 Text(label)
                     .font(LuckyTheme.Text.label)

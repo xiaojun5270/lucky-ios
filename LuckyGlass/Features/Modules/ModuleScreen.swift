@@ -76,7 +76,12 @@ struct EndpointRow: View {
                 Spacer(minLength: LuckyTheme.Space.xs)
                 Image(systemName: "chevron.right")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(LuckyTheme.textTertiary)
+                    .foregroundStyle(Color.white)
+                    .frame(width: 24, height: 24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(LuckyTheme.idle)
+                    )
             }
             Text(endpoint.path)
                 .font(LuckyTheme.Text.code)

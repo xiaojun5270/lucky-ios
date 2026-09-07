@@ -73,9 +73,9 @@ private struct ServiceTile: View {
                     Spacer(minLength: LuckyTheme.Space.s)
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(LuckyTheme.textTertiary)
+                        .foregroundStyle(Color.white)
                         .frame(width: 28, height: 28)
-                        .background(ConcentricRectangle().fill(LuckyTheme.surfaceRaised))
+                        .background(ConcentricRectangle().fill(LuckyTheme.idle))
                 }
                 Text(label)
                     .font(LuckyTheme.Text.cardTitle)

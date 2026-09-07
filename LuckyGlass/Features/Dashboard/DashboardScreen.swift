@@ -141,11 +141,11 @@ private struct ReverseProxyCard: View {
                     Spacer(minLength: LuckyTheme.Space.xs)
                     Image(systemName: "chevron.right")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(LuckyTheme.textTertiary)
+                        .foregroundStyle(Color.white)
                         .frame(width: 30, height: 30)
                         .background(
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .fill(LuckyTheme.surfaceRaised)
+                                .fill(LuckyTheme.idle)
                         )
                 }
                 .frame(minHeight: 44)
@@ -163,11 +163,11 @@ private struct ReverseProxyCard: View {
         } label: {
             Image(systemName: portsMasked ? "eye" : "eye.slash")
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(portsMasked ? LuckyTheme.accent : LuckyTheme.textTertiary)
+                .foregroundStyle(Color.white)
                 .frame(width: 40, height: 40)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(portsMasked ? LuckyTheme.accentSoft : LuckyTheme.surfaceRaised)
+                        .fill(portsMasked ? LuckyTheme.accent : LuckyTheme.idle)
                 )
         }
         .buttonStyle(DashboardPressStyle())
@@ -378,9 +378,7 @@ struct DashboardScreen: View {
     private func totalColumn(_ label: String, _ value: String, symbol: String,
                              tone: LuckyTone) -> some View {
         HStack(spacing: 7) {
-            Image(systemName: symbol)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(tone.tint)
+            LuckyIconTile(symbol: symbol, size: 28, glyph: 13, tone: tone)
             VStack(alignment: .leading, spacing: 1) {
                 Text(label)
                     .font(LuckyTheme.Text.caption)

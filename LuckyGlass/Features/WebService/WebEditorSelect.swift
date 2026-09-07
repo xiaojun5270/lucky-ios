@@ -57,9 +57,8 @@ extension WebSelect {
                                                       : LuckyTheme.textPrimary)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Image(systemName: "chevron.down")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(open ? LuckyTheme.accent : LuckyTheme.textSecondary)
+                LuckyFunctionIcon(symbol: "chevron.down", size: 26, glyph: 11,
+                                  color: open ? LuckyTheme.accent : LuckyTheme.idle)
             }
             .padding(.horizontal, LuckyTheme.Space.m)
             .frame(minHeight: 44)
@@ -98,18 +97,18 @@ extension WebSelect {
                 HStack(spacing: 9) {
                     Text(option.label)
                         .font(.system(size: 13, weight: active ? .bold : .medium, design: .rounded))
-                        .foregroundStyle(active ? LuckyTheme.accent : LuckyTheme.textPrimary)
+                        .foregroundStyle(active ? Color.white : LuckyTheme.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if active {
                         Image(systemName: "checkmark")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(LuckyTheme.accent)
+                            .foregroundStyle(Color.white)
                     }
                 }
                 .padding(.horizontal, LuckyTheme.Space.m)
                 .frame(minHeight: 42)
             }
-            .background(active ? LuckyTheme.accentSoft : LuckyTheme.surface)
+            .background(active ? LuckyTheme.accent : LuckyTheme.surface)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -243,12 +242,7 @@ extension WebPortStepper {
         Button {
             step(offset)
         } label: {
-            Image(systemName: symbol)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(LuckyTheme.accent)
-                .frame(width: 42, height: 42)
-                .background(shape.fill(LuckyTheme.surface))
-                .overlay(shape.strokeBorder(LuckyTheme.hairline, lineWidth: LuckyTheme.strokeWidth))
+            LuckyIconTile(symbol: symbol, size: 42, glyph: 18)
                 .contentShape(shape)
         }
         .buttonStyle(.plain)

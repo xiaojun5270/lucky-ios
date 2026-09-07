@@ -3,10 +3,9 @@ import UIKit
 
 /// The design language for LuckyGlass.
 ///
-/// The original is a React Native admin panel with flat cards and system blue accents. This port
-/// deliberately does not copy that look: it uses one ambient "aurora" backdrop, a teal/violet brand
-/// pair, rounded numerics, and concentric corners so every surface nests correctly under iOS 26's
-/// glass chrome. Only the *copy* is carried over verbatim.
+/// The app uses a crisp operations-console aesthetic: neutral canvases, compact surfaces and
+/// saturated semantic colours. Colour is concentrated in controls and icon plates, which keeps
+/// dense status screens easy to scan in both appearances.
 ///
 /// Everything here is a token. Screens must not hard-code colours, radii or durations — a value
 /// that appears twice belongs in this file.
@@ -21,51 +20,41 @@ enum LuckyTheme {
         })
     }
 
-    /// Brand teal. Reserved for the primary action and the selected state — per Apple's guidance a
-    /// glass tint conveys meaning, so it must stay rare.
-    static let accent = dynamic(light: 0x0E9C93, dark: 0x2ED3C6)
-    /// The accent at fill strength, for chips and gauge tracks.
-    static let accentSoft = dynamic(light: 0xD6F5F1, dark: 0x123E3B)
-    /// Secondary brand hue, used for Docker and tunnelling accents.
-    static let violet = dynamic(light: 0x5B4BDB, dark: 0x9A8CFF)
-    static let violetSoft = dynamic(light: 0xE6E2FF, dark: 0x241F4D)
+    static let accent = dynamic(light: 0x1769E0, dark: 0x4D92F7)
+    static let accentSoft = dynamic(light: 0xE7F0FF, dark: 0x172A46)
+    static let violet = dynamic(light: 0x7C3AED, dark: 0xA875FF)
+    static let violetSoft = dynamic(light: 0xF0E9FF, dark: 0x2D2147)
 
-    static let success = dynamic(light: 0x11845B, dark: 0x34D399)
-    static let successSoft = dynamic(light: 0xD8F3E7, dark: 0x0F3A2C)
-    static let warning = dynamic(light: 0xA35B00, dark: 0xF5A524)
-    static let warningSoft = dynamic(light: 0xFCEBD2, dark: 0x40300E)
-    static let danger = dynamic(light: 0xC0304C, dark: 0xFF6B85)
-    static let dangerSoft = dynamic(light: 0xFCE3E8, dark: 0x451C25)
-    static let info = dynamic(light: 0x2C6BD8, dark: 0x74A8FF)
-    static let infoSoft = dynamic(light: 0xDDE9FF, dark: 0x18294D)
-    static let idle = dynamic(light: 0x6B7280, dark: 0x9AA3B2)
-    static let idleSoft = dynamic(light: 0xECEEF2, dark: 0x232833)
+    static let success = dynamic(light: 0x16865A, dark: 0x2FC98A)
+    static let successSoft = dynamic(light: 0xE4F6EE, dark: 0x15372B)
+    static let warning = dynamic(light: 0xC06A00, dark: 0xF2A62B)
+    static let warningSoft = dynamic(light: 0xFFF1D7, dark: 0x3D2D14)
+    static let danger = dynamic(light: 0xD33C58, dark: 0xFF6F85)
+    static let dangerSoft = dynamic(light: 0xFFE8EC, dark: 0x43212A)
+    static let info = dynamic(light: 0x007E9E, dark: 0x35BDD5)
+    static let infoSoft = dynamic(light: 0xE0F5F8, dark: 0x15343B)
+    static let idle = dynamic(light: 0x536071, dark: 0x8E9AAA)
+    static let idleSoft = dynamic(light: 0xE9EDF2, dark: 0x29313B)
 
     // MARK: - Backdrop and surfaces
 
-    /// The two ends of the page wash. Kept low-contrast: glass needs something to refract, but a
-    /// busy backdrop makes text on the floating layer illegible.
-    static let canvasTop = dynamic(light: 0xF6F8FA, dark: 0x0B0E13)
-    static let canvasBottom = dynamic(light: 0xEDF1F5, dark: 0x11151C)
-    /// The two aurora blooms. Alpha is applied at use, so these stay opaque here.
-    static let bloomTeal = dynamic(light: 0x38D6C6, dark: 0x1E9C93)
-    static let bloomViolet = dynamic(light: 0x8B7DF7, dark: 0x4B3FA8)
+    static let canvasTop = dynamic(light: 0xF3F5F8, dark: 0x0D1117)
 
     /// Content-layer card fill. Nearly opaque — cards live *under* the glass chrome and must never
     /// be glass themselves.
-    static let surface = dynamic(light: 0xFFFFFF, dark: 0x171B23)
+    static let surface = dynamic(light: 0xFFFFFF, dark: 0x171C24)
     /// A second level for rows nested inside a card.
-    static let surfaceRaised = dynamic(light: 0xF4F6F9, dark: 0x1F242E)
+    static let surfaceRaised = dynamic(light: 0xF1F4F8, dark: 0x202731)
     /// Code, JSON and log backgrounds.
-    static let surfaceSunken = dynamic(light: 0xF0F2F6, dark: 0x0E1218)
-    static let hairline = dynamic(light: 0xE3E7EC, dark: 0x2A303B)
-    static let separator = dynamic(light: 0xEDEFF3, dark: 0x232935)
+    static let surfaceSunken = dynamic(light: 0xE9EDF3, dark: 0x0B1016)
+    static let hairline = dynamic(light: 0xD9DEE7, dark: 0x303947)
+    static let separator = dynamic(light: 0xE7EAF0, dark: 0x29313C)
 
-    static let textPrimary = dynamic(light: 0x111827, dark: 0xF2F5F9)
-    static let textSecondary = dynamic(light: 0x525C6B, dark: 0xA8B2C1)
-    static let textTertiary = dynamic(light: 0x8A94A3, dark: 0x6F7987)
+    static let textPrimary = dynamic(light: 0x151A23, dark: 0xF4F6F8)
+    static let textSecondary = dynamic(light: 0x4F5A69, dark: 0xADB7C5)
+    static let textTertiary = dynamic(light: 0x788393, dark: 0x778393)
     /// Text on top of a filled accent surface.
-    static let textOnAccent = dynamic(light: 0xFFFFFF, dark: 0x04211F)
+    static let textOnAccent = Color.white
 
     // MARK: - Radii
 
@@ -73,12 +62,12 @@ enum LuckyTheme {
     /// radius minus the padding between them, which `ConcentricRectangle` derives from the
     /// container shape — these constants are the *outer* values.
     enum Radius {
-        static let hero: CGFloat = 30
-        static let card: CGFloat = 22
-        static let panel: CGFloat = 18
-        static let row: CGFloat = 14
-        static let chip: CGFloat = 11
-        static let field: CGFloat = 14
+        static let hero: CGFloat = 20
+        static let card: CGFloat = 12
+        static let panel: CGFloat = 10
+        static let row: CGFloat = 9
+        static let chip: CGFloat = 7
+        static let field: CGFloat = 9
         /// Floor passed to `.concentric(minimum:)` so a nested corner never collapses to a square.
         static let concentricFloor: CGFloat = 8
     }
@@ -100,30 +89,29 @@ enum LuckyTheme {
         static let stack: CGFloat = 14
         /// Inner padding of a card, and therefore the concentric inset of anything drawn inside
         /// one.
-        static let cardInset: CGFloat = 16
+        static let cardInset: CGFloat = 15
     }
 
     // MARK: - Typography
 
-    /// Rounded throughout. The port shows a lot of numbers — ports, byte counts, durations — and
-    /// rounded digits read as data rather than as prose.
+    /// A compact system face keeps dense labels quiet; code and paths retain a monospaced face.
     enum Text {
-        static let hero = Font.system(size: 32, weight: .bold, design: .rounded)
-        static let title = Font.system(size: 22, weight: .semibold, design: .rounded)
-        static let sectionTitle = Font.system(size: 13, weight: .semibold, design: .rounded)
-        static let cardTitle = Font.system(size: 16, weight: .semibold, design: .rounded)
-        static let body = Font.system(size: 15, weight: .regular, design: .rounded)
-        static let bodyMedium = Font.system(size: 15, weight: .medium, design: .rounded)
-        static let caption = Font.system(size: 12, weight: .regular, design: .rounded)
-        static let captionMedium = Font.system(size: 12, weight: .semibold, design: .rounded)
-        static let label = Font.system(size: 13, weight: .medium, design: .rounded)
+        static let hero = Font.system(size: 30, weight: .bold, design: .default)
+        static let title = Font.system(size: 21, weight: .bold, design: .default)
+        static let sectionTitle = Font.system(size: 13, weight: .bold, design: .default)
+        static let cardTitle = Font.system(size: 16, weight: .semibold, design: .default)
+        static let body = Font.system(size: 15, weight: .regular, design: .default)
+        static let bodyMedium = Font.system(size: 15, weight: .medium, design: .default)
+        static let caption = Font.system(size: 12, weight: .regular, design: .default)
+        static let captionMedium = Font.system(size: 12, weight: .semibold, design: .default)
+        static let label = Font.system(size: 13, weight: .medium, design: .default)
         /// The big number in a metric tile.
-        static let metric = Font.system(size: 26, weight: .semibold, design: .rounded)
-        static let metricSmall = Font.system(size: 19, weight: .semibold, design: .rounded)
+        static let metric = Font.system(size: 26, weight: .bold, design: .default)
+        static let metricSmall = Font.system(size: 19, weight: .bold, design: .default)
         /// JSON, logs and paths. Monospaced digits alone are not enough — these need fixed advance.
         static let code = Font.system(size: 12, weight: .regular, design: .monospaced)
         static let codeSmall = Font.system(size: 11, weight: .regular, design: .monospaced)
-        static let button = Font.system(size: 15, weight: .semibold, design: .rounded)
+        static let button = Font.system(size: 15, weight: .semibold, design: .default)
     }
 
     // MARK: - Motion
@@ -147,9 +135,9 @@ enum LuckyTheme {
     /// Content-layer shadow. Deliberately soft and single-layer: iOS 26 draws its own shadow under
     /// glass, and a second one under the card underneath makes the stack look muddy.
     enum Shadow {
-        static let color = Color.black.opacity(0.10)
-        static let radius: CGFloat = 14
-        static let y: CGFloat = 6
+        static let color = Color.black.opacity(0.045)
+        static let radius: CGFloat = 4
+        static let y: CGFloat = 1
     }
 
     /// Hairline width. `1 / displayScale` would be crisper but reads as a hard line against glass,

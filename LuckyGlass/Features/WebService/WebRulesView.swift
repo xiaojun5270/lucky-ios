@@ -93,14 +93,7 @@ extension WebRuleCard {
             actions.expand(key)
         } label: {
             HStack(spacing: LuckyTheme.Space.m) {
-                Image(systemName: LuckySymbol.network)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.accent)
-                    .frame(width: 36, height: 36)
-                    .background(
-                        RoundedRectangle(cornerRadius: 11, style: .continuous)
-                            .fill(LuckyTheme.accentSoft)
-                    )
+                LuckyIconTile(symbol: LuckySymbol.network, size: 36, glyph: 16)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(name)
                         .font(LuckyTheme.Text.cardTitle)
@@ -114,7 +107,12 @@ extension WebRuleCard {
                 Spacer(minLength: 0)
                 Image(systemName: isOpen ? "chevron.up" : "chevron.down")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.textTertiary)
+                    .foregroundStyle(Color.white)
+                    .frame(width: 24, height: 24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(LuckyTheme.idle)
+                    )
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(.rect)
@@ -257,9 +255,8 @@ private struct WebSubRuleCard: View {
 extension WebSubRuleCard {
     private var header: some View {
         HStack(alignment: .center, spacing: LuckyTheme.Space.s) {
-            Image(systemName: "checkmark.shield")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(enabled ? LuckyTheme.success : LuckyTheme.idle)
+            LuckyFunctionIcon(symbol: "checkmark.shield", size: 28, glyph: 12,
+                              color: enabled ? LuckyTheme.success : LuckyTheme.idle)
             VStack(alignment: .leading, spacing: 3) {
                 Text(name)
                     .font(LuckyTheme.Text.captionMedium)

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Content-layer surfaces: the cards, sections and rows that scroll *under* the glass chrome.
+/// Content-layer surfaces: compact work panels that scroll under the system chrome.
 ///
 /// None of these use `glassEffect`. Two of Apple's stated pitfalls are stacking glass on glass and
 /// putting glass inside scrolling content, and every screen in this port is a scroll view under a
@@ -26,7 +26,7 @@ struct LuckyCard<Content: View>: View {
             .background(shape.fill(LuckyTheme.surface))
             .overlay(
                 shape.strokeBorder(
-                    tone?.tint.opacity(0.42) ?? LuckyTheme.hairline,
+                    tone?.tint.opacity(0.60) ?? LuckyTheme.hairline,
                     lineWidth: LuckyTheme.strokeWidth
                 )
             )
@@ -81,11 +81,9 @@ struct LuckySectionHeader<Trailing: View>: View {
     @ViewBuilder var trailing: () -> Trailing
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: LuckyTheme.Space.s) {
+        HStack(alignment: .center, spacing: LuckyTheme.Space.s) {
             if let symbol {
-                Image(systemName: symbol)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.accent)
+                LuckyIconTile(symbol: symbol, size: 24, glyph: 11)
             }
             VStack(alignment: .leading, spacing: LuckyTheme.Space.hair) {
                 Text(title)
@@ -215,9 +213,7 @@ struct LuckyMetricTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
             HStack(spacing: LuckyTheme.Space.xs) {
-                Image(systemName: symbol)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(tone.tint)
+                LuckyIconTile(symbol: symbol, size: 24, glyph: 11, tone: tone)
                 Text(label)
                     .font(LuckyTheme.Text.captionMedium)
                     .foregroundStyle(LuckyTheme.textSecondary)

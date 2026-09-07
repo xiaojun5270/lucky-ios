@@ -50,12 +50,12 @@ struct WebIconButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
-                Image(systemName: symbol).font(.system(size: 13, weight: .semibold))
+                LuckyFunctionIcon(symbol: symbol, size: 24, glyph: 11, color: tint)
                 Text(text ?? name)
                     .font(.system(size: 11, weight: .bold, design: .rounded))
                     .lineLimit(1)
             }
-            .foregroundStyle(tint)
+            .foregroundStyle(LuckyTheme.textPrimary)
             .padding(.horizontal, LuckyTheme.Space.s)
             .frame(minWidth: 58, minHeight: 36)
             .background(shape.fill(LuckyTheme.surfaceRaised))

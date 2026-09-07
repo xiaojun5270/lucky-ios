@@ -43,9 +43,8 @@ extension WebEditorProxyList {
     /// gives it the taller row.
     private var header: some View {
         HStack(spacing: LuckyTheme.Space.s) {
-            Image(systemName: "point.topleft.down.to.point.bottomright.curvepath")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(LuckyTheme.accent)
+            LuckyIconTile(symbol: "point.topleft.down.to.point.bottomright.curvepath",
+                          size: 30, glyph: 13)
             Text("子规则")
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(LuckyTheme.textPrimary)
@@ -64,12 +63,11 @@ extension WebEditorProxyList {
         let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
         return Button(action: add) {
             HStack(spacing: 7) {
-                Image(systemName: "plus")
-                    .font(.system(size: 17, weight: .semibold))
+                LuckyIconTile(symbol: "plus", size: 28, glyph: 13)
                 Text("添加子规则")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
             }
-            .foregroundStyle(LuckyTheme.accent)
+            .foregroundStyle(LuckyTheme.textPrimary)
             .frame(maxWidth: .infinity, minHeight: 44)
             .background(shape.fill(LuckyTheme.accentSoft))
             .overlay(shape.strokeBorder(LuckyTheme.accent, lineWidth: LuckyTheme.strokeWidth))
@@ -149,7 +147,12 @@ extension WebEditorProxyList {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: open ? "chevron.up" : "chevron.down")
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.textSecondary)
+                    .foregroundStyle(Color.white)
+                    .frame(width: 24, height: 24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(LuckyTheme.idle)
+                    )
             }
             .contentShape(Rectangle())
         }

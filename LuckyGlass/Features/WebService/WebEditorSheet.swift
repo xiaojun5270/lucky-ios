@@ -528,12 +528,11 @@ extension WebEditorSheet {
         let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
         return Button(action: applyWafToAllProxies) {
             HStack(spacing: 7) {
-                Image(systemName: "checkmark.shield")
-                    .font(.system(size: 17, weight: .semibold))
+                LuckyIconTile(symbol: "checkmark.shield", size: 28, glyph: 12)
                 Text("应用到所有子规则")
                     .font(.system(size: 12, weight: .bold, design: .rounded))
             }
-            .foregroundStyle(LuckyTheme.accent)
+            .foregroundStyle(LuckyTheme.textPrimary)
             .frame(maxWidth: .infinity, minHeight: 42)
             .background(shape.fill(LuckyTheme.surface))
             .overlay(shape.strokeBorder(LuckyTheme.accent, lineWidth: LuckyTheme.strokeWidth))

@@ -290,7 +290,7 @@ struct TunnelScreen: View {
                     Button {
                         Task { await loadList() }
                     } label: {
-                        Image(systemName: LuckySymbol.refresh)
+                        LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
                     }
                     .disabled(fetching)
                     .accessibilityLabel("刷新")

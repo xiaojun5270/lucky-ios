@@ -79,12 +79,12 @@ struct SettingsScreen: View {
             confirming = true
         } label: {
             HStack(spacing: LuckyTheme.Space.s) {
-                Image(systemName: "rectangle.portrait.and.arrow.right")
-                    .font(.system(size: 15, weight: .semibold))
+                LuckyIconTile(symbol: "rectangle.portrait.and.arrow.right", size: 28,
+                              glyph: 13, tone: .danger)
                 Text(busy ? "正在退出" : "退出登录")
                     .font(LuckyTheme.Text.button)
             }
-            .foregroundStyle(LuckyTheme.danger)
+            .foregroundStyle(LuckyTheme.textPrimary)
             .frame(maxWidth: .infinity, minHeight: 48)
             .background(shape.fill(LuckyTheme.surface))
             .overlay(shape.strokeBorder(LuckyTheme.danger, lineWidth: LuckyTheme.strokeWidth))

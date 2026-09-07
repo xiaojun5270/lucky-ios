@@ -60,9 +60,8 @@ struct LuckyErrorCard: View {
     var body: some View {
         LuckyCard(tone: .danger) {
             HStack(alignment: .top, spacing: LuckyTheme.Space.m) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(LuckyTheme.danger)
+                LuckyIconTile(symbol: "exclamationmark.triangle.fill", size: 34, glyph: 15,
+                              tone: .danger)
                 VStack(alignment: .leading, spacing: LuckyTheme.Space.xs) {
                     Text(title)
                         .font(LuckyTheme.Text.cardTitle)

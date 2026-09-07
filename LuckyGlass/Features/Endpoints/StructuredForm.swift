@@ -174,13 +174,8 @@ private struct StructuredTrashButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: LuckySymbol.delete)
-                .font(.system(size: size > 32 ? 15 : 14, weight: .semibold))
-                .foregroundStyle(LuckyTheme.danger)
-                .frame(width: size, height: size)
-                .background(
-                    RoundedRectangle(cornerRadius: radius, style: .continuous).fill(fill)
-                )
+            LuckyIconTile(symbol: LuckySymbol.delete, size: size,
+                          glyph: size > 32 ? 15 : 13, tone: .danger)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(field.map { "删除\(LuckyFieldName.label($0))" } ?? "删除列表项")
@@ -414,10 +409,10 @@ private struct StructuredAddField: View {
             withAnimation(LuckyTheme.Motion.snap) { open = true }
         } label: {
             HStack(spacing: 6) {
-                Image(systemName: LuckySymbol.add).font(.system(size: 15, weight: .semibold))
+                LuckyIconTile(symbol: LuckySymbol.add, size: 24, glyph: 11)
                 Text("添加字段").font(LuckyTheme.Text.captionMedium)
             }
-            .foregroundStyle(LuckyTheme.accent)
+            .foregroundStyle(LuckyTheme.textPrimary)
             .frame(maxWidth: .infinity, minHeight: 40)
             .background(
                 RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
@@ -552,11 +547,10 @@ private struct StructuredArrayField: View {
                     value.append(initial)
                 } label: {
                     HStack(spacing: 5) {
-                        Image(systemName: LuckySymbol.add)
-                            .font(.system(size: 14, weight: .semibold))
+                        LuckyIconTile(symbol: LuckySymbol.add, size: 22, glyph: 10)
                         Text("\(label)项").font(LuckyTheme.Text.captionMedium).lineLimit(1)
                     }
-                    .foregroundStyle(LuckyTheme.accent)
+                    .foregroundStyle(LuckyTheme.textPrimary)
                     .frame(maxWidth: .infinity, minHeight: 40)
                     .background(
                         RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
@@ -788,7 +782,6 @@ struct StructuredDataView: View {
             .frame(maxWidth: .infinity, alignment: .center)
     }
 }
-
 
 
 

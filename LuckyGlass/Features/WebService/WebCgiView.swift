@@ -67,9 +67,7 @@ private struct WebCgiCard: View {
 extension WebCgiCard {
     private var header: some View {
         HStack(alignment: .center, spacing: 10) {
-            Image(systemName: WebPane.cgi.symbol)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(LuckyTheme.info)
+            LuckyIconTile(symbol: WebPane.cgi.symbol, size: 32, glyph: 14, tone: .info)
             VStack(alignment: .leading, spacing: 3) {
                 Text(name)
                     .font(LuckyTheme.Text.cardTitle)

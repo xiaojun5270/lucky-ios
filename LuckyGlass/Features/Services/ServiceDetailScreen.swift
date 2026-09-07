@@ -115,7 +115,7 @@ struct ServiceDetailScreen: View {
                     Button {
                         Task { await refresh() }
                     } label: {
-                        Image(systemName: LuckySymbol.refresh)
+                        LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
                     }
                     .disabled(fetching || logsFetching)
                     .accessibilityLabel("刷新")
@@ -378,7 +378,12 @@ struct ServiceDetailScreen: View {
                               tone: ServiceRecord.isHealthyStatus(status) ? .ok : .idle)
                     Image(systemName: expanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(LuckyTheme.textSecondary)
+                        .foregroundStyle(Color.white)
+                        .frame(width: 24, height: 24)
+                        .background(
+                            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                .fill(LuckyTheme.idle)
+                        )
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
