@@ -19,20 +19,23 @@ struct LoginScreen: View {
         ZStack {
             LuckyBackdrop()
             ScrollView {
-                VStack(spacing: LuckyTheme.Space.xl) {
+                VStack(alignment: .leading, spacing: 30) {
                     header
-                    card
+                    VStack(alignment: .leading, spacing: 10) {
+                        LuckySectionHeader(title: "连接信息", subtitle: "Lucky 管理端",
+                                           symbol: "server.rack")
+                        card
+                    }
                 }
-                .frame(maxWidth: 440)
+                .frame(maxWidth: 520)
                 .padding(.horizontal, LuckyTheme.Space.xl)
-                .padding(.vertical, LuckyTheme.Space.xxl)
+                .padding(.top, 56)
+                .padding(.bottom, 110)
                 .frame(maxWidth: .infinity)
             }
             .scrollDismissesKeyboard(.interactively)
             .scrollBounceBehavior(.basedOnSize)
-            // `contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}`.
             .scrollClipDisabled()
-            .defaultScrollAnchor(.center)
         }
         .luckyActionBar {
             LuckyPillButton(
@@ -56,17 +59,30 @@ struct LoginScreen: View {
     }
 
     private var header: some View {
-        VStack(spacing: LuckyTheme.Space.s) {
-            LuckyMark(size: 82)
-                .shadow(color: LuckyTheme.accent.opacity(0.28), radius: 18, y: 8)
-            Text("Lucky")
-                .font(.system(size: 34, weight: .heavy, design: .rounded))
-                .foregroundStyle(LuckyTheme.textPrimary)
-                .padding(.top, 5)
-            Text("管理控制台")
-                .font(LuckyTheme.Text.body)
-                .foregroundStyle(LuckyTheme.textSecondary)
+        VStack(alignment: .leading, spacing: LuckyTheme.Space.l) {
+            HStack(spacing: LuckyTheme.Space.l) {
+                LuckyMark(size: 68)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("LUCKY CONSOLE")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(LuckyTheme.accent)
+                    Text("连接 Lucky")
+                        .font(LuckyTheme.Text.hero)
+                        .foregroundStyle(LuckyTheme.textPrimary)
+                    Text("管理控制台")
+                        .font(LuckyTheme.Text.body)
+                        .foregroundStyle(LuckyTheme.textSecondary)
+                }
+            }
+            HStack(spacing: 0) {
+                Rectangle().fill(LuckyTheme.accent).frame(width: 86)
+                Rectangle().fill(LuckyTheme.info).frame(width: 42)
+                Rectangle().fill(LuckyTheme.warning).frame(width: 22)
+                Rectangle().fill(LuckyTheme.hairline)
+            }
+            .frame(height: 3)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var card: some View {

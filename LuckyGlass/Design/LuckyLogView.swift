@@ -15,6 +15,8 @@ struct LuckyLogView: View {
     /// `nil` fills whatever space the parent offers — the global log tab is a non-scrolling page
     /// whose list must reach the tab bar.
     var height: CGFloat? = 380
+    /// Draws from the tail without allocating a reversed copy of the full log buffer.
+    var newestFirst: Bool = false
 
     private static let bottomAnchor = "lucky.log.bottom"
 
@@ -22,16 +24,14 @@ struct LuckyLogView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 3) {
-                    ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
-                        row(line)
-                            .id(index)
-                    }
+                    rows(query.jsTrimmed)
                     Color.clear
                         .frame(height: 1)
                         .id(Self.bottomAnchor)
                 }
                 .padding(LuckyTheme.Space.m)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .textSelection(.enabled)
             }
             .frame(height: height)
             .background(ConcentricRectangle().fill(LuckyTheme.surfaceSunken))
@@ -44,12 +44,32 @@ struct LuckyLogView: View {
         }
     }
 
-    private func row(_ line: String) -> some View {
-        Text(attributed(line))
-            .font(LuckyTheme.Text.codeSmall)
-            .foregroundStyle(LuckyLogView.tone(line)?.tint ?? LuckyTheme.textSecondary)
-            .textSelection(.enabled)
-            .fixedSize(horizontal: false, vertical: true)
+    @ViewBuilder
+    private func rows(_ needle: String) -> some View {
+        if newestFirst {
+            ForEach(lines.indices.reversed(), id: \.self) { index in
+                row(lines[index], needle: needle).id(index)
+            }
+        } else {
+            ForEach(lines.indices, id: \.self) { index in
+                row(lines[index], needle: needle).id(index)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func row(_ line: String, needle: String) -> some View {
+        if needle.isEmpty {
+            Text(verbatim: line)
+                .font(LuckyTheme.Text.codeSmall)
+                .foregroundStyle(LuckyLogView.tone(line)?.tint ?? LuckyTheme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        } else {
+            Text(attributed(line, needle: needle))
+                .font(LuckyTheme.Text.codeSmall)
+                .foregroundStyle(LuckyLogView.tone(line)?.tint ?? LuckyTheme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
     /// Only failures and warnings are tinted. Colouring every line by level turns a busy log into
@@ -66,10 +86,8 @@ struct LuckyLogView: View {
 
     /// Marks every occurrence of the query. `AttributedString` is built per visible line only, and
     /// only when there is something to mark.
-    private func attributed(_ line: String) -> AttributedString {
+    private func attributed(_ line: String, needle: String) -> AttributedString {
         var text = AttributedString(line)
-        let needle = query.jsTrimmed
-        guard !needle.isEmpty else { return text }
         var cursor = text.startIndex
         while cursor < text.endIndex,
               let found = text[cursor...].range(of: needle, options: .caseInsensitive) {

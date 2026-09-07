@@ -63,11 +63,11 @@ enum LuckyTheme {
     /// container shape — these constants are the *outer* values.
     enum Radius {
         static let hero: CGFloat = 20
-        static let card: CGFloat = 12
-        static let panel: CGFloat = 10
-        static let row: CGFloat = 9
-        static let chip: CGFloat = 7
-        static let field: CGFloat = 9
+        static let card: CGFloat = 8
+        static let panel: CGFloat = 8
+        static let row: CGFloat = 7
+        static let chip: CGFloat = 6
+        static let field: CGFloat = 7
         /// Floor passed to `.concentric(minimum:)` so a nested corner never collapses to a square.
         static let concentricFloor: CGFloat = 8
     }
@@ -85,7 +85,7 @@ enum LuckyTheme {
         /// Page side margin. Also the spacing handed to `GlassEffectContainer`, which uses it to
         /// decide how close two glass shapes must be before their fields merge.
         static let gutter: CGFloat = 18
-        /// Vertical rhythm between cards in a scroll view.
+        /// Vertical rhythm between repeated records in a scroll view.
         static let stack: CGFloat = 14
         /// Inner padding of a card, and therefore the concentric inset of anything drawn inside
         /// one.
@@ -128,16 +128,6 @@ enum LuckyTheme {
         static let reveal = Animation.smooth(duration: 0.3)
         /// The status pulse on a live dot.
         static let pulse = Animation.easeInOut(duration: 1.1).repeatForever(autoreverses: true)
-    }
-
-    // MARK: - Depth
-
-    /// Content-layer shadow. Deliberately soft and single-layer: iOS 26 draws its own shadow under
-    /// glass, and a second one under the card underneath makes the stack look muddy.
-    enum Shadow {
-        static let color = Color.black.opacity(0.045)
-        static let radius: CGFloat = 4
-        static let y: CGFloat = 1
     }
 
     /// Hairline width. `1 / displayScale` would be crisper but reads as a hard line against glass,

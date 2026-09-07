@@ -158,7 +158,7 @@ final class LuckyStatusStore {
 
     // MARK: - Throttled decoding
 
-    /// `flushStatus` — at most one frame per second, always the newest one, and never two
+    /// `flushStatus` — publishes at the UI cadence, always the newest frame, and never runs two
     /// decodes at once. Frames arrive faster than the charts can usefully redraw.
     private func flush(generation: Int) {
         guard generation == self.generation, !decoding, let payload = pending else { return }
@@ -178,7 +178,7 @@ final class LuckyStatusStore {
         decoding = true
         Task { [weak self] in
             // Inflate and decode off the main actor: a frame carries 90 samples.
-            let decoded = await Task.detached(priority: .userInitiated) {
+            let decoded = await Task.detached(priority: .utility) {
                 do { return Result<LuckyLiveStatus, LuckyError>.success(try LuckyLiveStatus.decode(gzipped: payload)) }
                 catch { return .failure(LuckyError(error.luckyMessage("状态数据解析失败"))) }
             }.value

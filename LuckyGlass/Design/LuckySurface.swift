@@ -30,8 +30,6 @@ struct LuckyCard<Content: View>: View {
                     lineWidth: LuckyTheme.strokeWidth
                 )
             )
-            .shadow(color: LuckyTheme.Shadow.color, radius: LuckyTheme.Shadow.radius,
-                    y: LuckyTheme.Shadow.y)
             // Lets anything inside ask for `ConcentricRectangle()` and get the right inner radius.
             .containerShape(shape)
     }
@@ -81,14 +79,14 @@ struct LuckySectionHeader<Trailing: View>: View {
     @ViewBuilder var trailing: () -> Trailing
 
     var body: some View {
-        HStack(alignment: .center, spacing: LuckyTheme.Space.s) {
+        HStack(alignment: .center, spacing: LuckyTheme.Space.m) {
             if let symbol {
-                LuckyIconTile(symbol: symbol, size: 24, glyph: 11)
+                LuckyIconTile(symbol: symbol, size: 30, glyph: 13)
             }
-            VStack(alignment: .leading, spacing: LuckyTheme.Space.hair) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(LuckyTheme.Text.sectionTitle)
-                    .foregroundStyle(LuckyTheme.textSecondary)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(LuckyTheme.textPrimary)
                     .textCase(nil)
                 if let subtitle, !subtitle.isEmpty {
                     Text(subtitle)
@@ -99,7 +97,8 @@ struct LuckySectionHeader<Trailing: View>: View {
             Spacer(minLength: LuckyTheme.Space.s)
             trailing()
         }
-        .padding(.horizontal, LuckyTheme.Space.xs)
+        .padding(.horizontal, 2)
+        .padding(.top, LuckyTheme.Space.xs)
     }
 }
 
@@ -119,7 +118,7 @@ struct LuckySection<Content: View>: View {
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
+        VStack(alignment: .leading, spacing: 10) {
             LuckySectionHeader(title: title, subtitle: subtitle, symbol: symbol)
             LuckyCard(padding: padding, spacing: spacing, content: content)
         }

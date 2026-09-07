@@ -35,6 +35,7 @@ struct LuckyRoot: View {
                     destination(route)
                         .navigationTitle(route.title)
                         .navigationBarTitleDisplayMode(.inline)
+                        .toolbar(.visible, for: .navigationBar)
                         // The original pushes onto the root stack, above the tab bar, so a
                         // detail screen never shows one.
                         .toolbar(.hidden, for: .tabBar)

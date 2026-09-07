@@ -39,7 +39,7 @@ struct LuckyLiveStatus: Sendable, Hashable {
 
 enum LuckyStatusConstants {
     /// `STATUS_UPDATE_INTERVAL = 1000`
-    static let updateInterval: TimeInterval = 1
+    static let updateInterval: TimeInterval = 1.5
     /// `STATUS_HISTORY_LIMIT = 90`
     static let historyLimit = 90
     /// `reconnectDelay` starts here, doubles, and caps at `maxReconnectDelay`.

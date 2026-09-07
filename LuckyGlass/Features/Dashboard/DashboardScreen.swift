@@ -68,6 +68,117 @@ private struct DashboardPressStyle: ButtonStyle {
     }
 }
 
+/// Keeps observation of the high-frequency status store inside a small subtree. The dashboard
+/// shell, reverse-proxy rules and navigation controls no longer invalidate on every socket frame.
+private struct DashboardLiveReader<Content: View>: View {
+    @ViewBuilder var content: (LuckyStatusStore) -> Content
+
+    var body: some View {
+        content(LuckyStatusStore.shared)
+    }
+}
+
+/// The dashboard's first panel: one dense read of the host instead of separate same-weight cards.
+private struct DashboardHostPanel: View {
+    var status: LuckyLiveStatus?
+    var connected: Bool
+    var containerCount: Double?
+
+    private var memory: Double {
+        guard let status else { return 0 }
+        return Format.percent(status.usedMem, status.totalMem)
+    }
+
+    var body: some View {
+        LuckyCard(padding: 0, spacing: 0) {
+            HStack(spacing: LuckyTheme.Space.m) {
+                LuckyIconTile(symbol: "server.rack", size: 44, glyph: 20, tone: .brand)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("主机状态")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(LuckyTheme.textPrimary)
+                    Text(connected ? "实时状态流已连接" : "正在连接状态流")
+                        .font(LuckyTheme.Text.caption)
+                        .foregroundStyle(LuckyTheme.textSecondary)
+                }
+                Spacer(minLength: 0)
+                LuckyChip(text: connected ? "在线" : "连接中",
+                          tone: connected ? .ok : .warning,
+                          symbol: connected ? "checkmark" : "arrow.clockwise")
+            }
+            .padding(LuckyTheme.Space.l)
+
+            LuckyHairline()
+
+            HStack(spacing: 0) {
+                metric("CPU", status.map { JSCompat.toFixed($0.usedCpu, 1) + "%" } ?? "--",
+                       tone: .brand)
+                divider
+                metric("内存", status == nil ? "--" : JSCompat.toFixed(memory, 1) + "%",
+                       tone: .ok)
+                divider
+                metric("容器", DockerText.count(containerCount), tone: .warning)
+            }
+            .padding(.vertical, LuckyTheme.Space.m)
+            .background(LuckyTheme.surfaceRaised)
+        }
+    }
+
+    private func metric(_ label: String, _ value: String, tone: LuckyTone) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(LuckyTheme.textTertiary)
+            Text(value)
+                .font(.system(size: 21, weight: .bold))
+                .foregroundStyle(tone.tint)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.65)
+        }
+        .padding(.horizontal, LuckyTheme.Space.m)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var divider: some View {
+        Rectangle().fill(LuckyTheme.separator).frame(width: 1, height: 38)
+    }
+}
+
+private struct DashboardRouteButton: View {
+    var title: String
+    var detail: String
+    var symbol: String
+    var tone: LuckyTone
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                LuckyIconTile(symbol: symbol, size: 34, glyph: 15, tone: tone)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(LuckyTheme.Text.captionMedium)
+                    Text(detail)
+                        .font(.system(size: 10))
+                        .foregroundStyle(LuckyTheme.textTertiary)
+                        .lineLimit(1)
+                }
+                .foregroundStyle(LuckyTheme.textPrimary)
+                Spacer(minLength: 0)
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, minHeight: 58, alignment: .leading)
+            .background(LuckyTheme.surface, in: .rect(cornerRadius: LuckyTheme.Radius.row))
+            .overlay {
+                RoundedRectangle(cornerRadius: LuckyTheme.Radius.row, style: .continuous)
+                    .strokeBorder(LuckyTheme.hairline, lineWidth: LuckyTheme.strokeWidth)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 /// `<ReverseProxyOverview>` — the one non-Docker card on the dashboard: three counts, the first two
 /// enabled rules, and a local eye toggle that masks listen ports.
 private struct ReverseProxyCard: View {
@@ -276,36 +387,60 @@ struct DashboardScreen: View {
     private var active: Bool { navigator.selection == .dashboard && phase == .active }
 
     var body: some View {
-        LuckyPage(refresh: { await refreshAll() }) {
-            if !live.error.isEmpty, live.data == nil {
-                LuckyErrorCard(message: live.error)
+        LuckyPage(spacing: 22, refresh: { await refreshAll() }) {
+            DashboardLiveReader { statusStore in
+                LuckyWorkspaceHeader(
+                    eyebrow: "实时工作台",
+                    title: "运行总览",
+                    subtitle: "资源、网络与服务状态"
+                ) {
+                    LuckyStatusDot(tone: statusStore.connected ? .ok : .warning,
+                                   pulsing: statusStore.connected, size: 10)
+                        .padding(12)
+                        .background(LuckyTheme.surface, in: .circle)
+                        .overlay(Circle().strokeBorder(LuckyTheme.hairline, lineWidth: 1))
+                }
+                if !statusStore.error.isEmpty, statusStore.data == nil {
+                    LuckyErrorCard(message: statusStore.error)
+                }
+                DashboardHostPanel(status: statusStore.data, connected: statusStore.connected,
+                                   containerCount: overview?.containerCount)
             }
+
             if !overviewFailure.isEmpty {
                 LuckyErrorCard(message: "Docker 总览：\(overviewFailure)") {
                     Task { await loadOverview() }
                 }
             }
-            DockerOverviewDashboard(
-                data: overview,
-                active: active,
-                live: live,
-                showHeader: false,
-                showDockerSummary: false,
-                showContainerInsights: false,
-                onSelectView: { navigator.push(.docker(view: $0.rawValue)) },
-                onSelectContainer: { navigator.push(.docker(view: "containers", search: $0)) }
-            )
-            ReverseProxyCard(rules: rules, ready: rulesReady, loading: rulesFetching,
-                             failure: rulesFailure) {
-                navigator.push(.webservice)
+
+            HStack(spacing: LuckyTheme.Space.m) {
+                DashboardRouteButton(title: "Docker", detail: "容器与镜像",
+                                     symbol: LuckySymbol.docker, tone: .warning) {
+                    navigator.push(.docker())
+                }
+                DashboardRouteButton(title: "Web 服务", detail: "代理与路由",
+                                     symbol: LuckySymbol.network, tone: .brand) {
+                    navigator.push(.webservice)
+                }
             }
-            if let status = live.data {
-                systemPanel(status)
-                networkPanel(status)
-                serverPanel(status)
+
+            VStack(alignment: .leading, spacing: 10) {
+                LuckySectionHeader(title: "服务状态", subtitle: "反向代理概况",
+                                   symbol: "waveform.path.ecg")
+                ReverseProxyCard(rules: rules, ready: rulesReady, loading: rulesFetching,
+                                 failure: rulesFailure) {
+                    navigator.push(.webservice)
+                }
+            }
+            DashboardLiveReader { statusStore in
+                if let status = statusStore.data {
+                    systemPanel(status)
+                    networkPanel(status)
+                    serverPanel(status)
+                }
             }
         }
-        .luckyTitle("总览", "实时资源与服务状态")
+        .toolbar(.hidden, for: .navigationBar)
         .task(id: active) { await holdStatus() }
         .task(id: active) { await pollOverview() }
         .task(id: active) { await pollRules() }
@@ -401,15 +536,35 @@ struct DashboardScreen: View {
     /// instead of being rounded to `Int` for display.
     private func serverPanel(_ status: LuckyLiveStatus) -> some View {
         LuckySection(title: "服务器信息", symbol: LuckySymbol.disk) {
-            LuckyRow("进程启动时间", status.runTime.isEmpty ? "--" : status.runTime)
-            LuckyRow("查询时间", status.queryTime.isEmpty ? "--" : status.queryTime)
-            LuckyRow("进程已打开句柄数", JSONSerializer.numberString(status.handleCount))
-            LuckyRow("协程数", JSONSerializer.numberString(status.goroutine))
-            LuckyRow("进程占用内存", Format.bytes(status.processUsedMem), mono: true)
-            LuckyHairline()
-            LuckyRow("GC 总次数", JSONSerializer.numberString(status.numGc))
-            LuckyRow("堆占用内存", Format.bytes(status.heapInuse), mono: true)
+            LuckyTileGrid(minimum: 135, spacing: LuckyTheme.Space.s) {
+                serverFact("进程启动", status.runTime.isEmpty ? "--" : status.runTime)
+                serverFact("查询时间", status.queryTime.isEmpty ? "--" : status.queryTime)
+                serverFact("打开句柄", JSONSerializer.numberString(status.handleCount))
+                serverFact("协程", JSONSerializer.numberString(status.goroutine))
+                serverFact("进程内存", Format.bytes(status.processUsedMem))
+                serverFact("GC 次数", JSONSerializer.numberString(status.numGc))
+                serverFact("堆内存", Format.bytes(status.heapInuse))
+            }
         }
+    }
+
+    private func serverFact(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(LuckyTheme.textTertiary)
+            Text(value)
+                .font(LuckyTheme.Text.captionMedium)
+                .foregroundStyle(LuckyTheme.textPrimary)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .padding(LuckyTheme.Space.m)
+        .frame(maxWidth: .infinity, minHeight: 58, alignment: .leading)
+        .background(LuckyTheme.surfaceRaised,
+                    in: .rect(cornerRadius: LuckyTheme.Radius.row))
+        .accessibilityElement(children: .combine)
     }
 
     /// `Promise.all([dockerOverview.refetch(), webServiceOverview.refetch()])`.

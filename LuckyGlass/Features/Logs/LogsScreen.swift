@@ -27,18 +27,7 @@ struct LogsScreen: View {
             LuckyBackdrop()
             content
         }
-        .luckyTitle("运行日志", "Lucky 全局日志")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    Task { await poll() }
-                } label: {
-                    LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
-                }
-                .disabled(fetching)
-                .accessibilityLabel("刷新")
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         // `refetchInterval: 3000` while enabled, cancelled the moment it is not.
         .task(id: active) {
             guard active else { return }
@@ -52,7 +41,21 @@ struct LogsScreen: View {
     /// `scrollable={false}`: the page does not scroll, the list inside it does.
     @ViewBuilder
     private var content: some View {
-        VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
+        VStack(alignment: .leading, spacing: LuckyTheme.Space.l) {
+            LuckyWorkspaceHeader(
+                eyebrow: "实时输出",
+                title: "运行日志",
+                subtitle: startTime.isEmpty ? "Lucky 全局日志" : "进程启动于 \(startTime)"
+            ) {
+                Button {
+                    Task { await poll() }
+                } label: {
+                    LuckyIconTile(symbol: LuckySymbol.refresh, size: 40, glyph: 17)
+                }
+                .buttonStyle(.plain)
+                .disabled(fetching)
+                .accessibilityLabel("刷新")
+            }
             if !failure.isEmpty {
                 LuckyErrorCard(message: failure) { Task { await poll() } }
             }
@@ -64,19 +67,31 @@ struct LogsScreen: View {
                     LuckyLoadingView().frame(maxHeight: .infinity)
                 }
             } else {
-                LuckySectionHeader(title: "实时输出", symbol: "terminal") {
+                HStack(spacing: LuckyTheme.Space.s) {
+                    LuckyIconTile(symbol: "terminal", size: 30, glyph: 13, tone: .idle)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("全局输出")
+                            .font(LuckyTheme.Text.cardTitle)
+                            .foregroundStyle(LuckyTheme.textPrimary)
+                        Text("最新记录优先")
+                            .font(LuckyTheme.Text.caption)
+                            .foregroundStyle(LuckyTheme.textTertiary)
+                    }
+                    Spacer(minLength: 0)
                     LuckyChip(text: "\(lines.count) 条", tone: .idle)
+                    LuckyStatusDot(tone: active ? .ok : .idle, pulsing: active)
                 }
                 // `[...lines].reverse()` — newest first, so the interesting line is on screen
                 // without scrolling, and therefore no auto-follow.
-                LuckyLogView(lines: Array(lines.reversed()), follows: false, height: nil)
+                LuckyLogView(lines: lines, follows: false, height: nil, newestFirst: true)
                     .clipShape(RoundedRectangle(cornerRadius: LuckyTheme.Radius.card,
                                                 style: .continuous))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, LuckyTheme.Space.gutter)
-        .padding(.top, LuckyTheme.Space.s)
+        .padding(.top, LuckyTheme.Space.l)
+        .padding(.bottom, LuckyTheme.Space.s)
     }
 
     private func poll() async {

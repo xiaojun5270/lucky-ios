@@ -29,10 +29,10 @@ struct LuckyPage<Content: View>: View {
 
     private var base: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: spacing, content: content)
+            LazyVStack(alignment: .leading, spacing: spacing, content: content)
                 .padding(.horizontal, LuckyTheme.Space.gutter)
-                .padding(.top, LuckyTheme.Space.s)
-                .padding(.bottom, LuckyTheme.Space.xxl)
+                .padding(.top, LuckyTheme.Space.l)
+                .padding(.bottom, 48)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         // Soft at the top so cards dissolve under the title; hard at the bottom so a list does not
@@ -40,6 +40,53 @@ struct LuckyPage<Content: View>: View {
         .scrollEdgeEffectStyle(.soft, for: .top)
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
+    }
+}
+
+/// A root-tab masthead. Detail screens keep the compact system navigation title, while the four
+/// workspaces use this larger in-content hierarchy so their first viewport has a clear identity.
+struct LuckyWorkspaceHeader<Trailing: View>: View {
+    var eyebrow: String
+    var title: String
+    var subtitle: String?
+    @ViewBuilder var trailing: () -> Trailing
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: LuckyTheme.Space.m) {
+            HStack(alignment: .top, spacing: LuckyTheme.Space.m) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text(eyebrow)
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(LuckyTheme.accent)
+                    Text(title)
+                        .font(LuckyTheme.Text.hero)
+                        .foregroundStyle(LuckyTheme.textPrimary)
+                        .lineLimit(2)
+                    if let subtitle, !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(LuckyTheme.Text.body)
+                            .foregroundStyle(LuckyTheme.textSecondary)
+                            .lineLimit(2)
+                    }
+                }
+                Spacer(minLength: LuckyTheme.Space.s)
+                trailing()
+            }
+            HStack(spacing: 0) {
+                Rectangle().fill(LuckyTheme.accent).frame(width: 72)
+                Rectangle().fill(LuckyTheme.info).frame(width: 34)
+                Rectangle().fill(LuckyTheme.warning).frame(width: 18)
+                Rectangle().fill(LuckyTheme.hairline)
+            }
+            .frame(height: 3)
+        }
+        .accessibilityElement(children: .contain)
+    }
+}
+
+extension LuckyWorkspaceHeader where Trailing == EmptyView {
+    init(eyebrow: String, title: String, subtitle: String? = nil) {
+        self.init(eyebrow: eyebrow, title: title, subtitle: subtitle) { EmptyView() }
     }
 }
 

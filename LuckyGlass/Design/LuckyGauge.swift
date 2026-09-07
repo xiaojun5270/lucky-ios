@@ -49,7 +49,6 @@ struct LuckyRingGauge: View {
                 }
             }
             .frame(width: size, height: size)
-            .animation(LuckyTheme.Motion.snap, value: clamped)
             VStack(spacing: 1) {
                 Text(label)
                     .font(LuckyTheme.Text.captionMedium)
@@ -112,7 +111,6 @@ struct LuckyMeterBar: View {
                 }
             }
             .frame(height: height)
-            .animation(LuckyTheme.Motion.snap, value: clamped)
             if let leading, !leading.isEmpty {
                 Text(leading)
                     .font(LuckyTheme.Text.caption)
@@ -164,14 +162,21 @@ struct LuckySparkline: View {
         }
     }
 
-    private var peak: Double {
+    private func peak(in lines: [LuckySparkSeries]) -> Double {
         if let ceiling, ceiling > 0 { return ceiling }
-        let highest = windowed.flatMap(\.values).filter(\.isFinite).max() ?? 0
+        var highest = 0.0
+        for line in lines {
+            for value in line.values where value.isFinite {
+                highest = max(highest, value)
+            }
+        }
         return max(1, highest) * 1.12
     }
 
     var body: some View {
-        Canvas { context, size in
+        let lines = windowed
+        let scale = peak(in: lines)
+        Canvas(rendersAsynchronously: true) { context, size in
             for fraction in Self.gridlines {
                 var rule = Path()
                 let y = (size.height * fraction).rounded() + 0.5
@@ -183,8 +188,8 @@ struct LuckySparkline: View {
                     style: StrokeStyle(lineWidth: 1, dash: [3, 4])
                 )
             }
-            for line in windowed {
-                let points = coordinates(line.values, in: size)
+            for line in lines {
+                let points = coordinates(line.values, scale: scale, in: size)
                 guard points.count > 1 else { continue }
                 var path = Path()
                 path.addLines(points)
@@ -216,10 +221,9 @@ struct LuckySparkline: View {
         .accessibilityHidden(true)
     }
 
-    private func coordinates(_ values: [Double], in size: CGSize) -> [CGPoint] {
+    private func coordinates(_ values: [Double], scale: Double, in size: CGSize) -> [CGPoint] {
         guard values.count > 1 else { return [] }
         let step = size.width / CGFloat(values.count - 1)
-        let scale = peak
         return values.enumerated().map { index, raw in
             let value = raw.isFinite ? min(max(raw, 0), scale) : 0
             let y = size.height * (Self.baseline - Self.span * CGFloat(value / scale))
@@ -268,7 +272,6 @@ struct LuckyArcGauge: View {
                 .padding(.horizontal, lineWidth * 2)
         }
         .frame(width: size, height: size)
-        .animation(LuckyTheme.Motion.snap, value: clamped)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(label)
     }

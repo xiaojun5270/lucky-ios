@@ -7,12 +7,21 @@ struct SettingsScreen: View {
     @State private var confirming = false
 
     var body: some View {
-        LuckyPage {
+        LuckyPage(spacing: 22) {
+            LuckyWorkspaceHeader(
+                eyebrow: "系统偏好",
+                title: "连接与安全",
+                subtitle: session.baseUrl
+            )
             connection
             security
-            logout
+            VStack(alignment: .leading, spacing: 10) {
+                LuckySectionHeader(title: "当前会话", subtitle: "本机凭据与登录状态",
+                                   symbol: "person.crop.circle")
+                logout
+            }
         }
-        .luckyTitle("设置", "当前 Lucky 连接")
+        .toolbar(.hidden, for: .navigationBar)
         // `Alert.alert('退出登录', '确定结束当前 Lucky 会话吗？', …)` — a decision, so it stays an
         // alert rather than becoming a toast.
         .alert("退出登录", isPresented: $confirming) {
@@ -24,52 +33,75 @@ struct SettingsScreen: View {
     }
 
     private var connection: some View {
-        LuckyCard {
-            HStack(spacing: LuckyTheme.Space.m) {
-                LuckyIconTile(symbol: "server.rack", size: 46, glyph: 22)
-                VStack(alignment: .leading, spacing: LuckyTheme.Space.xs) {
-                    Text(session.account.isEmpty ? "管理员" : session.account)
-                        .font(.system(size: 15, weight: .heavy, design: .rounded))
-                        .foregroundStyle(LuckyTheme.textPrimary)
-                    Text(session.baseUrl)
-                        .font(LuckyTheme.Text.caption)
-                        .foregroundStyle(LuckyTheme.textSecondary)
-                        .lineLimit(2)
-                        .textSelection(.enabled)
+        VStack(alignment: .leading, spacing: 10) {
+            LuckySectionHeader(title: "服务器", subtitle: "当前管理目标", symbol: "server.rack")
+            LuckyCard(padding: 0, spacing: 0) {
+                HStack(spacing: LuckyTheme.Space.m) {
+                    LuckyIconTile(symbol: "server.rack", size: 52, glyph: 24)
+                    VStack(alignment: .leading, spacing: LuckyTheme.Space.xs) {
+                        Text(session.account.isEmpty ? "管理员" : session.account)
+                            .font(.system(size: 19, weight: .bold))
+                            .foregroundStyle(LuckyTheme.textPrimary)
+                        Text(session.baseUrl)
+                            .font(LuckyTheme.Text.codeSmall)
+                            .foregroundStyle(LuckyTheme.textSecondary)
+                            .lineLimit(2)
+                            .textSelection(.enabled)
+                    }
+                    Spacer(minLength: LuckyTheme.Space.s)
+                    LuckyChip(text: "已连接", tone: .ok, symbol: "checkmark")
                 }
-                Spacer(minLength: LuckyTheme.Space.s)
-                LuckyStatusDot(tone: .ok, size: 9)
-            }
-            LuckyHairline()
-            VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
-                note("person", "账号已保存")
-                note("key", "凭据由设备安全存储保护")
+                .padding(LuckyTheme.Space.l)
+
+                LuckyHairline()
+
+                HStack(spacing: 0) {
+                    connectionFact("person.fill", "账号", "已保存", .brand)
+                    Rectangle().fill(LuckyTheme.separator).frame(width: 1, height: 34)
+                    connectionFact("key.fill", "凭据", "安全存储", .info)
+                }
+                .padding(.vertical, LuckyTheme.Space.m)
+                .background(LuckyTheme.surfaceRaised)
             }
         }
     }
 
-    private func note(_ symbol: String, _ text: String) -> some View {
-        HStack(spacing: 9) {
-            LuckyIconTile(symbol: symbol, size: 28, glyph: 14, tone: .idle)
-            Text(text)
-                .font(LuckyTheme.Text.caption)
-                .foregroundStyle(LuckyTheme.textSecondary)
+    private func connectionFact(_ symbol: String, _ label: String, _ value: String,
+                                _ tone: LuckyTone) -> some View {
+        HStack(spacing: 8) {
+            LuckyIconTile(symbol: symbol, size: 28, glyph: 12, tone: tone)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label).font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(LuckyTheme.textTertiary)
+                Text(value).font(LuckyTheme.Text.captionMedium)
+                    .foregroundStyle(LuckyTheme.textPrimary)
+            }
         }
+        .padding(.horizontal, LuckyTheme.Space.m)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var security: some View {
-        LuckyCard {
-            HStack(spacing: 9) {
-                LuckyIconTile(symbol: "checkmark.shield", tone: .ok)
-                Text("连接安全")
-                    .font(LuckyTheme.Text.cardTitle)
-                    .foregroundStyle(LuckyTheme.textPrimary)
+        VStack(alignment: .leading, spacing: 10) {
+            LuckySectionHeader(title: "安全", subtitle: "连接与存储策略",
+                               symbol: "checkmark.shield")
+            LuckyCard {
+                HStack(alignment: .top, spacing: LuckyTheme.Space.m) {
+                    LuckyIconTile(symbol: "lock.shield.fill", size: 40, glyph: 18, tone: .ok)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("连接安全")
+                            .font(LuckyTheme.Text.cardTitle)
+                            .foregroundStyle(LuckyTheme.textPrimary)
+                        Text("公网访问时应在 Lucky 前配置 HTTPS 与访问控制。")
+                            .font(LuckyTheme.Text.body)
+                            .foregroundStyle(LuckyTheme.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                LuckyInset {
+                    LuckyRow("管理 Token", "仅保存在设备安全存储", tone: .ok)
+                }
             }
-            Text("公网访问时应在 Lucky 前配置 HTTPS 与访问控制。管理 Token 不会写入 Web 的持久存储。")
-                .font(LuckyTheme.Text.body)
-                .foregroundStyle(LuckyTheme.textSecondary)
-                .lineSpacing(4)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 

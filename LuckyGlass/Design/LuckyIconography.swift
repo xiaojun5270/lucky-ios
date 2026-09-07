@@ -147,7 +147,6 @@ struct LuckyFunctionIcon: View {
                     .font(.system(size: glyph, weight: .semibold))
                     .foregroundStyle(Color.white)
             )
-            .shadow(color: color.opacity(0.18), radius: 3, y: 2)
             .accessibilityHidden(true)
     }
 }
