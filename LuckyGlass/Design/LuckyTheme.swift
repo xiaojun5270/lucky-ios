@@ -22,9 +22,6 @@ enum LuckyTheme {
 
     static let accent = dynamic(light: 0x1769E0, dark: 0x4D92F7)
     static let accentSoft = dynamic(light: 0xE7F0FF, dark: 0x172A46)
-    static let violet = dynamic(light: 0x7C3AED, dark: 0xA875FF)
-    static let violetSoft = dynamic(light: 0xF0E9FF, dark: 0x2D2147)
-
     static let success = dynamic(light: 0x16865A, dark: 0x2FC98A)
     static let successSoft = dynamic(light: 0xE4F6EE, dark: 0x15372B)
     static let warning = dynamic(light: 0xC06A00, dark: 0xF2A62B)

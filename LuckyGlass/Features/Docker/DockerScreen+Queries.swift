@@ -1,18 +1,16 @@
 import SwiftUI
 
-/// §2's fourteen queries, as `.task` loops.
+/// Docker queries owned by view-scoped `.task` loops.
 ///
 /// react-query's `enabled` flag becomes the `.task(id:)` that owns the loop: cancelling the task
 /// cancels the request and the sleep with it, which is what `enabled: false` does to a mounted
 /// query. `staleTime` has no counterpart — re-entering a view always refetches, which is a visible
 /// divergence on a fast tab bounce and a harmless one.
 extension DockerScreen {
-    /// `active.refetch()` on entry. Three views are missing from this switch on purpose: 总览 and
-    /// 日志 are refetched on an interval and own `fetching` from inside their own loops, and the two
-    /// statistics sweeps are not tied to a view at all.
+    /// `active.refetch()` on entry. 日志 owns its interval; statistics have their own task.
     func loadView() async {
         switch view {
-        case .overview, .logs: return
+        case .logs: return
         case .containers: await loadContainers()
         case .settings: await loadSettings()
         default: await loadList(view)
@@ -99,34 +97,9 @@ extension DockerScreen {
     }
 }
 
-// MARK: - 轮询
+// MARK: - 日志轮询
 
 extension DockerScreen {
-    /// `overview`: `refetchInterval: 60_000`. The loop is the whole gate — `.task(id:)` cancels it,
-    /// and the sleep with it, the moment the view changes or the app leaves the foreground.
-    func pollOverview() async {
-        guard overviewActive else { return }
-        await loadOverview()
-        while !Task.isCancelled {
-            try? await Task.sleep(for: .seconds(60))
-            guard !Task.isCancelled else { return }
-            await loadOverview()
-        }
-    }
-
-    private func loadOverview() async {
-        fetching = true
-        defer { if view == .overview { fetching = false } }
-        do {
-            overview = try await DockerService.overview()
-            queryFailures[.overview] = ""
-            loaded.insert(.overview)
-        } catch {
-            guard !error.isCancellation else { return }
-            queryFailures[.overview] = error.luckyMessage()
-        }
-    }
-
     /// `logs`: `refetchInterval: 15000`, and unlike the tunnel and webservice logs every page polls
     /// — the query key carries `dockerLogPage`, so paging is a new query and not a new argument.
     func pollLogs() async {
@@ -205,9 +178,7 @@ extension DockerScreen {
         // `setProgressiveContainerStats(undefined)` — the previous sweep's partials go before the
         // next one starts streaming, so the grid never mixes two rounds.
         progressiveStats = nil
-        // 容器 hands the sweep the list it is already showing; 总览 passes nothing and lets
-        // `refreshDockerContainerStats` fetch its own.
-        let items = view == .containers ? containers : nil
+        let items = containers
         // `State` is `Sendable` and its setter is nonmutating, so the box can cross into the
         // progress callback where `self` could not.
         let sink = $progressiveStats
@@ -226,20 +197,16 @@ extension DockerScreen {
 // MARK: - 刷新与失效
 
 extension DockerScreen {
-    /// §6's `refreshDockerView` — the toolbar button and every pull-to-refresh. 总览 and 容器 also
-    /// re-run the statistics sweeps, and 设置 re-runs the two queries that are not `active`.
+    /// The toolbar button and pull-to-refresh. 容器 also refreshes its statistics sweep.
     func refresh() async {
         await reloadActive()
         guard statsActive else { return }
         await refreshStats()
     }
 
-    /// `active.refetch()` for all nine views. Unlike `loadView` this one does reload 总览 and 日志:
-    /// their intervals belong to their loops, but a manual refresh and an invalidation both mean
-    /// "read it again now".
+    /// Reload the current workspace. 日志 normally owns an interval, but manual refresh reads now.
     private func reloadActive() async {
         switch view {
-        case .overview: await loadOverview()
         case .logs: await loadLogs()
         case .containers: await loadContainers()
         case .settings: await loadSettings()

@@ -311,13 +311,11 @@ struct ContainerCommandButton: View {
 
 // MARK: - 面板滚动
 
-/// The scroll 总览 and 设置 sit in. §6's list views take `DockerListPane` below; these two are
-/// `ScrollView`s in the original too, and share its 98 pt bottom inset so the glass bar never
-/// covers the last card.
+/// The scroll used by settings and full-payload log views. List views use `DockerListPane` below.
 struct DockerPaneScroll<Content: View>: View {
     var spacing: CGFloat = LuckyTheme.Space.l
     /// `<Page refreshing onRefresh>` — the scrollable page has pull to refresh just as the lists
-    /// do, so 总览, 设置 and 日志's Mode A all get it here.
+    /// do, so 设置 and 日志's Mode A both get it here.
     var refresh: @Sendable () async -> Void
     @ViewBuilder var content: Content
 

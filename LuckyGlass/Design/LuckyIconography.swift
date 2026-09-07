@@ -9,7 +9,6 @@ import SwiftUI
 enum LuckySymbol {
     // MARK: - Sections
 
-    static let dashboard = "speedometer"
     static let services = "square.stack.3d.up"
     static let docker = "cube.transparent"
     static let monitor = "waveform.path.ecg"

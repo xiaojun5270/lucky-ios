@@ -2,9 +2,8 @@ import SwiftUI
 
 /// `app/(tabs)/_layout.tsx`.
 ///
-/// The original renders `<NativeTabs minimizeBehavior="onScrollDown" blurEffect="systemDefault">`
-/// — which is the React Native wrapper around exactly the iOS 26 tab bar this uses directly. The
-/// glass, the blur and the minimize-on-scroll all come from the system; nothing here paints a bar.
+/// The system tab bar stays at its full size while content scrolls, so navigation does not shift
+/// under the user's thumb. Glass and blur still come from the native iOS 26 tab bar.
 struct LuckyRoot: View {
     @State private var navigator = LuckyNavigator()
     @State private var session = LuckySession.shared
@@ -17,8 +16,7 @@ struct LuckyRoot: View {
                 }
             }
         }
-        // `minimizeBehavior="onScrollDown"`.
-        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabBarMinimizeBehavior(.never)
         .environment(\.luckyNavigator, navigator)
         .tint(LuckyTheme.accent)
     }

@@ -38,7 +38,7 @@ struct LuckyLiveStatus: Sendable, Hashable {
 }
 
 enum LuckyStatusConstants {
-    /// `STATUS_UPDATE_INTERVAL = 1000`
+    /// UI publication cadence. Incoming frames are coalesced so only the newest one is decoded.
     static let updateInterval: TimeInterval = 1.5
     /// `STATUS_HISTORY_LIMIT = 90`
     static let historyLimit = 90

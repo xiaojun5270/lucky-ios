@@ -125,7 +125,10 @@ extension TunnelNatDetector {
         guard let payload = JSONParser.tryParse(raw) else {
             // The `catch` branch appends the frame as it arrived, skipping the emptiness filter the
             // JSON branch applies — so a frame of whitespace does leave a blank line behind.
-            lines = Array((lines + [raw]).suffix(200))
+            var next = lines
+            next.append(raw)
+            if next.count > 200 { next.removeFirst(next.count - 200) }
+            lines = next
             return false
         }
         append(TunnelRecord.text(first(payload, of: ["log", "result", "error"])))
@@ -149,7 +152,10 @@ extension TunnelNatDetector {
     /// The 检测超时 and 检测连接失败 lines route through here too. The original appends those without
     /// the cap, which can only ever matter for the single line that ends the run.
     private func append(_ line: String) {
-        lines = Array((lines + [line]).filter { !$0.isEmpty }.suffix(200))
+        var next = lines.filter { !$0.isEmpty }
+        if !line.isEmpty { next.append(line) }
+        if next.count > 200 { next.removeFirst(next.count - 200) }
+        lines = next
     }
 
     /// `new URL(…)` with `http`→`ws`, then the three parameters `URLSearchParams` writes.

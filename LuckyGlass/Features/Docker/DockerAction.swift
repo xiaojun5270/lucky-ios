@@ -115,32 +115,32 @@ extension DockerActionType {
         // Reading or writing a path inside a container changes no list metadata.
         if self == .containerFiles { return [] }
         if isContainer {
-            var keys: [DockerQuery] = [.containers, .containerStats, .overview]
+            var keys: [DockerQuery] = [.containers, .containerStats]
             if self == .containerCommit || self == .containerVersionSwitch { keys.append(.images) }
             if [.containerLabelSet, .containerLabelRemove, .containerGroupSet].contains(self) {
                 keys.append(.maintenance)
             }
             return keys
         }
-        if isImage || self == .imagesRemoveBatch { return [.images, .overview] }
+        if isImage || self == .imagesRemoveBatch { return [.images] }
         if isCompose {
-            var keys: [DockerQuery] = [.compose, .overview]
+            var keys: [DockerQuery] = [.compose]
             if self == .composeCreate { keys.append(contentsOf: [.tasks, .containers, .images]) }
             if rawValue.contains("backup") { keys.append(.maintenance) }
             return keys
         }
-        if isNetwork { return [.networks, .overview] }
+        if isNetwork { return [.networks] }
         if isVolume {
-            var keys: [DockerQuery] = [.volumes, .overview]
+            var keys: [DockerQuery] = [.volumes]
             if rawValue.contains("backup") || self == .volumeRestore { keys.append(.maintenance) }
             return keys
         }
         if isTask || self == .tasksClear { return [.tasks] }
-        if isGroup { return [.containers, .overview, .maintenance] }
+        if isGroup { return [.containers, .maintenance] }
         if self == .configSave { return [.config] }
         if isMirror { return [.mirrors] }
         if self == .upgradeStatusClear { return [.maintenance] }
-        return [.overview]
+        return []
     }
 
     /// The seven whose success releases the held upload.

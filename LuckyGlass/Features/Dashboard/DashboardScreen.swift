@@ -2,8 +2,8 @@ import SwiftUI
 
 /// `app/(tabs)/monitor.tsx` — the 总览 tab.
 ///
-/// Three feeds run at once: the status socket pushes a frame a second, the Docker overview is
-/// refetched every 60 s, and the reverse-proxy rule list every 30 s. All three are gated on
+/// Two feeds run at once: the status socket publishes live frames and the reverse-proxy rule list
+/// refreshes every 30 s. Both are gated on
 /// `dockerActive = isFocused && appIsActive`, so a backgrounded app holds no socket and issues no
 /// requests. The socket is the shared reference-counted stream, so leaving the tab drops the
 /// connection but keeps the last frame on screen instead of blanking the charts.
@@ -82,7 +82,6 @@ private struct DashboardLiveReader<Content: View>: View {
 private struct DashboardHostPanel: View {
     var status: LuckyLiveStatus?
     var connected: Bool
-    var containerCount: Double?
 
     private var memory: Double {
         guard let status else { return 0 }
@@ -117,7 +116,8 @@ private struct DashboardHostPanel: View {
                 metric("内存", status == nil ? "--" : JSCompat.toFixed(memory, 1) + "%",
                        tone: .ok)
                 divider
-                metric("容器", DockerText.count(containerCount), tone: .warning)
+                metric("协程", status.map { JSONSerializer.numberString($0.goroutine) } ?? "--",
+                       tone: .warning)
             }
             .padding(.vertical, LuckyTheme.Space.m)
             .background(LuckyTheme.surfaceRaised)
@@ -374,12 +374,6 @@ struct DashboardScreen: View {
     @Environment(\.luckyNavigator) private var navigator
     @Environment(\.scenePhase) private var phase
 
-    @State private var overview: DockerOverview?
-    @State private var overviewFailure = ""
-    /// `isFetching`, kept as a re-entrancy guard. SwiftUI owns the refresh spinner, so the
-    /// original's `refreshing` flag — which only fed the `RefreshControl` and blocked a second
-    /// pull — has nothing else left to drive.
-    @State private var overviewFetching = false
     @State private var rules: [LuckyListItem] = []
     @State private var rulesReady = false
     @State private var rulesFailure = ""
@@ -393,26 +387,10 @@ struct DashboardScreen: View {
     var body: some View {
         LuckyPage(spacing: 18, refresh: { await refreshAll() }) {
             DashboardLiveReader { statusStore in
-                LuckyWorkspaceHeader(
-                    eyebrow: "实时工作台",
-                    title: "运行总览",
-                    subtitle: "资源、网络与服务状态"
-                ) {
-                    LuckyChip(text: statusStore.connected ? "实时" : "连接中",
-                              tone: statusStore.connected ? .ok : .warning,
-                              symbol: statusStore.connected ? "waveform.path.ecg" : "arrow.clockwise")
-                }
                 if !statusStore.error.isEmpty, statusStore.data == nil {
                     LuckyErrorCard(message: statusStore.error)
                 }
-                DashboardHostPanel(status: statusStore.data, connected: statusStore.connected,
-                                   containerCount: overview?.containerCount)
-            }
-
-            if !overviewFailure.isEmpty {
-                LuckyErrorCard(message: "Docker 总览：\(overviewFailure)") {
-                    Task { await loadOverview() }
-                }
+                DashboardHostPanel(status: statusStore.data, connected: statusStore.connected)
             }
 
             HStack(spacing: LuckyTheme.Space.m) {
@@ -420,19 +398,16 @@ struct DashboardScreen: View {
                                      symbol: LuckySymbol.docker, tone: .warning) {
                     navigator.push(.docker())
                 }
-                DashboardRouteButton(title: "Web 服务", detail: "代理与路由",
-                                     symbol: LuckySymbol.network, tone: .brand) {
-                    navigator.push(.webservice)
+                DashboardRouteButton(title: "内网穿透", detail: "隧道与代理",
+                                     symbol: "point.3.connected.trianglepath.dotted",
+                                     tone: .info) {
+                    navigator.reset(to: .services)
                 }
             }
 
-            VStack(alignment: .leading, spacing: 10) {
-                LuckySectionHeader(title: "服务状态", subtitle: "反向代理概况",
-                                   symbol: "waveform.path.ecg")
-                ReverseProxyCard(rules: rules, ready: rulesReady, loading: rulesFetching,
-                                 failure: rulesFailure) {
-                    navigator.push(.webservice)
-                }
+            ReverseProxyCard(rules: rules, ready: rulesReady, loading: rulesFetching,
+                             failure: rulesFailure) {
+                navigator.push(.webservice)
             }
             DashboardLiveReader { statusStore in
                 if let status = statusStore.data {
@@ -444,7 +419,6 @@ struct DashboardScreen: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .task(id: active) { await holdStatus() }
-        .task(id: active) { await pollOverview() }
         .task(id: active) { await pollRules() }
     }
 
@@ -452,18 +426,17 @@ struct DashboardScreen: View {
     /// draws bare polylines; area-filling the primary line is the one visual liberty taken here.
     private func systemPanel(_ status: LuckyLiveStatus) -> some View {
         let memory = Format.percent(status.usedMem, status.totalMem)
-        return VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
+        return LuckyCard {
             LuckySectionHeader(title: "系统资源", symbol: LuckySymbol.cpu) {
                 LuckyChip(text: "内存 \(JSCompat.toFixed(memory, 1))%", tone: .idle)
             }
-            LuckyCard {
-                LuckyWrap(spacing: LuckyTheme.Space.m, lineSpacing: 6) {
-                    DashboardLegend(label: "系统 CPU", tone: .brand)
-                    DashboardLegend(label: "进程 CPU", tone: .danger)
-                    DashboardLegend(label: "系统内存", tone: .ok)
-                }
-                LuckySparkline(series: systemSeries(status.history), height: 128, ceiling: 100)
+            LuckyHairline()
+            LuckyWrap(spacing: LuckyTheme.Space.m, lineSpacing: 6) {
+                DashboardLegend(label: "系统 CPU", tone: .brand)
+                DashboardLegend(label: "进程 CPU", tone: .danger)
+                DashboardLegend(label: "系统内存", tone: .ok)
             }
+            LuckySparkline(series: systemSeries(status.history), height: 128, ceiling: 100)
         }
     }
 
@@ -486,20 +459,19 @@ struct DashboardScreen: View {
     private func networkPanel(_ status: LuckyLiveStatus) -> some View {
         let inSpeed = Format.bytes(status.lastNetInSpeed, speed: true)
         let outSpeed = Format.bytes(status.lastNetOutSpeed, speed: true)
-        return VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
+        return LuckyCard {
             LuckySectionHeader(title: "网络趋势", symbol: LuckySymbol.network)
-            LuckyCard {
-                LuckyWrap(spacing: LuckyTheme.Space.m, lineSpacing: 6) {
-                    DashboardLegend(label: "下载 \(inSpeed)", tone: .info)
-                    DashboardLegend(label: "上传 \(outSpeed)", tone: .warning)
-                }
-                LuckySparkline(series: networkSeries(status.history), height: 128)
-                HStack(spacing: 10) {
-                    totalColumn("接收总量", Format.bytes(status.netIn),
-                                symbol: LuckySymbol.download, tone: .info)
-                    totalColumn("发送总量", Format.bytes(status.netOut),
-                                symbol: LuckySymbol.upload, tone: .warning)
-                }
+            LuckyHairline()
+            LuckyWrap(spacing: LuckyTheme.Space.m, lineSpacing: 6) {
+                DashboardLegend(label: "下载 \(inSpeed)", tone: .info)
+                DashboardLegend(label: "上传 \(outSpeed)", tone: .warning)
+            }
+            LuckySparkline(series: networkSeries(status.history), height: 128)
+            HStack(spacing: 10) {
+                totalColumn("接收总量", Format.bytes(status.netIn),
+                            symbol: LuckySymbol.download, tone: .info)
+                totalColumn("发送总量", Format.bytes(status.netOut),
+                            symbol: LuckySymbol.upload, tone: .warning)
             }
         }
     }
@@ -537,7 +509,9 @@ struct DashboardScreen: View {
     /// JavaScript number is `JSONSerializer.numberString`, which is why these stay `Double`s
     /// instead of being rounded to `Int` for display.
     private func serverPanel(_ status: LuckyLiveStatus) -> some View {
-        LuckySection(title: "服务器信息", symbol: LuckySymbol.disk) {
+        LuckyCard {
+            LuckySectionHeader(title: "服务器信息", symbol: LuckySymbol.disk)
+            LuckyHairline()
             LuckyTileGrid(minimum: 135, spacing: LuckyTheme.Space.s) {
                 serverFact("进程启动", status.runTime.isEmpty ? "--" : status.runTime)
                 serverFact("查询时间", status.queryTime.isEmpty ? "--" : status.queryTime)
@@ -569,11 +543,8 @@ struct DashboardScreen: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// `Promise.all([dockerOverview.refetch(), webServiceOverview.refetch()])`.
     private func refreshAll() async {
-        async let overviewDone: Void = loadOverview()
-        async let rulesDone: Void = loadRules()
-        _ = await (overviewDone, rulesDone)
+        await loadRules()
     }
 
     /// The socket lives exactly as long as the tab is showing and the app is foregrounded. The
@@ -586,37 +557,12 @@ struct DashboardScreen: View {
         while !Task.isCancelled { try? await Task.sleep(for: .seconds(60)) }
     }
 
-    /// `staleTime: 30_000, refetchInterval: 60_000`. `staleTime` has no equivalent here: coming
-    /// back to the tab inside 30 s refetches, where react-query would have served its cache.
-    private func pollOverview() async {
-        guard active else { return }
-        while !Task.isCancelled {
-            await loadOverview()
-            try? await Task.sleep(for: .seconds(60))
-        }
-    }
-
     /// `staleTime: 15_000, refetchInterval: 30_000`.
     private func pollRules() async {
         guard active else { return }
         while !Task.isCancelled {
             await loadRules()
             try? await Task.sleep(for: .seconds(30))
-        }
-    }
-
-    /// A failure keeps the previous payload on screen — react-query's `data` survives a later
-    /// error, and the error card above the charts is what reports it.
-    private func loadOverview() async {
-        guard !overviewFetching else { return }
-        overviewFetching = true
-        defer { overviewFetching = false }
-        do {
-            overview = try await DockerService.overview()
-            overviewFailure = ""
-        } catch {
-            guard !error.isCancellation else { return }
-            overviewFailure = error.luckyMessage()
         }
     }
 

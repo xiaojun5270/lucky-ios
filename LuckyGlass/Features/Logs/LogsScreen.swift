@@ -42,20 +42,6 @@ struct LogsScreen: View {
     @ViewBuilder
     private var content: some View {
         VStack(alignment: .leading, spacing: LuckyTheme.Space.l) {
-            LuckyWorkspaceHeader(
-                eyebrow: "实时输出",
-                title: "运行日志",
-                subtitle: startTime.isEmpty ? "Lucky 全局日志" : "进程启动于 \(startTime)"
-            ) {
-                Button {
-                    Task { await poll() }
-                } label: {
-                    LuckyIconTile(symbol: LuckySymbol.refresh, size: 40, glyph: 17)
-                }
-                .buttonStyle(.plain)
-                .disabled(fetching)
-                .accessibilityLabel("刷新")
-            }
             if !failure.isEmpty {
                 LuckyErrorCard(message: failure) { Task { await poll() } }
             }
@@ -80,6 +66,14 @@ struct LogsScreen: View {
                     Spacer(minLength: 0)
                     LuckyChip(text: "\(lines.count) 条", tone: .idle)
                     LuckyStatusDot(tone: active ? .ok : .idle, pulsing: active)
+                    Button {
+                        Task { await poll() }
+                    } label: {
+                        LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(fetching)
+                    .accessibilityLabel("刷新")
                 }
                 // `[...lines].reverse()` — newest first, so the interesting line is on screen
                 // without scrolling, and therefore no auto-follow.
@@ -91,7 +85,7 @@ struct LogsScreen: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, LuckyTheme.Space.gutter)
         .padding(.top, LuckyTheme.Space.l)
-        .padding(.bottom, LuckyTheme.Space.s)
+        .padding(.bottom, 96)
     }
 
     private func poll() async {
@@ -124,7 +118,11 @@ struct LogsScreen: View {
         // and the user's text selection survives.
         if !batch.incremental, !restarted, lines == batch.lines { return }
 
-        let next = batch.incremental && !restarted ? lines + batch.lines : batch.lines
-        lines = next.count > Self.maxLogLines ? Array(next.suffix(Self.maxLogLines)) : next
+        var next = batch.incremental && !restarted ? lines : []
+        next.append(contentsOf: batch.lines)
+        if next.count > Self.maxLogLines {
+            next.removeFirst(next.count - Self.maxLogLines)
+        }
+        lines = next
     }
 }

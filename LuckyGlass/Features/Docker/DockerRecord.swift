@@ -241,8 +241,10 @@ extension DockerRecord {
         for key in keys {
             let needle = key.lowercased()
             var queue: [JSONValue] = [payload]
-            while !queue.isEmpty {
-                let current = queue.removeFirst()
+            var cursor = 0
+            while cursor < queue.count {
+                let current = queue[cursor]
+                cursor += 1
                 var children: [JSONValue] = []
                 switch current {
                 case .object(let record):
@@ -273,9 +275,11 @@ extension DockerRecord {
         let root = payload.record
         for key in keys {
             var queue: [JSONObject] = [root]
+            var cursor = 0
             let needle = key.lowercased()
-            while !queue.isEmpty {
-                let current = queue.removeFirst()
+            while cursor < queue.count {
+                let current = queue[cursor]
+                cursor += 1
                 if let match = current.keys.first(where: { $0.lowercased() == needle }),
                    let value = current[match], let record = value.objectValue {
                     return record
@@ -296,8 +300,10 @@ extension DockerRecord {
     /// `data` and `result` are tried after the named keys at every level, not only at the root.
     static func composeConfigText(_ payload: JSONValue) -> String {
         var queue: [JSONObject] = [payload.record]
-        while !queue.isEmpty {
-            let source = queue.removeFirst()
+        var cursor = 0
+        while cursor < queue.count {
+            let source = queue[cursor]
+            cursor += 1
             for key in configTextKeys {
                 if case .string(let text)? = source[key] { return text }
             }

@@ -115,6 +115,7 @@ extension LuckyLiveStatus {
     static func decode(protobuf: Data) throws -> LuckyLiveStatus {
         var reader = ProtobufReader(protobuf)
         var status = LuckyLiveStatus()
+        status.history.reserveCapacity(LuckyStatusConstants.historyLimit)
         var ok = false
         var error = ""
 

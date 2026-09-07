@@ -21,9 +21,9 @@ struct DockerPick {
     var failure: String { fileFirst ? "选择文件失败" : "选择上传文件失败" }
 }
 
-/// `app/docker.tsx` — 容器、镜像、Compose、网络、数据卷、任务、总览、设置 与 日志, in one screen.
+/// Docker management: containers, images, Compose, networks, volumes, tasks, settings and logs.
 ///
-/// The original is a single 3,500-line component: nine views behind one tab bar, fourteen queries,
+/// The original is a single 3,500-line component with many views and queries,
 /// one mutation with sixty-one arms, six overlays and forty-three generated forms. Here the value
 /// types live in `DockerScreenModel.swift`, the payload readers in `DockerRecord.swift`, the
 /// mutation in `DockerAction.swift` and each view in a file of its own; this file is the shell —
@@ -34,7 +34,7 @@ struct DockerScreen: View {
     ///
     /// None of the state below is `private`, and it is the only screen in the port where that is
     /// true: `private` in Swift is file-scoped, and this screen's selectors, loaders, actions and
-    /// nine views live in files of their own. Anything they read has to be at least internal.
+    /// eight views live in files of their own. Anything they read has to be at least internal.
     @Environment(\.scenePhase) var phase
 
     @State var view: DockerView
@@ -53,7 +53,6 @@ struct DockerScreen: View {
     @State var networks: [LuckyListItem] = []
     @State var volumes: [LuckyListItem] = []
     @State var tasks: [LuckyListItem] = []
-    @State var overview: DockerOverview?
     @State var config: JSONValue?
     @State var mirrors: JSONValue?
     @State var maintenance: JSONValue?
@@ -122,8 +121,7 @@ struct DockerScreen: View {
     /// it started with and is dropped if the id has moved on.
     @State var detailRequest = 0
 
-    /// `LuckyRoute.docker(view:search:)` — 总览 links here with a view already chosen, and the
-    /// container rankings link here with a name already in the search box.
+    /// `LuckyRoute.docker(view:search:)` can open a specific workspace and seed its search.
     init(initialView: String = "", initialSearch: String = "") {
         _view = State(initialValue: DockerView(rawValue: initialView) ?? .containers)
         _search = State(initialValue: initialSearch)
@@ -134,7 +132,6 @@ struct DockerScreen: View {
             .task(id: view) { await loadView() }
             .task(id: statsTaskID) { await pollStats() }
             .task(id: liveStatsTaskID) { await pollLiveStats() }
-            .task(id: overviewActive) { await pollOverview() }
             .task(id: logsTaskID) { await pollLogs() }
     }
 }
@@ -191,7 +188,7 @@ extension DockerScreen {
             }
     }
 
-    /// `<SearchField>` exists for six of the nine views. Only `shell` is inside the branch, so the
+    /// `<SearchField>` exists for six of the eight views. Only `shell` is inside the branch, so the
     /// subtitle, the toolbar, the overlays and the five tasks all survive the subtree swap.
     @ViewBuilder
     private var searchable: some View {
@@ -232,7 +229,7 @@ extension DockerScreen {
 
 extension DockerScreen {
     /// §6's `renderDockerNavigation`, minus the two pieces the navigation bar now owns: the
-    /// nine-tab `ResponsiveTabBar`, then the four notices — all of which can show at once, and in
+    /// The workspace picker, then the four notices — all of which can show at once, and in
     /// this order.
     private var header: some View {
         VStack(alignment: .leading, spacing: LuckyTheme.Space.m) {
@@ -293,13 +290,12 @@ extension DockerScreen {
 // MARK: - 底部操作栏
 
 extension DockerScreen {
-    /// 总览 has no verb of its own and 设置 keeps all four of its CTAs inside their own cards, so
-    /// neither takes a bar; 日志 takes one only while it is paging the daemon log.
+    /// 设置 keeps its CTAs inside its own cards; 日志 takes a bar only while paging the daemon log.
     private var hasActionBar: Bool {
         switch view {
         case .containers, .images, .compose, .networks, .volumes, .tasks: true
         case .logs: output == nil
-        case .overview, .settings: false
+        case .settings: false
         }
     }
 
@@ -349,7 +345,7 @@ extension DockerScreen {
             }
         case .logs:
             logPager
-        case .overview, .settings:
+        case .settings:
             EmptyView()
         }
     }

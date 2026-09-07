@@ -8,12 +8,6 @@ struct ServicesScreen: View {
 
     var body: some View {
         LuckyPage(spacing: 18) {
-            LuckyWorkspaceHeader(
-                eyebrow: "服务工作台",
-                title: "服务",
-                subtitle: "7 个服务入口"
-            )
-
             VStack(alignment: .leading, spacing: 10) {
                 LuckySectionHeader(title: "服务管理", subtitle: "网络、容器与自动化",
                                    symbol: "square.grid.2x2.fill")

@@ -16,7 +16,6 @@
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key><true/>
-		<key>NSAllowsLocalNetworking</key><true/>
 	</dict>
 	<key>NSLocalNetworkUsageDescription</key><string>用于连接并管理局域网内的 Lucky 服务。</string>
 	<key>UIApplicationSceneManifest</key>

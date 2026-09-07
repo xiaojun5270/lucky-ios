@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - 视图分支
 
 extension DockerScreen {
-    /// §10–§18's nine bodies, chosen by the tab picker above them.
+    /// The eight bodies chosen by the tab picker above them.
     ///
     /// Each pane is a function of the screen's state and a bundle of closures; nothing below the
     /// branch reaches back into `DockerScreen`, because `private` in Swift is file-scoped and these
@@ -18,7 +18,6 @@ extension DockerScreen {
         case .networks: networksPane
         case .volumes: volumesPane
         case .tasks: tasksPane
-        case .overview: overviewBranch
         case .settings: settingsPane
         case .logs: logsPane
         }
@@ -303,47 +302,9 @@ extension DockerScreen {
     }
 }
 
-// MARK: - 总览、设置与日志
+// MARK: - 设置与日志
 
 extension DockerScreen {
-    /// §16. Both jumps clear the log drawer, and the ranking rows also pre-fill the search box —
-    /// which is how tapping a container in the dashboard lands on its row in 容器.
-    private var overviewBranch: some View {
-        DockerOverviewPane(
-            data: overview,
-            active: overviewActive,
-            stats: statsSource,
-            statsLoading: containerStatRows.isEmpty
-                && (statsLoading || (liveStatsNeeded && liveStatsLoading)),
-            statsError: containerStatRows.isEmpty && liveStatsNeeded && !liveStatsFailure.isEmpty
-                ? "容器统计暂时不可用" : "",
-            refresh: { await refresh() },
-            selectView: { target in
-                search = ""
-                output = nil
-                view = DockerScreen.destination(of: target)
-            },
-            selectContainer: { name in
-                output = nil
-                search = name
-                view = .containers
-            }
-        )
-    }
-
-    /// The dashboard's five destinations. It cannot name a `DockerView` itself — the summary tiles
-    /// live in a file that knows nothing about the tab picker — so it names a target and the screen
-    /// resolves it.
-    private static func destination(of target: DockerOverviewTarget) -> DockerView {
-        switch target {
-        case .containers: .containers
-        case .images: .images
-        case .compose: .compose
-        case .networks: .networks
-        case .volumes: .volumes
-        }
-    }
-
     /// §17. Eight verbs, none of which fires anything on its own: seven open a form and the eighth
     /// asks first.
     private var settingsPane: some View {

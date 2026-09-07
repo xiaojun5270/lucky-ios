@@ -1,8 +1,8 @@
 import Foundation
 
-/// §1 — `DockerView`, the nine segments of the screen, in tab order.
+/// The eight Docker workspaces, in tab order.
 enum DockerView: String, Hashable, CaseIterable, Identifiable, Sendable {
-    case containers, images, compose, networks, volumes, tasks, overview, settings, logs
+    case containers, images, compose, networks, volumes, tasks, settings, logs
 
     var id: String { rawValue }
 
@@ -16,7 +16,6 @@ enum DockerView: String, Hashable, CaseIterable, Identifiable, Sendable {
         case .networks: "网络"
         case .volumes: "数据卷"
         case .tasks: "任务"
-        case .overview: "总览"
         case .settings: "设置"
         case .logs: "日志"
         }
@@ -32,13 +31,12 @@ enum DockerView: String, Hashable, CaseIterable, Identifiable, Sendable {
         case .networks: LuckySymbol.network
         case .volumes: "externaldrive"
         case .tasks: "waveform.path.ecg"
-        case .overview: LuckySymbol.dashboard
         case .settings: "gearshape.2"
         case .logs: LuckySymbol.logs
         }
     }
 
-    /// The `SectionHeader` title, which is not the tab label for six of the nine.
+    /// The `SectionHeader` title, which may be more specific than the tab label.
     var title: String {
         switch self {
         case .containers: "容器"
@@ -47,7 +45,6 @@ enum DockerView: String, Hashable, CaseIterable, Identifiable, Sendable {
         case .networks: "Docker 网络"
         case .volumes: "数据卷"
         case .tasks: "后台任务"
-        case .overview: "Docker 总览"
         case .settings: "Docker 设置"
         case .logs: "Docker 日志"
         }
@@ -65,11 +62,11 @@ enum DockerView: String, Hashable, CaseIterable, Identifiable, Sendable {
     var searchPrompt: String? {
         switch self {
         case .containers, .images, .compose, .networks, .volumes, .tasks: "搜索\(label)"
-        case .overview, .settings, .logs: nil
+        case .settings, .logs: nil
         }
     }
 
-    /// `<EmptyState message>`; the two scrollable views have none.
+    /// `<EmptyState message>`; settings has no list empty state.
     var emptyMessage: String {
         switch self {
         case .containers: "暂无容器"
@@ -79,7 +76,7 @@ enum DockerView: String, Hashable, CaseIterable, Identifiable, Sendable {
         case .volumes: "暂无数据卷"
         case .tasks: "暂无后台任务"
         case .logs: "暂无 Docker 日志"
-        case .overview, .settings: ""
+        case .settings: ""
         }
     }
 }
@@ -88,7 +85,7 @@ enum DockerView: String, Hashable, CaseIterable, Identifiable, Sendable {
 /// they are refetched together and invalidated together, so one case is enough.
 enum DockerQuery: Hashable, Sendable {
     case containers, images, compose, networks, volumes, tasks
-    case overview, config, mirrors, maintenance, logs
+    case config, mirrors, maintenance, logs
     case containerStats, iconLibrary
 }
 

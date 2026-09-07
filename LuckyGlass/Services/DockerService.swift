@@ -76,25 +76,6 @@ struct DockerBatchResult<Item: Sendable>: Sendable {
     var cancelled: Bool = false
 }
 
-/// What `getDockerOverview` resolves to — a plain object in the original, deliberately not a
-/// Lucky envelope, so there is no `ret`.
-///
-/// Every count is optional because "the endpoint was unavailable" and "the endpoint reported
-/// zero" have to stay distinguishable: the dashboard shows a dash for the first and `0` for the
-/// second. `containerCount` and `imageCount` are `Double` because they may come from a
-/// server-reported fallback field rather than from counting the array.
-struct DockerOverview: Sendable {
-    var info: JSONValue = .object([])
-    var containers: [LuckyListItem] = []
-    var containersAvailable = false
-    var containerCount: Double?
-    var imageCount: Double?
-    var imageSize: Double?
-    var composeCount: Int?
-    var networkCount: Int?
-    var volumeCount: Int?
-}
-
 /// The shared cursor and accumulators behind `runDockerBatch`. An actor rather than captured
 /// `var`s because the four workers really do race for the next index — in JavaScript
 /// `items[cursor++]` is atomic by virtue of the single thread, and here it is not.
@@ -219,8 +200,10 @@ enum DockerService {
     private static func findArray(_ payload: JSONValue, _ keys: [String]) -> [JSONValue]? {
         for wanted in keys.map({ $0.lowercased() }) {
             var queue: [JSONValue] = [payload]
-            while !queue.isEmpty {
-                let source = queue.removeFirst()
+            var cursor = 0
+            while cursor < queue.count {
+                let source = queue[cursor]
+                cursor += 1
                 if case .array(let entries) = source { return entries }
                 guard case .object(let object) = source else { continue }
                 // First pass: the key we are actually looking for.
@@ -253,8 +236,10 @@ enum DockerService {
     private static func findScalar(_ payload: JSONValue, _ keys: [String]) -> JSONValue? {
         let wanted = Set(keys.map { $0.lowercased() })
         var queue: [JSONValue] = [payload]
-        while !queue.isEmpty {
-            let current = queue.removeFirst()
+        var cursor = 0
+        while cursor < queue.count {
+            let current = queue[cursor]
+            cursor += 1
             if case .array(let entries) = current {
                 queue.append(contentsOf: entries)
                 continue
@@ -269,25 +254,6 @@ enum DockerService {
             queue.append(contentsOf: object.values)
         }
         return nil
-    }
-
-    /// `findRecord(payload, keys)` — records only, and it **falls back to `payload` itself**
-    /// rather than returning nothing. That fallback is load-bearing: `overview()` reads
-    /// `Containers` straight off an `info` response that has no `info` wrapper at all.
-    private static func findRecord(_ payload: JSONValue, _ keys: [String]) -> JSONValue {
-        let wanted = Set(keys.map { $0.lowercased() })
-        var queue: [JSONValue] = [payload]
-        while !queue.isEmpty {
-            let current = queue.removeFirst()
-            guard case .object(let object) = current else { continue }
-            for pair in object.pairs where wanted.contains(pair.key.lowercased()) {
-                if pair.value.isRecord { return pair.value }
-            }
-            for pair in object.pairs where pair.value.isRecord {
-                queue.append(pair.value)
-            }
-        }
-        return payload
     }
 
     /// `preferredTaskScalar(payload, keys)` — a **one-key** `findScalar` per key, which is how the
@@ -328,23 +294,6 @@ enum DockerService {
     private static func present(_ value: JSONValue, _ key: String) -> JSONValue? {
         guard let found = value[key], !found.isNull else { return nil }
         return found
-    }
-
-    /// `Number(value)` for a value that came out of `findScalar`, kept only when finite.
-    ///
-    /// It switches on the case rather than routing everything through `JSCompat.number` because
-    /// `Number(true)` is 1 while `JSCompat.number("true")` is NaN. The only input the two would
-    /// still read differently is the literal string `"Infinity"`, which no Docker daemon reports.
-    private static func finiteNumber(_ value: JSONValue?) -> Double? {
-        guard let value else { return nil }
-        let number: Double
-        switch value {
-        case .number(let raw): number = raw
-        case .bool(let flag): number = flag ? 1 : 0
-        case .string(let text): number = JSCompat.number(text)
-        default: return nil
-        }
-        return number.isFinite ? number : nil
     }
 
     /// `[...new Set(values.map(v => v.trim()).filter(Boolean))]` — trim, drop empties,
@@ -1319,8 +1268,10 @@ enum DockerService {
         let wanted = Set(keys.map { $0.lowercased() })
         var values: [JSONValue] = []
         var queue: [(value: JSONValue, depth: Int)] = [(item, 0)]
-        while !queue.isEmpty {
-            let current = queue.removeFirst()
+        var cursor = 0
+        while cursor < queue.count {
+            let current = queue[cursor]
+            cursor += 1
             if case .array(let entries) = current.value {
                 if current.depth < 3 {
                     queue.append(contentsOf: entries.map { ($0, current.depth + 1) })
@@ -1944,8 +1895,6 @@ enum DockerService {
     // MARK: - System
 
     /// `getDockerInfo()`
-    static func info() async throws -> JSONValue { try await call("info") }
-
     /// `getDockerVersion()`
     static func version() async throws -> JSONValue { try await call("version") }
 
@@ -1996,19 +1945,6 @@ enum DockerService {
 
     // MARK: - Aggregates
 
-    /// `optionalDockerRequest(request, signal)` — a failure becomes `nil` instead of propagating, so
-    /// one dead endpoint cannot blank the whole overview. Cancellation still propagates.
-    private static func optional<Value: Sendable>(
-        _ work: @Sendable () async throws -> Value
-    ) async throws -> Value? {
-        do {
-            return try await work()
-        } catch {
-            if Task.isCancelled { throw error }
-            return nil
-        }
-    }
-
     /// The same shape for the settled fan-out: a rejection becomes the error record the screen shows
     /// in place of that one card.
     private static func settled(_ work: @Sendable () async throws -> JSONValue) async -> JSONValue {
@@ -2017,55 +1953,6 @@ enum DockerService {
         } catch {
             return .object([("error", .string(error.luckyMessage("接口请求失败")))])
         }
-    }
-
-    /// `getDockerOverview()` — six requests at once, each allowed to fail on its own.
-    ///
-    /// The counts stay optional so the screen can tell "unavailable" from "zero": when a list
-    /// endpoint failed, the count falls back to `info`'s own tally, and when that is missing or not
-    /// finite it stays `nil` and the card shows a dash instead of a wrong `0`.
-    static func overview() async throws -> DockerOverview {
-        async let infoTask = optional { try await info() }
-        async let containersTask = optional { try await containers() }
-        async let imagesTask = optional { try await images() }
-        async let composeTask = optional { try await composeProjects() }
-        async let networksTask = optional { try await networks() }
-        async let volumesTask = optional { try await volumes() }
-
-        let (infoResult, containersResult, imagesResult) =
-            try await (infoTask, containersTask, imagesTask)
-        let (composeResult, networksResult, volumesResult) =
-            try await (composeTask, networksTask, volumesTask)
-        try Task.checkCancellation()
-        if infoResult == nil, containersResult == nil, imagesResult == nil,
-           composeResult == nil, networksResult == nil, volumesResult == nil {
-            throw LuckyError("Docker 总览接口均不可用")
-        }
-
-        var result = DockerOverview()
-        // `findRecord` falls back to the whole payload, so a flat `info` response still works.
-        result.info = findRecord(infoResult ?? .object([]), ["info", "dockerInfo", "data", "result"])
-        result.containers = containersResult?.items ?? []
-        result.containersAvailable = containersResult != nil
-        let imageRows = imagesResult?.items ?? []
-        if containersResult != nil {
-            result.containerCount = Double(result.containers.count)
-        } else {
-            result.containerCount = finiteNumber(findScalar(result.info, ["Containers", "containers"]))
-        }
-        if imagesResult != nil {
-            result.imageCount = Double(imageRows.count)
-            result.imageSize = imageRows.reduce(into: 0.0) { total, image in
-                let size = findScalar(image, ["Size", "size", "VirtualSize", "virtualSize"])
-                total += finiteNumber(size) ?? 0
-            }
-        } else {
-            result.imageCount = finiteNumber(findScalar(result.info, ["Images", "images"]))
-        }
-        result.composeCount = composeResult?.items.count
-        result.networkCount = networksResult?.items.count
-        result.volumeCount = volumesResult?.items.count
-        return result
     }
 
     /// `getDockerMaintenanceStatus()` — the seven background-state endpoints the Docker screen polls

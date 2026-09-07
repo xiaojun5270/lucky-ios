@@ -27,13 +27,12 @@ extension DockerScreen {
         case .networks: .networks
         case .volumes: .volumes
         case .tasks: .tasks
-        case .overview: .overview
         case .logs: .logs
         case .settings: .config
         }
     }
 
-    /// §2's `source` — the six list payloads, and `[]` for the three views that render their own.
+    /// The six searchable list payloads; settings and logs render their own sources.
     var source: [LuckyListItem] {
         switch view {
         case .containers: containers
@@ -42,7 +41,7 @@ extension DockerScreen {
         case .networks: networks
         case .volumes: volumes
         case .tasks: tasks
-        case .overview, .settings, .logs: []
+        case .settings, .logs: []
         }
     }
 
@@ -113,11 +112,7 @@ extension DockerScreen {
 // MARK: - 容器统计
 
 extension DockerScreen {
-    /// `view === "containers" ? containers.data?.items : overview.data?.containers` — 总览 matches
-    /// the sweep against its own container list, which it fetched with the rest of the dashboard.
-    var statsContainerItems: [LuckyListItem] {
-        view == .containers ? containers : (overview?.containers ?? [])
-    }
+    var statsContainerItems: [LuckyListItem] { containers }
 
     /// §25.2 — `paused` counts as running, so a paused container still expects a stats row and its
     /// absence still triggers the live sweep.
@@ -142,9 +137,8 @@ extension DockerScreen {
         return statsSucceeded && runningContainerCount > cachedStatRows.count
     }
 
-    /// §3's `containerStatsSource` — always an array, because §16 hands this same value to the
-    /// dashboard and `DockerStats.rows` deep-walks whatever it is given. The live branch carries
-    /// the partial results the sweep streams while it is still running.
+    /// The statistics payload normalized to an array. The live branch carries partial results
+    /// while the fallback sweep is still running.
     var statsSource: JSONValue {
         let payloads = liveStatsNeeded
             ? [stats, liveStats, progressiveStats]
@@ -178,10 +172,7 @@ extension DockerScreen {
 extension DockerScreen {
     /// `isScreenFocused` is `.task`'s own cancellation — a popped screen tears its tasks down — so
     /// only the scene phase is left to test.
-    var overviewActive: Bool { view == .overview && phase == .active }
-
-    /// The cached sweep runs for both views that draw statistics.
-    var statsActive: Bool { (view == .overview || view == .containers) && phase == .active }
+    var statsActive: Bool { view == .containers && phase == .active }
 
     var logsActive: Bool { view == .logs && phase == .active }
 
@@ -189,9 +180,7 @@ extension DockerScreen {
     /// A `String` rather than the flag itself so the three ids read alike.
     var statsTaskID: String { "\(statsActive)" }
 
-    /// The live sweep's payload differs by view — 容器 hands it the visible container list, 总览
-    /// hands it nothing — so a view switch has to restart it, not merely keep it alive.
-    var liveStatsTaskID: String { "\(liveStatsNeeded)|\(view == .containers)" }
+    var liveStatsTaskID: String { "\(liveStatsNeeded)" }
 
     /// Paging the daemon log restarts the fifteen-second refetch, as changing the query key does.
     var logsTaskID: String { "\(logsActive)|\(logPage)" }
