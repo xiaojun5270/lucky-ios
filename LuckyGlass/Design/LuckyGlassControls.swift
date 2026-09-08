@@ -54,7 +54,8 @@ struct LuckyPillButton: View {
                     ProgressView().controlSize(.small)
                 } else if let symbol {
                     if iconPlate {
-                        LuckyIconTile(symbol: symbol, size: 24, glyph: 11, tone: tone)
+                        LuckyIconTile(symbol: symbol, size: 24, glyph: 11,
+                                      tone: tone == .brand ? nil : tone)
                     } else {
                         Image(systemName: symbol).font(.system(size: 14, weight: .semibold))
                     }
@@ -78,7 +79,8 @@ struct LuckyGlassIconButton: View {
 
     var body: some View {
         Button(action: action) {
-            LuckyIconTile(symbol: symbol, size: 40, glyph: 16, tone: tone)
+            LuckyIconTile(symbol: symbol, size: 40, glyph: 16,
+                          tone: prominent || tone != .brand ? tone : nil)
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
@@ -170,7 +172,8 @@ struct LuckyGlassSegmentedControl<Value: Hashable>: View {
             HStack(spacing: LuckyTheme.Space.xs) {
                 if let symbol = segment.symbol {
                     if selected, glass {
-                        LuckyIconTile(symbol: symbol, size: 20, glyph: 9, tone: tone)
+                        LuckyIconTile(symbol: symbol, size: 20, glyph: 9,
+                                      tone: tone == .brand ? nil : tone)
                     } else {
                         Image(systemName: symbol).font(.system(size: 12, weight: .semibold))
                     }
@@ -209,7 +212,7 @@ struct LuckyGlassMenuPicker<Value: Hashable>: View {
     var title: String
     @Binding var selection: Value
     var segments: [LuckySegment<Value>]
-    var tone: LuckyTone = .brand
+    var iconRole: LuckyIconRole? = nil
 
     private var current: LuckySegment<Value>? {
         segments.first { $0.value == selection }
@@ -229,7 +232,7 @@ struct LuckyGlassMenuPicker<Value: Hashable>: View {
         } label: {
             HStack(spacing: LuckyTheme.Space.xs) {
                 if let symbol = current?.symbol {
-                    LuckyIconTile(symbol: symbol, size: 20, glyph: 9, tone: tone)
+                    LuckyIconTile(symbol: symbol, size: 20, glyph: 9, role: iconRole)
                 }
                 Text(current?.title ?? title).font(LuckyTheme.Text.captionMedium).lineLimit(1)
                 Image(systemName: "chevron.up.chevron.down").font(.system(size: 10, weight: .bold))
@@ -237,6 +240,7 @@ struct LuckyGlassMenuPicker<Value: Hashable>: View {
             .foregroundStyle(LuckyTheme.textPrimary)
             .padding(.horizontal, LuckyTheme.Space.m)
             .padding(.vertical, 8)
+            .frame(minHeight: LuckyTheme.Space.touchTarget)
             // Glass goes on the label rather than through `buttonStyle`: a `Menu` does not reliably
             // forward a button style to its label on iOS, and the shape here must be exact.
             .glassEffect(.regular, in: .capsule)

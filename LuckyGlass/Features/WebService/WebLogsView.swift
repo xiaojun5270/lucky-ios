@@ -23,7 +23,8 @@ struct WebLogsView: View {
 
     var body: some View {
         WebPaneScroll(refresh: refresh) {
-            LuckySectionHeader(title: target.title, symbol: target.kind.symbol) {
+            LuckySectionHeader(title: target.title, symbol: target.kind.symbol,
+                               iconRole: target.kind.iconRole) {
                 LuckyChip(text: meta, tone: .idle)
             }
             if entries.isEmpty {

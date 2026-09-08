@@ -26,7 +26,8 @@ struct LuckyListRow<Trailing: View>: View {
     /// Monospaced supporting line — a path, an address, a container id.
     var detail: String?
     var symbol: String?
-    var tone: LuckyTone = .brand
+    var tone: LuckyTone? = nil
+    var iconRole: LuckyIconRole? = nil
     var chips: [LuckyChipSpec] = []
     var dot: LuckyTone?
     var showsChevron: Bool = true
@@ -36,7 +37,7 @@ struct LuckyListRow<Trailing: View>: View {
         LuckyCard(spacing: LuckyTheme.Space.s) {
             HStack(alignment: .center, spacing: LuckyTheme.Space.m) {
                 if let symbol {
-                    LuckyIconTile(symbol: symbol, size: 36, glyph: 16, tone: tone)
+                    LuckyIconTile(symbol: symbol, size: 36, glyph: 16, tone: tone, role: iconRole)
                 }
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: LuckyTheme.Space.xs) {
@@ -87,9 +88,11 @@ struct LuckyListRow<Trailing: View>: View {
 
 extension LuckyListRow where Trailing == EmptyView {
     init(title: String, subtitle: String? = nil, detail: String? = nil, symbol: String? = nil,
-         tone: LuckyTone = .brand, chips: [LuckyChipSpec] = [], dot: LuckyTone? = nil,
+         tone: LuckyTone? = nil, iconRole: LuckyIconRole? = nil,
+         chips: [LuckyChipSpec] = [], dot: LuckyTone? = nil,
          showsChevron: Bool = true) {
         self.init(title: title, subtitle: subtitle, detail: detail, symbol: symbol, tone: tone,
-                  chips: chips, dot: dot, showsChevron: showsChevron) { EmptyView() }
+                  iconRole: iconRole, chips: chips, dot: dot,
+                  showsChevron: showsChevron) { EmptyView() }
     }
 }

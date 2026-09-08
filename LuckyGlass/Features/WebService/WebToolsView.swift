@@ -19,7 +19,8 @@ struct WebToolsView: View {
 
     var body: some View {
         WebPaneScroll(refresh: refresh) {
-            LuckySectionHeader(title: WebPane.tools.title, symbol: WebPane.tools.symbol)
+            LuckySectionHeader(title: WebPane.tools.title, symbol: WebPane.tools.symbol,
+                               iconRole: WebPane.tools.iconRole)
             rulesPanel
             templatePanel
             if let output {

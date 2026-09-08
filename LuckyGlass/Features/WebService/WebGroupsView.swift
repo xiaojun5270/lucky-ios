@@ -17,7 +17,8 @@ struct WebGroupsView: View {
 
     var body: some View {
         WebPaneScroll(refresh: refresh) {
-            LuckySectionHeader(title: WebPane.groups.title, symbol: WebPane.groups.symbol) {
+            LuckySectionHeader(title: WebPane.groups.title, symbol: WebPane.groups.symbol,
+                               iconRole: WebPane.groups.iconRole) {
                 LuckyChip(text: "\(items.count) 项", tone: .idle)
             }
             if loading {
@@ -77,7 +78,8 @@ extension WebGroupCard {
     /// `marginTop` of its own.
     private var header: some View {
         HStack(alignment: .center, spacing: 10) {
-            LuckyIconTile(symbol: WebPane.groups.symbol, size: 32, glyph: 14)
+            LuckyIconTile(symbol: WebPane.groups.symbol, size: 32, glyph: 14,
+                          role: WebPane.groups.iconRole)
             VStack(alignment: .leading, spacing: 0) {
                 Text(name)
                     .font(LuckyTheme.Text.cardTitle)
@@ -120,6 +122,8 @@ extension WebGroupCard {
                 .disabled(busy)
             } label: {
                 LuckyIconTile(symbol: "ellipsis", size: 36, glyph: 15, tone: .idle)
+                    .frame(width: LuckyTheme.Space.touchTarget, height: LuckyTheme.Space.touchTarget)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("分组更多操作")

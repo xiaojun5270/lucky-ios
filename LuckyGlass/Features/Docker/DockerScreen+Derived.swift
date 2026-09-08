@@ -9,6 +9,28 @@ struct DockerImageEntry: Identifiable, Hashable {
     var searchText: String
 }
 
+/// The payload and its derived index change together, only after a successful image-list read.
+/// Search, selection and unrelated state updates can then reuse the expensive JSON search text.
+struct DockerImageSnapshot {
+    let items: [LuckyListItem]
+    let entries: [DockerImageEntry]
+    let ids: Set<String>
+
+    init(items: [LuckyListItem] = []) {
+        let entries = items.enumerated().map { index, item in
+            DockerImageEntry(
+                item: item,
+                id: DockerRecord.keyOf(item, index),
+                references: DockerRecord.imageReferences(item),
+                searchText: DockerRecord.searchText(item)
+            )
+        }
+        self.items = items
+        self.entries = entries
+        self.ids = Set(entries.map(\.id))
+    }
+}
+
 // MARK: - 当前视图
 
 extension DockerScreen {
@@ -36,7 +58,7 @@ extension DockerScreen {
     var source: [LuckyListItem] {
         switch view {
         case .containers: containers
-        case .images: images
+        case .images: imageSnapshot.items
         case .compose: projects
         case .networks: networks
         case .volumes: volumes
@@ -61,17 +83,8 @@ extension DockerScreen {
 // MARK: - 镜像
 
 extension DockerScreen {
-    /// §3's `imageEntries`.
-    var imageEntries: [DockerImageEntry] {
-        images.enumerated().map { index, item in
-            DockerImageEntry(
-                item: item,
-                id: DockerRecord.keyOf(item, index),
-                references: DockerRecord.imageReferences(item),
-                searchText: DockerRecord.searchText(item)
-            )
-        }
-    }
+    /// §3's `imageEntries`, prepared when the payload changes rather than on every body read.
+    var imageEntries: [DockerImageEntry] { imageSnapshot.entries }
 
     /// The same word, matched against the entry's own cached text rather than re-stringified.
     var visibleImageEntries: [DockerImageEntry] {
@@ -80,7 +93,7 @@ extension DockerScreen {
         return imageEntries.filter { $0.searchText.contains(word) }
     }
 
-    var imageIdSet: Set<String> { Set(imageEntries.map(\.id)) }
+    var imageIdSet: Set<String> { imageSnapshot.ids }
 
     /// `selectedImageIds.filter(id => imageIdSet.has(id))` — the pruning effect keeps the array in
     /// step with the payload, but a selection made against a list that has since been refetched is
@@ -98,7 +111,8 @@ extension DockerScreen {
     /// keeps the 全选 label from reading 取消全选 over an empty search result.
     var allVisibleImagesSelected: Bool {
         let selected = selectedImageSet
-        return !visibleImageIds.isEmpty && visibleImageIds.allSatisfy { selected.contains($0) }
+        let visible = visibleImageIds
+        return !visible.isEmpty && visible.allSatisfy { selected.contains($0) }
     }
 
     /// `mutation.isPending || unusedImageScanChecking` — what dims the checkboxes.

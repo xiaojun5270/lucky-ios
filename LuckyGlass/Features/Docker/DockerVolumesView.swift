@@ -81,7 +81,8 @@ struct DockerVolumesView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
             LuckySectionHeader(title: DockerView.volumes.title,
-                               symbol: DockerView.volumes.symbol) {
+                               symbol: DockerView.volumes.symbol,
+                               iconRole: DockerView.volumes.iconRole) {
                 DockerCountChip(count: items.count)
             }
             ServiceActionButton(title: "导入数据卷", symbol: LuckySymbol.upload, fill: .tinted,
@@ -130,7 +131,8 @@ private struct DockerVolumeCard: View {
 
     private var heading: some View {
         HStack(spacing: LuckyTheme.Space.s + 2) {
-            LuckyIconTile(symbol: DockerView.volumes.symbol, size: 38, glyph: 19, tone: .warning)
+            LuckyIconTile(symbol: DockerView.volumes.symbol, size: 38, glyph: 19,
+                          role: DockerView.volumes.iconRole)
             VStack(alignment: .leading, spacing: 3) {
                 Text(name)
                     .font(.system(size: 13, weight: .heavy))

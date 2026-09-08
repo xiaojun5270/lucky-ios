@@ -146,7 +146,8 @@ extension WebServiceScreen {
                     selection: paneSelection,
                     segments: WebPane.allCases.map {
                         LuckySegment($0, $0.label, symbol: $0.symbol)
-                    }
+                    },
+                    iconRole: pane.iconRole
                 )
                 Spacer(minLength: 0)
                 if pane == .logs { logSourceButtons }
@@ -871,4 +872,3 @@ extension WebServiceScreen {
             }
     }
 }
-

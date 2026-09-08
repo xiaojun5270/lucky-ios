@@ -73,19 +73,19 @@ extension WebToolsSheet {
 
     @ViewBuilder
     private var rows: some View {
-        WebToolsRow(title: "HTTP 服务日志", symbol: "server.rack", tone: .info, busy: busy) {
+        WebToolsRow(title: "HTTP 服务日志", symbol: "server.rack", iconRole: .logs, busy: busy) {
             openLog(WebLogTarget(.http, title: "\(target.ruleName) · HTTP 日志",
                                  ruleKey: target.ruleKey))
         }
         if target.hasSubRule {
-            WebToolsRow(title: "子规则日志", symbol: LuckySymbol.logs, tone: .info, busy: busy) {
+            WebToolsRow(title: "子规则日志", symbol: LuckySymbol.logs, iconRole: .logs, busy: busy) {
                 open(.subrule, "日志")
             }
-            WebToolsRow(title: "访问详情与客户端", symbol: "person.2", tone: .brand, busy: busy) {
+            WebToolsRow(title: "访问详情与客户端", symbol: "person.2", iconRole: .account, busy: busy) {
                 open(.access, "访问详情")
             }
             WebToolsRow(title: "Coraza WAF 日志", symbol: "exclamationmark.shield",
-                        tone: .warning, busy: busy) {
+                        iconRole: .security, busy: busy) {
                 open(.coraza, "WAF 日志")
             }
             if target.fileService {
@@ -113,7 +113,8 @@ extension WebToolsSheet {
 private struct WebToolsRow: View {
     var title: String
     var symbol: String
-    var tone: LuckyTone
+    var tone: LuckyTone?
+    var iconRole: LuckyIconRole?
     var busy: Bool
     var action: () -> Void
 
@@ -124,7 +125,7 @@ private struct WebToolsRow: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                LuckyIconTile(symbol: symbol, size: 30, glyph: 13, tone: tone)
+                LuckyIconTile(symbol: symbol, size: 30, glyph: 13, tone: tone, role: iconRole)
                 Text(title)
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundStyle(LuckyTheme.textPrimary)

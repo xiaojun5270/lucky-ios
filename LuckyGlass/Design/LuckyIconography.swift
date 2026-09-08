@@ -122,10 +122,12 @@ struct LuckyIconTile: View {
     var symbol: String
     var size: CGFloat = 38
     var glyph: CGFloat = 18
-    var tone: LuckyTone = .brand
+    var tone: LuckyTone? = nil
+    var role: LuckyIconRole? = nil
 
     var body: some View {
-        LuckyFunctionIcon(symbol: symbol, size: size, glyph: glyph, color: tone.tint)
+        LuckyFunctionIcon(symbol: symbol, size: size, glyph: glyph,
+                          color: tone?.tint ?? (role ?? LuckyIconRole.symbol(symbol)).color)
     }
 }
 
@@ -135,7 +137,7 @@ struct LuckyFunctionIcon: View {
     var symbol: String
     var size: CGFloat = 38
     var glyph: CGFloat = 18
-    var color: Color = LuckyTheme.accent
+    var color: Color = LuckyIconRole.neutral.color
 
     var body: some View {
         RoundedRectangle(cornerRadius: size * 0.36, style: .continuous)
@@ -150,8 +152,7 @@ struct LuckyFunctionIcon: View {
     }
 }
 
-/// Presentation metadata for the three tunnel kinds, taken from the tiles in `manage.tsx`: STUN is
-/// the primary tone, Cloudflared is amber and FRP is cyan.
+/// Presentation metadata for the three tunnel kinds. Function colours live in `LuckyIconRole`.
 extension TunnelKind {
     var symbol: String {
         switch self {
@@ -167,14 +168,6 @@ extension TunnelKind {
         case .stun: "穿透规则与公网地址"
         case .cloudflared: "隧道与域名路由"
         case .frp: "客户端、服务端与代理"
-        }
-    }
-
-    var tone: LuckyTone {
-        switch self {
-        case .stun: .brand
-        case .cloudflared: .warning
-        case .frp: .info
         }
     }
 }

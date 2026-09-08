@@ -44,7 +44,7 @@ extension WebEditorProxyList {
     private var header: some View {
         HStack(spacing: LuckyTheme.Space.s) {
             LuckyIconTile(symbol: "point.topleft.down.to.point.bottomright.curvepath",
-                          size: 30, glyph: 13)
+                          size: 30, glyph: 13, role: .web)
             Text("子规则")
                 .font(.system(size: 15, weight: .heavy, design: .rounded))
                 .foregroundStyle(LuckyTheme.textPrimary)
@@ -133,7 +133,7 @@ extension WebEditorProxyList {
             expandedProxyId = open ? "" : id
         } label: {
             HStack(spacing: 9) {
-                LuckyIconTile(symbol: LuckySymbol.network, size: 34, glyph: 17)
+                LuckyIconTile(symbol: LuckySymbol.network, size: 34, glyph: 17, role: .web)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(name)
                         .font(.system(size: 13, weight: .heavy, design: .rounded))

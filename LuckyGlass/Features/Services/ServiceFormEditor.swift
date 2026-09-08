@@ -23,8 +23,8 @@ struct ServiceSheet<Content: View, Actions: View>: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: LuckyTheme.Space.stack, content: content)
                         .padding(.horizontal, LuckyTheme.Space.gutter)
-                        .padding(.top, LuckyTheme.Space.s)
-                        .padding(.bottom, LuckyTheme.Space.xxl)
+                        .padding(.top, LuckyTheme.Space.pageTop)
+                        .padding(.bottom, LuckyTheme.Space.pageBottom)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .scrollDismissesKeyboard(.interactively)

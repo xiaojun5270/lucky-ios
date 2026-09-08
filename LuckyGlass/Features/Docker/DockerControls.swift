@@ -97,7 +97,7 @@ struct ContainerArtwork: View {
                     symbol: LuckySymbol.docker,
                     size: size,
                     glyph: (size * 0.45).rounded(),
-                    color: running ? LuckyTheme.accent : LuckyTheme.idle
+                    color: running ? LuckyIconRole.docker.color : LuckyTheme.idle
                 )
             }
         }
@@ -325,8 +325,8 @@ struct DockerPaneScroll<Content: View>: View {
                 content
             }
             .padding(.horizontal, LuckyTheme.Space.gutter)
-            .padding(.top, LuckyTheme.Space.xs)
-            .padding(.bottom, 98)
+            .padding(.top, LuckyTheme.Space.pageTop)
+            .padding(.bottom, LuckyTheme.Space.pageBottom)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .scrollEdgeEffectStyle(.soft, for: .top)
@@ -337,7 +337,7 @@ struct DockerPaneScroll<Content: View>: View {
 }
 
 /// §6's shared `FlatList` config, as the one shape all six list views and 日志 share: a header that
-/// scrolls with the rows, a 12 pt separator between them, the 98 pt bottom inset, and pull to
+/// scrolls with the rows, consistent spacing inside the system safe area, and pull to
 /// refresh. `initialNumToRender` / `windowSize` have no counterpart — `LazyVStack` decides for
 /// itself how far ahead to build — and the tab bar, the search box and the error cards have moved
 /// out of `ListHeaderComponent` into the pinned chrome, because glass may not scroll.
@@ -355,7 +355,7 @@ struct DockerListPane<Header: View, Rows: View>: View {
     /// view's own sentence reads better and costs nothing (§25.15).
     var loadingText: String
     /// 12 px in the original. 日志 passes 0 — it has no separator.
-    var spacing: CGFloat = LuckyTheme.Space.m
+    var spacing: CGFloat = LuckyTheme.Space.stack
     var refresh: @Sendable () async -> Void
     @ViewBuilder var header: () -> Header
     @ViewBuilder var rows: () -> Rows
@@ -375,8 +375,8 @@ struct DockerListPane<Header: View, Rows: View>: View {
                 }
             }
             .padding(.horizontal, LuckyTheme.Space.gutter)
-            .padding(.top, LuckyTheme.Space.xs)
-            .padding(.bottom, 98)
+            .padding(.top, LuckyTheme.Space.pageTop)
+            .padding(.bottom, LuckyTheme.Space.pageBottom)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .scrollEdgeEffectStyle(.soft, for: .top)

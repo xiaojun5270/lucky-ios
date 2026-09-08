@@ -25,7 +25,8 @@ struct DockerLogsView: View {
     /// §18.1. A scroll rather than a list, and no pager: one payload, however deep it is.
     private func payload(_ value: JSONValue) -> some View {
         DockerPaneScroll(refresh: refresh) {
-            LuckySectionHeader(title: DockerView.logs.title, symbol: DockerView.logs.symbol)
+            LuckySectionHeader(title: DockerView.logs.title, symbol: DockerView.logs.symbol,
+                               iconRole: DockerView.logs.iconRole)
             LuckyCard(spacing: LuckyTheme.Space.m) {
                 StructuredDataView(value: value)
             }
@@ -40,7 +41,8 @@ struct DockerLogsView: View {
                        empty: DockerView.logs.emptyMessage,
                        symbol: DockerView.logs.symbol,
                        loadingText: "正在读取 Docker 日志", spacing: 0, refresh: refresh) {
-            LuckySectionHeader(title: DockerView.logs.title, symbol: DockerView.logs.symbol)
+            LuckySectionHeader(title: DockerView.logs.title, symbol: DockerView.logs.symbol,
+                               iconRole: DockerView.logs.iconRole)
                 .padding(.bottom, LuckyTheme.Space.m)
         } rows: {
             ForEach(Array(lines.enumerated()), id: \.offset) { index, line in

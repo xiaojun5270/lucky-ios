@@ -51,6 +51,7 @@ struct WebFormSection<Content: View>: View {
     var title: String
     var symbol: String?
     var meta: String?
+    var iconRole: LuckyIconRole?
     @ViewBuilder var content: () -> Content
 
     private var shape: RoundedRectangle {
@@ -61,7 +62,7 @@ struct WebFormSection<Content: View>: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: LuckyTheme.Space.s) {
                 if let symbol {
-                    LuckyIconTile(symbol: symbol, size: 28, glyph: 12)
+                    LuckyIconTile(symbol: symbol, size: 28, glyph: 12, role: iconRole)
                 }
                 Text(title)
                     .font(.system(size: 14, weight: .heavy, design: .rounded))
@@ -91,7 +92,7 @@ struct WebSecurityHeading: View {
             LuckyHairline()
                 .padding(.vertical, LuckyTheme.Space.hair)
             HStack(spacing: 7) {
-                LuckyIconTile(symbol: "checkmark.shield", size: 26, glyph: 11)
+                LuckyIconTile(symbol: "checkmark.shield", size: 26, glyph: 11, role: .security)
                 Text("安全设置")
                     .font(.system(size: 13, weight: .heavy, design: .rounded))
                     .foregroundStyle(LuckyTheme.textPrimary)

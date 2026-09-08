@@ -74,7 +74,8 @@ extension DockerImagesView {
     private var header: some View {
         VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
             LuckySectionHeader(title: DockerView.images.title,
-                               symbol: DockerView.images.symbol) {
+                               symbol: DockerView.images.symbol,
+                               iconRole: DockerView.images.iconRole) {
                 DockerCountChip(count: entries.count)
             }
             HStack(spacing: LuckyTheme.Space.s) {
@@ -239,7 +240,8 @@ private struct DockerImageCard: View {
     private var heading: some View {
         HStack(spacing: LuckyTheme.Space.s + 2) {
             if batch.mode { checkbox }
-            LuckyIconTile(symbol: DockerView.images.symbol, size: 38, glyph: 19, tone: .warning)
+            LuckyIconTile(symbol: DockerView.images.symbol, size: 38, glyph: 19,
+                          role: DockerView.images.iconRole)
             VStack(alignment: .leading, spacing: 3) {
                 Text(name)
                     .font(.system(size: 14, weight: .heavy))

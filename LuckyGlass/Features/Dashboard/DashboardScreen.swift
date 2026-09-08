@@ -91,7 +91,7 @@ private struct DashboardHostPanel: View {
     var body: some View {
         LuckyCard(padding: 0, spacing: 0) {
             HStack(spacing: LuckyTheme.Space.m) {
-                LuckyIconTile(symbol: "server.rack", size: 42, glyph: 19, tone: .brand)
+                LuckyIconTile(symbol: "server.rack", size: 42, glyph: 19, role: .server)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("主机状态")
                         .font(.system(size: 18, weight: .bold))
@@ -150,13 +150,13 @@ private struct DashboardRouteButton: View {
     var title: String
     var detail: String
     var symbol: String
-    var tone: LuckyTone
+    var iconRole: LuckyIconRole
     var action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                LuckyIconTile(symbol: symbol, size: 36, glyph: 16, tone: tone)
+                LuckyIconTile(symbol: symbol, size: 36, glyph: 16, role: iconRole)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(LuckyTheme.Text.captionMedium)
                     Text(detail)
@@ -239,7 +239,7 @@ private struct ReverseProxyCard: View {
         HStack(spacing: LuckyTheme.Space.s) {
             Button(action: open) {
                 HStack(spacing: 10) {
-                    LuckyIconTile(symbol: "globe.asia.australia", size: 42, glyph: 21)
+                    LuckyIconTile(symbol: "globe.asia.australia", size: 42, glyph: 21, role: .web)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("反向代理")
                             .font(LuckyTheme.Text.cardTitle)
@@ -342,7 +342,7 @@ private struct ReverseProxyCard: View {
         let tls = webRuleFlag(rule, ["EnableTLS", "enableTLS", "TLS"], fallback: false)
         return HStack(spacing: 9) {
             LuckyIconTile(symbol: tls ? "lock.fill" : "arrow.triangle.branch", size: 28,
-                          glyph: 14, tone: tls ? .warning : .brand)
+                          glyph: 14, role: tls ? .security : .web)
             VStack(alignment: .leading, spacing: 1) {
                 Text(name)
                     .font(LuckyTheme.Text.captionMedium)
@@ -385,7 +385,7 @@ struct DashboardScreen: View {
     private var active: Bool { navigator.selection == .dashboard && phase == .active }
 
     var body: some View {
-        LuckyPage(spacing: 18, refresh: { await refreshAll() }) {
+        LuckyPage(spacing: LuckyTheme.Space.section, refresh: { await refreshAll() }) {
             DashboardLiveReader { statusStore in
                 if !statusStore.error.isEmpty, statusStore.data == nil {
                     LuckyErrorCard(message: statusStore.error)
@@ -395,12 +395,12 @@ struct DashboardScreen: View {
 
             HStack(spacing: LuckyTheme.Space.m) {
                 DashboardRouteButton(title: "Docker", detail: "容器与镜像",
-                                     symbol: LuckySymbol.docker, tone: .warning) {
+                                     symbol: LuckySymbol.docker, iconRole: .docker) {
                     navigator.push(.docker())
                 }
                 DashboardRouteButton(title: "内网穿透", detail: "隧道与代理",
                                      symbol: "point.3.connected.trianglepath.dotted",
-                                     tone: .info) {
+                                     iconRole: .tunnels) {
                     navigator.reset(to: .services)
                 }
             }
@@ -427,7 +427,7 @@ struct DashboardScreen: View {
     private func systemPanel(_ status: LuckyLiveStatus) -> some View {
         let memory = Format.percent(status.usedMem, status.totalMem)
         return LuckyCard {
-            LuckySectionHeader(title: "系统资源", symbol: LuckySymbol.cpu) {
+            LuckySectionHeader(title: "系统资源", symbol: LuckySymbol.cpu, iconRole: .system) {
                 LuckyChip(text: "内存 \(JSCompat.toFixed(memory, 1))%", tone: .idle)
             }
             LuckyHairline()
@@ -460,7 +460,7 @@ struct DashboardScreen: View {
         let inSpeed = Format.bytes(status.lastNetInSpeed, speed: true)
         let outSpeed = Format.bytes(status.lastNetOutSpeed, speed: true)
         return LuckyCard {
-            LuckySectionHeader(title: "网络趋势", symbol: LuckySymbol.network)
+            LuckySectionHeader(title: "网络趋势", symbol: LuckySymbol.network, iconRole: .network)
             LuckyHairline()
             LuckyWrap(spacing: LuckyTheme.Space.m, lineSpacing: 6) {
                 DashboardLegend(label: "下载 \(inSpeed)", tone: .info)
@@ -510,7 +510,7 @@ struct DashboardScreen: View {
     /// instead of being rounded to `Int` for display.
     private func serverPanel(_ status: LuckyLiveStatus) -> some View {
         LuckyCard {
-            LuckySectionHeader(title: "服务器信息", symbol: LuckySymbol.disk)
+            LuckySectionHeader(title: "服务器信息", symbol: LuckySymbol.disk, iconRole: .server)
             LuckyHairline()
             LuckyTileGrid(minimum: 135, spacing: LuckyTheme.Space.s) {
                 serverFact("进程启动", status.runTime.isEmpty ? "--" : status.runTime)

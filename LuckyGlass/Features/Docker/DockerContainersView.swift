@@ -27,7 +27,8 @@ struct DockerContainersView: View {
                        symbol: DockerView.containers.symbol,
                        loadingText: "正在读取容器", refresh: refresh) {
             LuckySectionHeader(title: DockerView.containers.title,
-                               symbol: DockerView.containers.symbol) {
+                               symbol: DockerView.containers.symbol,
+                               iconRole: DockerView.containers.iconRole) {
                 DockerCountChip(count: items.count)
             }
         } rows: {

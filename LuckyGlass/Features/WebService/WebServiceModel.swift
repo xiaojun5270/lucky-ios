@@ -33,6 +33,17 @@ enum WebPane: String, Hashable, CaseIterable, Identifiable {
         }
     }
 
+    var iconRole: LuckyIconRole {
+        switch self {
+        case .rules: .web
+        case .groups: .storage
+        case .cgi: .automation
+        case .settings: .settings
+        case .logs: .logs
+        case .tools: .tools
+        }
+    }
+
     /// `SectionHeader`'s title for the pane.
     var title: String {
         switch self {
@@ -116,6 +127,14 @@ enum WebLogKind: String, Hashable {
         case .access: "person.2"
         case .coraza: "exclamationmark.shield"
         default: LuckySymbol.logs
+        }
+    }
+
+    var iconRole: LuckyIconRole {
+        switch self {
+        case .access: .account
+        case .coraza: .security
+        default: .logs
         }
     }
 

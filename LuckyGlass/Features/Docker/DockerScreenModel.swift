@@ -36,6 +36,18 @@ enum DockerView: String, Hashable, CaseIterable, Identifiable, Sendable {
         }
     }
 
+    var iconRole: LuckyIconRole {
+        switch self {
+        case .containers: .docker
+        case .images: .media
+        case .compose, .tasks: .automation
+        case .networks: .network
+        case .volumes: .storage
+        case .settings: .settings
+        case .logs: .logs
+        }
+    }
+
     /// The `SectionHeader` title, which may be more specific than the tab label.
     var title: String {
         switch self {

@@ -15,7 +15,8 @@ struct WebCgiView: View {
 
     var body: some View {
         WebPaneScroll(refresh: refresh) {
-            LuckySectionHeader(title: WebPane.cgi.title, symbol: WebPane.cgi.symbol) {
+            LuckySectionHeader(title: WebPane.cgi.title, symbol: WebPane.cgi.symbol,
+                               iconRole: WebPane.cgi.iconRole) {
                 LuckyChip(text: "\(items.count) 项", tone: .idle)
             }
             if loading {
@@ -67,7 +68,8 @@ private struct WebCgiCard: View {
 extension WebCgiCard {
     private var header: some View {
         HStack(alignment: .center, spacing: 10) {
-            LuckyIconTile(symbol: WebPane.cgi.symbol, size: 32, glyph: 14, tone: .info)
+            LuckyIconTile(symbol: WebPane.cgi.symbol, size: 32, glyph: 14,
+                          role: WebPane.cgi.iconRole)
             VStack(alignment: .leading, spacing: 3) {
                 Text(name)
                     .font(LuckyTheme.Text.cardTitle)
@@ -101,6 +103,8 @@ extension WebCgiCard {
                 .disabled(busy)
             } label: {
                 LuckyIconTile(symbol: "ellipsis", size: 36, glyph: 15, tone: .idle)
+                    .frame(width: LuckyTheme.Space.touchTarget, height: LuckyTheme.Space.touchTarget)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("CGI 更多操作")

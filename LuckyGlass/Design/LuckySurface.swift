@@ -41,7 +41,7 @@ struct LuckyCard<Content: View>: View {
 /// press feedback is applied here so every tappable card in the app behaves identically.
 struct LuckyCardButtonStyle: ButtonStyle {
     var radius: CGFloat = LuckyTheme.Radius.card
-    var padding: CGFloat = LuckyTheme.Space.m + 3
+    var padding: CGFloat = LuckyTheme.Space.cardInset
     var tone: LuckyTone?
 
     func makeBody(configuration: Configuration) -> some View {
@@ -77,12 +77,13 @@ struct LuckySectionHeader<Trailing: View>: View {
     var title: String
     var subtitle: String?
     var symbol: String?
+    var iconRole: LuckyIconRole? = nil
     @ViewBuilder var trailing: () -> Trailing
 
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             if let symbol {
-                LuckyIconTile(symbol: symbol, size: 28, glyph: 12)
+                LuckyIconTile(symbol: symbol, size: 28, glyph: 12, role: iconRole)
             }
             VStack(alignment: .leading, spacing: 3) {
                 Text(title)
@@ -98,14 +99,14 @@ struct LuckySectionHeader<Trailing: View>: View {
             Spacer(minLength: LuckyTheme.Space.s)
             trailing()
         }
-        .padding(.horizontal, 2)
-        .padding(.top, LuckyTheme.Space.xs)
+        .accessibilityAddTraits(.isHeader)
     }
 }
 
 extension LuckySectionHeader where Trailing == EmptyView {
-    init(title: String, subtitle: String? = nil, symbol: String? = nil) {
-        self.init(title: title, subtitle: subtitle, symbol: symbol) { EmptyView() }
+    init(title: String, subtitle: String? = nil, symbol: String? = nil,
+         iconRole: LuckyIconRole? = nil) {
+        self.init(title: title, subtitle: subtitle, symbol: symbol, iconRole: iconRole) { EmptyView() }
     }
 }
 
@@ -114,13 +115,14 @@ struct LuckySection<Content: View>: View {
     var title: String
     var subtitle: String?
     var symbol: String?
+    var iconRole: LuckyIconRole? = nil
     var padding: CGFloat = LuckyTheme.Space.cardInset
     var spacing: CGFloat = LuckyTheme.Space.m
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            LuckySectionHeader(title: title, subtitle: subtitle, symbol: symbol)
+        VStack(alignment: .leading, spacing: LuckyTheme.Space.m) {
+            LuckySectionHeader(title: title, subtitle: subtitle, symbol: symbol, iconRole: iconRole)
             LuckyCard(padding: padding, spacing: spacing, content: content)
         }
     }

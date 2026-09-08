@@ -30,7 +30,8 @@ struct WebRulesView: View {
 
     var body: some View {
         WebPaneScroll(refresh: refresh) {
-            LuckySectionHeader(title: WebPane.rules.title, symbol: WebPane.rules.symbol) {
+            LuckySectionHeader(title: WebPane.rules.title, symbol: WebPane.rules.symbol,
+                               iconRole: WebPane.rules.iconRole) {
                 LuckyChip(text: "\(items.count) 项", tone: .idle)
             }
             if loading {
@@ -92,7 +93,7 @@ extension WebRuleCard {
             actions.expand(key)
         } label: {
             HStack(spacing: LuckyTheme.Space.m) {
-                LuckyIconTile(symbol: LuckySymbol.network, size: 36, glyph: 16)
+                LuckyIconTile(symbol: LuckySymbol.network, size: 36, glyph: 16, role: .web)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(name)
                         .font(LuckyTheme.Text.cardTitle)
@@ -123,7 +124,27 @@ extension WebRuleCard {
     /// The switch and its sentence are the entire status derivation — no pill, no TLS badge, no
     /// protocol badge.
     private var status: some View {
-        HStack(spacing: 10) {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: LuckyTheme.Space.m) {
+                statusControl
+                Spacer(minLength: LuckyTheme.Space.m)
+                primaryActions
+            }
+            VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
+                statusControl
+                HStack {
+                    Spacer(minLength: 0)
+                    primaryActions
+                }
+            }
+        }
+        .padding(LuckyTheme.Space.s)
+        .background(LuckyTheme.surfaceRaised,
+                    in: .rect(cornerRadius: LuckyTheme.Radius.row))
+    }
+
+    private var statusControl: some View {
+        HStack(spacing: LuckyTheme.Space.s) {
             WebEnableSwitch(isOn: enabled, disabled: busy, name: "启用规则") { on in
                 actions.setEnabled(key, on)
             }
@@ -131,15 +152,18 @@ extension WebRuleCard {
             Text(enabled ? "已启用" : "已停用")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(LuckyTheme.textSecondary)
-            Spacer(minLength: 0)
+        }
+        .fixedSize()
+    }
+
+    private var primaryActions: some View {
+        HStack(spacing: LuckyTheme.Space.s) {
             WebInlineActionButton(title: "编辑", symbol: "pencil", prominent: true) {
                 actions.edit(key, false)
             }
             moreMenu
         }
-        .padding(10)
-        .background(LuckyTheme.surfaceRaised,
-                    in: .rect(cornerRadius: LuckyTheme.Radius.row))
+        .fixedSize()
     }
 
     private var moreMenu: some View {
@@ -184,6 +208,8 @@ extension WebRuleCard {
             }
         } label: {
             LuckyIconTile(symbol: "ellipsis", size: 36, glyph: 15, tone: .idle)
+                .frame(width: LuckyTheme.Space.touchTarget, height: LuckyTheme.Space.touchTarget)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel("规则更多操作")
@@ -296,14 +322,34 @@ extension WebSubRuleCard {
     }
 
     private var verbs: some View {
-        HStack(spacing: 8) {
-            WebInlineActionButton(title: "复制网址", symbol: LuckySymbol.copy) {
-                actions.copyURL(rule, sub)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: LuckyTheme.Space.s) {
+                copyAction
+                Spacer(minLength: 0)
+                editActions
             }
+            VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
+                copyAction
+                HStack {
+                    Spacer(minLength: 0)
+                    editActions
+                }
+            }
+        }
+    }
+
+    private var copyAction: some View {
+        WebInlineActionButton(title: "复制网址", symbol: LuckySymbol.copy) {
+            actions.copyURL(rule, sub)
+        }
+        .fixedSize()
+    }
+
+    private var editActions: some View {
+        HStack(spacing: LuckyTheme.Space.s) {
             WebInlineActionButton(title: "编辑", symbol: "pencil", prominent: true) {
                 actions.editSub(parentKey, key)
             }
-            Spacer(minLength: 0)
             Menu {
                 Button {
                     actions.tools(WebToolsTarget(ruleKey: parentKey, ruleName: parentName,
@@ -320,9 +366,12 @@ extension WebSubRuleCard {
                 .disabled(busy)
             } label: {
                 LuckyIconTile(symbol: "ellipsis", size: 34, glyph: 14, tone: .idle)
+                    .frame(width: LuckyTheme.Space.touchTarget, height: LuckyTheme.Space.touchTarget)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("子规则更多操作")
         }
+        .fixedSize()
     }
 }

@@ -35,7 +35,8 @@ struct DockerSettingsView: View {
 
     var body: some View {
         DockerPaneScroll(refresh: refresh) {
-            LuckySectionHeader(title: "Docker 设置", symbol: LuckySymbol.settings)
+            LuckySectionHeader(title: "Docker 设置", symbol: LuckySymbol.settings,
+                               iconRole: DockerView.settings.iconRole)
             // `config.data ? … : null` — there is nothing to edit until the daemon's settings are
             // in hand, and an editor opened over an empty record would save an empty record.
             if config != nil {
@@ -47,7 +48,8 @@ struct DockerSettingsView: View {
             if !maintenanceFailure.isEmpty {
                 LuckyErrorCard(message: maintenanceFailure) { Task { await refresh() } }
             }
-            LuckySectionHeader(title: "维护状态", symbol: LuckySymbol.monitor) {
+            LuckySectionHeader(title: "维护状态", symbol: LuckySymbol.monitor,
+                               iconRole: .system) {
                 Text(maintenanceFetching ? "正在刷新" : "7 个接口")
                     .font(LuckyTheme.Text.caption)
                     .foregroundStyle(LuckyTheme.textSecondary)
@@ -79,7 +81,7 @@ extension DockerSettingsView {
     /// The four fields are re-wrapped rather than passed through: `maintenance` also carries
     /// `imageUpgrades`, `composeBackup` and `volumeBackup`, and each panel shows only its own.
     private func groupPanel(_ payload: JSONValue) -> some View {
-        panel(title: "分组与标签", symbol: "shippingbox") {
+        panel(title: "分组与标签", symbol: "shippingbox", iconRole: .docker) {
             StructuredDataView(value: .object(JSONObject([
                 ("labels", payload["labels"] ?? .null),
                 ("containerGroups", payload["containerGroups"] ?? .null),
@@ -110,7 +112,7 @@ extension DockerSettingsView {
     /// §17.5's second panel. lucide's `Database` is a stack of platters, which reads as a drive on
     /// iOS; there is no report here beyond the two backup states, and no verb at all.
     private func backupPanel(_ payload: JSONValue) -> some View {
-        panel(title: "备份任务", symbol: LuckySymbol.disk) {
+        panel(title: "备份任务", symbol: LuckySymbol.disk, iconRole: .storage) {
             StructuredDataView(value: .object(JSONObject([
                 ("composeBackup", payload["composeBackup"] ?? .null),
                 ("volumeBackup", payload["volumeBackup"] ?? .null),
@@ -120,7 +122,7 @@ extension DockerSettingsView {
 
     /// §17.5's third panel — the upgrade report, and the one verb in 设置 that fires a mutation.
     private func upgradePanel(_ payload: JSONValue) -> some View {
-        panel(title: "镜像升级", symbol: DockerView.images.symbol) {
+        panel(title: "镜像升级", symbol: DockerView.images.symbol, iconRole: .media) {
             StructuredDataView(value: payload["imageUpgrades"] ?? .null)
             ServiceActionButton(title: "清除升级状态", symbol: LuckySymbol.delete, tone: .danger,
                                 fill: .soft, height: 44,
@@ -166,10 +168,11 @@ extension DockerSettingsView {
     private func panel<Content: View>(
         title: String,
         symbol: String,
+        iconRole: LuckyIconRole,
         @ViewBuilder content: @escaping () -> Content
     ) -> some View {
         LuckyCard(spacing: LuckyTheme.Space.m) {
-            LuckySectionHeader(title: title, symbol: symbol)
+            LuckySectionHeader(title: title, symbol: symbol, iconRole: iconRole)
             content()
         }
     }

@@ -31,8 +31,8 @@ struct LuckyPage<Content: View>: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: spacing, content: content)
                 .padding(.horizontal, LuckyTheme.Space.gutter)
-                .padding(.top, LuckyTheme.Space.l)
-                .padding(.bottom, 104)
+                .padding(.top, LuckyTheme.Space.pageTop)
+                .padding(.bottom, LuckyTheme.Space.pageBottom)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         // Soft at the top so cards dissolve under the title; hard at the bottom so a list does not

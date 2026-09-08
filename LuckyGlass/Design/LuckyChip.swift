@@ -116,14 +116,25 @@ struct LuckyWrap: Layout {
     var spacing: CGFloat = LuckyTheme.Space.s
     var lineSpacing: CGFloat = LuckyTheme.Space.s
 
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+    struct Cache {
+        var sizes: [CGSize]
+    }
+
+    func makeCache(subviews: Subviews) -> Cache {
+        Cache(sizes: subviews.map { $0.sizeThatFits(.unspecified) })
+    }
+
+    func updateCache(_ cache: inout Cache, subviews: Subviews) {
+        cache = makeCache(subviews: subviews)
+    }
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGSize {
         let limit = proposal.width ?? .infinity
         var line: CGFloat = 0
         var width: CGFloat = 0
         var height: CGFloat = 0
         var lineHeight: CGFloat = 0
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+        for size in cache.sizes {
             if line > 0, line + spacing + size.width > limit {
                 width = max(width, line)
                 height += lineHeight + lineSpacing
@@ -137,12 +148,12 @@ struct LuckyWrap: Layout {
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews,
-                       cache: inout ()) {
+                       cache: inout Cache) {
         var x = bounds.minX
         var y = bounds.minY
         var lineHeight: CGFloat = 0
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+        for (index, subview) in subviews.enumerated() {
+            let size = cache.sizes[index]
             if x > bounds.minX, x + size.width > bounds.maxX {
                 x = bounds.minX
                 y += lineHeight + lineSpacing

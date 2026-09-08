@@ -81,12 +81,18 @@ enum LuckyTheme {
         static let xxl: CGFloat = 32
         /// Page side margin. Also the spacing handed to `GlassEffectContainer`, which uses it to
         /// decide how close two glass shapes must be before their fields merge.
-        static let gutter: CGFloat = 18
+        static let gutter: CGFloat = 20
         /// Vertical rhythm between repeated records in a scroll view.
-        static let stack: CGFloat = 14
+        static let stack: CGFloat = 16
         /// Inner padding of a card, and therefore the concentric inset of anything drawn inside
         /// one.
-        static let cardInset: CGFloat = 18
+        static let cardInset: CGFloat = 16
+        /// Distinguish space between sections from space inside a card.
+        static let section: CGFloat = 20
+        static let pageTop: CGFloat = 12
+        /// Additional breathing room inside the system's tab/action-bar safe area.
+        static let pageBottom: CGFloat = 32
+        static let touchTarget: CGFloat = 44
     }
 
     // MARK: - Typography

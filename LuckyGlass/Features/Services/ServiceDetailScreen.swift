@@ -245,7 +245,7 @@ struct ServiceDetailScreen: View {
 
     private var listBranch: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: LuckyTheme.Space.m) {
+            LazyVStack(alignment: .leading, spacing: LuckyTheme.Space.stack) {
                 if !listFailure.isEmpty {
                     LuckyErrorCard(message: listFailure) { Task { await loadList() } }
                 }
@@ -260,7 +260,8 @@ struct ServiceDetailScreen: View {
                 }
             }
             .padding(.horizontal, LuckyTheme.Space.gutter)
-            .padding(.bottom, LuckyTheme.Space.xxl)
+            .padding(.top, LuckyTheme.Space.pageTop)
+            .padding(.bottom, LuckyTheme.Space.pageBottom)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .scrollEdgeEffectStyle(.soft, for: .top)

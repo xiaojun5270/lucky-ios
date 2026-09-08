@@ -42,6 +42,7 @@ struct LogsScreen: View {
     @ViewBuilder
     private var content: some View {
         VStack(alignment: .leading, spacing: LuckyTheme.Space.l) {
+            outputHeader
             if !failure.isEmpty {
                 LuckyErrorCard(message: failure) { Task { await poll() } }
             }
@@ -53,28 +54,6 @@ struct LogsScreen: View {
                     LuckyLoadingView().frame(maxHeight: .infinity)
                 }
             } else {
-                HStack(spacing: LuckyTheme.Space.s) {
-                    LuckyIconTile(symbol: "terminal", size: 30, glyph: 13, tone: .idle)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("全局输出")
-                            .font(LuckyTheme.Text.cardTitle)
-                            .foregroundStyle(LuckyTheme.textPrimary)
-                        Text("最新记录优先")
-                            .font(LuckyTheme.Text.caption)
-                            .foregroundStyle(LuckyTheme.textTertiary)
-                    }
-                    Spacer(minLength: 0)
-                    LuckyChip(text: "\(lines.count) 条", tone: .idle)
-                    LuckyStatusDot(tone: active ? .ok : .idle, pulsing: active)
-                    Button {
-                        Task { await poll() }
-                    } label: {
-                        LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(fetching)
-                    .accessibilityLabel("刷新")
-                }
                 // `[...lines].reverse()` — newest first, so the interesting line is on screen
                 // without scrolling, and therefore no auto-follow.
                 LuckyLogView(lines: lines, follows: false, height: nil, newestFirst: true)
@@ -84,8 +63,35 @@ struct LogsScreen: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(.horizontal, LuckyTheme.Space.gutter)
-        .padding(.top, LuckyTheme.Space.l)
-        .padding(.bottom, 96)
+        .padding(.top, LuckyTheme.Space.pageTop)
+        .padding(.bottom, LuckyTheme.Space.m)
+    }
+
+    private var outputHeader: some View {
+        HStack(spacing: LuckyTheme.Space.s) {
+            LuckyIconTile(symbol: "terminal", size: 30, glyph: 13, role: .logs)
+            VStack(alignment: .leading, spacing: LuckyTheme.Space.xs) {
+                Text("全局输出")
+                    .font(LuckyTheme.Text.cardTitle)
+                    .foregroundStyle(LuckyTheme.textPrimary)
+                Text("最新记录优先")
+                    .font(LuckyTheme.Text.caption)
+                    .foregroundStyle(LuckyTheme.textTertiary)
+            }
+            Spacer(minLength: 0)
+            LuckyChip(text: "\(lines.count) 条", tone: .idle)
+            LuckyStatusDot(tone: active && failure.isEmpty ? .ok : .idle)
+            Button {
+                Task { await poll() }
+            } label: {
+                LuckyIconTile(symbol: LuckySymbol.refresh, size: 30, glyph: 13)
+                    .frame(width: LuckyTheme.Space.touchTarget, height: LuckyTheme.Space.touchTarget)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(fetching)
+            .accessibilityLabel("刷新")
+        }
     }
 
     private func poll() async {

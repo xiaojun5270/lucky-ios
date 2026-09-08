@@ -28,7 +28,9 @@ extension DockerScreen {
         defer { if view == target { fetching = false } }
         do {
             switch target {
-            case .images: images = try await DockerService.images().items
+            case .images:
+                let items = try await DockerService.images().items
+                imageSnapshot = DockerImageSnapshot(items: items)
             case .compose: projects = try await DockerService.composeProjects().items
             case .networks: networks = try await DockerService.networks().items
             case .volumes: volumes = try await DockerService.volumes().items

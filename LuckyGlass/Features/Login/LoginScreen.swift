@@ -19,9 +19,9 @@ struct LoginScreen: View {
         ZStack {
             LuckyBackdrop()
             ScrollView {
-                VStack(alignment: .leading, spacing: 30) {
+                VStack(alignment: .leading, spacing: LuckyTheme.Space.xl) {
                     header
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: LuckyTheme.Space.m) {
                         LuckySectionHeader(title: "连接信息", subtitle: "Lucky 管理端",
                                            symbol: "server.rack")
                         card
@@ -29,8 +29,8 @@ struct LoginScreen: View {
                 }
                 .frame(maxWidth: 520)
                 .padding(.horizontal, LuckyTheme.Space.xl)
-                .padding(.top, 56)
-                .padding(.bottom, 110)
+                .padding(.top, LuckyTheme.Space.xl)
+                .padding(.bottom, LuckyTheme.Space.pageBottom)
                 .frame(maxWidth: .infinity)
             }
             .scrollDismissesKeyboard(.interactively)

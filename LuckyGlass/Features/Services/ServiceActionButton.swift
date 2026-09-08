@@ -85,7 +85,8 @@ struct ServiceActionButton: View {
         case .solid:
             Image(systemName: symbol).font(.system(size: glyph, weight: .semibold))
         default:
-            LuckyIconTile(symbol: symbol, size: 23, glyph: min(glyph, 11), tone: tone)
+            LuckyIconTile(symbol: symbol, size: 23, glyph: min(glyph, 11),
+                          tone: tone == .brand ? nil : tone)
         }
     }
 

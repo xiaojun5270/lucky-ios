@@ -16,7 +16,8 @@ struct DockerNetworksView: View {
                        loadingText: "正在读取 Docker 网络", refresh: refresh) {
             // 创建网络 is the glass bar's; nothing else was ever in this header.
             LuckySectionHeader(title: DockerView.networks.title,
-                               symbol: DockerView.networks.symbol) {
+                               symbol: DockerView.networks.symbol,
+                               iconRole: DockerView.networks.iconRole) {
                 DockerCountChip(count: items.count)
             }
         } rows: {
@@ -47,7 +48,8 @@ private struct DockerNetworkCard: View {
     var body: some View {
         LuckyCard(spacing: LuckyTheme.Space.m) {
             HStack(spacing: LuckyTheme.Space.s + 2) {
-                LuckyIconTile(symbol: DockerView.networks.symbol, size: 38, glyph: 19, tone: .info)
+                LuckyIconTile(symbol: DockerView.networks.symbol, size: 38, glyph: 19,
+                              role: DockerView.networks.iconRole)
                 VStack(alignment: .leading, spacing: LuckyTheme.Space.hair) {
                     Text(name)
                         .font(LuckyTheme.Text.cardTitle)

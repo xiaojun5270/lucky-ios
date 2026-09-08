@@ -107,7 +107,7 @@ struct LuckyFieldLabel: View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: LuckyTheme.Space.xs) {
                 if let symbol {
-                    LuckyIconTile(symbol: symbol, size: 21, glyph: 9, tone: tone ?? .brand)
+                    LuckyIconTile(symbol: symbol, size: 21, glyph: 9, tone: tone)
                 }
                 Text(label)
                     .font(LuckyTheme.Text.label)

@@ -331,7 +331,7 @@ extension TunnelScreen {
     /// glass bar and its search field to the navigation bar, so what is left of it is four banners.
     private var list: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: LuckyTheme.Space.m) {
+            LazyVStack(alignment: .leading, spacing: LuckyTheme.Space.stack) {
                 banners
                 if !loaded {
                     LuckySkeleton(rows: 4)
@@ -342,8 +342,8 @@ extension TunnelScreen {
                 emptyState
             }
             .padding(.horizontal, LuckyTheme.Space.gutter)
-            .padding(.top, LuckyTheme.Space.s)
-            .padding(.bottom, LuckyTheme.Space.xxl)
+            .padding(.top, LuckyTheme.Space.pageTop)
+            .padding(.bottom, LuckyTheme.Space.pageBottom)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .scrollEdgeEffectStyle(.soft, for: .top)
@@ -441,7 +441,7 @@ extension TunnelScreen {
         let state = TunnelRecord.state(item)
         let type = TunnelRecord.text(item["StunType"])
         return HStack(alignment: .top, spacing: LuckyTheme.Space.m) {
-            LuckyIconTile(symbol: TunnelRecord.symbol(kind))
+            LuckyIconTile(symbol: TunnelRecord.symbol(kind), role: kind.iconRole)
             VStack(alignment: .leading, spacing: 5) {
                 Text(name)
                     .font(LuckyTheme.Text.bodyMedium)

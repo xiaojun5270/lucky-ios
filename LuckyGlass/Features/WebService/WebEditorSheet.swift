@@ -452,11 +452,11 @@ extension WebEditorSheet {
 
     @ViewBuilder
     private var ruleForm: some View {
-        WebFormSection(title: "规则设置", symbol: "slider.horizontal.3") {
+        WebFormSection(title: "规则设置", symbol: "slider.horizontal.3", iconRole: .settings) {
             ruleListen
             ruleService
         }
-        WebFormSection(title: "默认规则", symbol: "globe") {
+        WebFormSection(title: "默认规则", symbol: "globe", iconRole: .web) {
             defaultIdentity
             defaultSwitches
             WebSecurityHeading()
@@ -528,7 +528,7 @@ extension WebEditorSheet {
         let shape = RoundedRectangle(cornerRadius: LuckyTheme.Radius.field, style: .continuous)
         return Button(action: applyWafToAllProxies) {
             HStack(spacing: 7) {
-                LuckyIconTile(symbol: "checkmark.shield", size: 28, glyph: 12)
+                LuckyIconTile(symbol: "checkmark.shield", size: 28, glyph: 12, role: .security)
                 Text("应用到所有子规则")
                     .font(.system(size: 12, weight: .bold, design: .rounded))
             }
@@ -601,12 +601,12 @@ extension WebEditorSheet {
     /// was opened from a list rather than from inside a rule.
     @ViewBuilder
     private var subRuleForm: some View {
-        WebFormSection(title: "基础设置", symbol: LuckySymbol.network) {
+        WebFormSection(title: "基础设置", symbol: LuckySymbol.network, iconRole: .web) {
             WebSubRuleFields(data: value, scope: "subrule", ruleMode: request.ruleMode ?? "simple",
                              tlsEnabled: request.tlsEnabled ?? false, context: context,
                              openSelect: $openSelect, write: update)
         }
-        WebFormSection(title: "安全设置", symbol: "checkmark.shield") {
+        WebFormSection(title: "安全设置", symbol: "checkmark.shield", iconRole: .security) {
             WebSecurityFields(data: value, scope: "subrule-security",
                               showIpFilter: subRuleIpFilter, context: context,
                               openSelect: $openSelect, write: update)

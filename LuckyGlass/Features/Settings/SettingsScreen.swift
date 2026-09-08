@@ -7,12 +7,12 @@ struct SettingsScreen: View {
     @State private var confirming = false
 
     var body: some View {
-        LuckyPage(spacing: 18) {
+        LuckyPage(spacing: LuckyTheme.Space.section) {
             connection
             security
             LuckyCard {
                 LuckySectionHeader(title: "当前会话", subtitle: "本机凭据与登录状态",
-                                   symbol: "person.crop.circle")
+                                   symbol: "person.crop.circle", iconRole: .account)
                 LuckyHairline()
                 logout
             }
@@ -30,27 +30,29 @@ struct SettingsScreen: View {
 
     private var connection: some View {
         LuckyCard {
-            LuckySectionHeader(title: "服务器", subtitle: "当前管理目标", symbol: "server.rack")
+            LuckySectionHeader(title: "服务器", subtitle: "当前管理目标", symbol: "server.rack",
+                               iconRole: .server)
             LuckyHairline()
             HStack(spacing: LuckyTheme.Space.m) {
-                LuckyIconTile(symbol: "server.rack", size: 48, glyph: 22)
+                LuckyIconTile(symbol: "server.rack", size: 48, glyph: 22, role: .server)
                 VStack(alignment: .leading, spacing: LuckyTheme.Space.xs) {
                     Text(session.account.isEmpty ? "管理员" : session.account)
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(LuckyTheme.textPrimary)
-                    Text(session.baseUrl)
-                        .font(LuckyTheme.Text.codeSmall)
-                        .foregroundStyle(LuckyTheme.textSecondary)
-                        .lineLimit(2)
-                        .textSelection(.enabled)
                 }
                 Spacer(minLength: LuckyTheme.Space.s)
                 LuckyChip(text: "已连接", tone: .ok, symbol: "checkmark")
             }
+            Text(session.baseUrl)
+                .font(LuckyTheme.Text.codeSmall)
+                .foregroundStyle(LuckyTheme.textSecondary)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+                .textSelection(.enabled)
             HStack(spacing: 0) {
-                connectionFact("person.fill", "账号", "已保存", .brand)
+                connectionFact("person.fill", "账号", "已保存", .account)
                 Rectangle().fill(LuckyTheme.separator).frame(width: 1, height: 34)
-                connectionFact("key.fill", "凭据", "安全存储", .info)
+                connectionFact("key.fill", "凭据", "安全存储", .security)
             }
             .padding(.vertical, LuckyTheme.Space.m)
             .background(LuckyTheme.surfaceRaised,
@@ -59,9 +61,9 @@ struct SettingsScreen: View {
     }
 
     private func connectionFact(_ symbol: String, _ label: String, _ value: String,
-                                _ tone: LuckyTone) -> some View {
+                                _ iconRole: LuckyIconRole) -> some View {
         HStack(spacing: 8) {
-            LuckyIconTile(symbol: symbol, size: 28, glyph: 12, tone: tone)
+            LuckyIconTile(symbol: symbol, size: 28, glyph: 12, role: iconRole)
             VStack(alignment: .leading, spacing: 2) {
                 Text(label).font(.system(size: 10, weight: .bold))
                     .foregroundStyle(LuckyTheme.textTertiary)
@@ -76,10 +78,10 @@ struct SettingsScreen: View {
     private var security: some View {
         LuckyCard {
             LuckySectionHeader(title: "安全", subtitle: "连接与存储策略",
-                               symbol: "checkmark.shield")
+                               symbol: "checkmark.shield", iconRole: .security)
             LuckyHairline()
             HStack(alignment: .top, spacing: LuckyTheme.Space.m) {
-                LuckyIconTile(symbol: "lock.shield.fill", size: 40, glyph: 18, tone: .ok)
+                LuckyIconTile(symbol: "lock.shield.fill", size: 40, glyph: 18, role: .security)
                 VStack(alignment: .leading, spacing: 5) {
                     Text("连接安全")
                         .font(LuckyTheme.Text.cardTitle)

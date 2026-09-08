@@ -37,9 +37,7 @@ struct LuckyLogView: View {
             .background(ConcentricRectangle().fill(LuckyTheme.surfaceSunken))
             .onChange(of: lines.count) {
                 guard follows else { return }
-                withAnimation(LuckyTheme.Motion.snap) {
-                    proxy.scrollTo(Self.bottomAnchor, anchor: .bottom)
-                }
+                proxy.scrollTo(Self.bottomAnchor, anchor: .bottom)
             }
         }
     }
@@ -48,26 +46,32 @@ struct LuckyLogView: View {
     private func rows(_ needle: String) -> some View {
         if newestFirst {
             ForEach(lines.indices.reversed(), id: \.self) { index in
-                row(lines[index], needle: needle).id(index)
+                LuckyLogLine(line: lines[index], needle: needle).equatable()
             }
         } else {
             ForEach(lines.indices, id: \.self) { index in
-                row(lines[index], needle: needle).id(index)
+                LuckyLogLine(line: lines[index], needle: needle).equatable()
             }
         }
     }
 
-    @ViewBuilder
-    private func row(_ line: String, needle: String) -> some View {
+}
+
+/// Unchanged rows skip level parsing and highlight construction when the polling controls update.
+private struct LuckyLogLine: View, Equatable {
+    var line: String
+    var needle: String
+
+    var body: some View {
         if needle.isEmpty {
             Text(verbatim: line)
                 .font(LuckyTheme.Text.codeSmall)
-                .foregroundStyle(LuckyLogView.tone(line)?.tint ?? LuckyTheme.textSecondary)
+                .foregroundStyle(Self.tone(line)?.tint ?? LuckyTheme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         } else {
             Text(attributed(line, needle: needle))
                 .font(LuckyTheme.Text.codeSmall)
-                .foregroundStyle(LuckyLogView.tone(line)?.tint ?? LuckyTheme.textSecondary)
+                .foregroundStyle(Self.tone(line)?.tint ?? LuckyTheme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

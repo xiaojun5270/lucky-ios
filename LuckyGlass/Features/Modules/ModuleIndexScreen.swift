@@ -31,6 +31,7 @@ struct ModuleIndexScreen: View {
                         title: module.label,
                         subtitle: module.key,
                         symbol: LuckySymbol.module(module.key),
+                        iconRole: LuckyIconRole.module(module.key),
                         chips: [
                             LuckyChipSpec("\(module.endpointCount) 端点", tone: .brand),
                             LuckyChipSpec("\(module.methodCount) 方法", tone: .info),

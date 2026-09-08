@@ -13,14 +13,15 @@ struct WebPaneScroll<Content: View>: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: LuckyTheme.Space.m, content: content)
+            LazyVStack(alignment: .leading, spacing: LuckyTheme.Space.stack, content: content)
                 .padding(.horizontal, LuckyTheme.Space.gutter)
-                .padding(.top, LuckyTheme.Space.xs)
-                .padding(.bottom, LuckyTheme.Space.xxl)
+                .padding(.top, LuckyTheme.Space.pageTop)
+                .padding(.bottom, LuckyTheme.Space.pageBottom)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .scrollEdgeEffectStyle(.soft, for: .top)
         .scrollIndicators(.hidden)
+        .scrollDismissesKeyboard(.interactively)
         .refreshable { await refresh() }
     }
 }
@@ -57,7 +58,7 @@ struct WebIconButton: View {
             }
             .foregroundStyle(LuckyTheme.textPrimary)
             .padding(.horizontal, LuckyTheme.Space.s)
-            .frame(minWidth: 58, minHeight: 36)
+            .frame(minWidth: 58, minHeight: LuckyTheme.Space.touchTarget)
             .background(shape.fill(LuckyTheme.surfaceRaised))
             .contentShape(shape)
         }
@@ -87,7 +88,8 @@ struct WebInlineActionButton: View {
                     Image(systemName: symbol)
                         .font(.system(size: 12, weight: .semibold))
                 } else {
-                    LuckyIconTile(symbol: symbol, size: 22, glyph: 10, tone: tone)
+                    LuckyIconTile(symbol: symbol, size: 22, glyph: 10,
+                                  tone: tone == .brand ? nil : tone)
                 }
                 Text(title)
                     .font(.system(size: 12, weight: .semibold))
@@ -95,7 +97,7 @@ struct WebInlineActionButton: View {
             }
             .foregroundStyle(prominent ? Color.white : LuckyTheme.textPrimary)
             .padding(.horizontal, prominent ? 14 : 10)
-            .frame(minHeight: 36)
+            .frame(minHeight: LuckyTheme.Space.touchTarget)
             .background(shape.fill(prominent ? tone.tint : LuckyTheme.surface))
             .overlay(
                 shape.strokeBorder(prominent ? Color.clear : LuckyTheme.hairline,

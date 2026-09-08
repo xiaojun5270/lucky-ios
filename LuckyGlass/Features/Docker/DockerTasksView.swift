@@ -15,7 +15,8 @@ struct DockerTasksView: View {
                        symbol: DockerView.tasks.symbol,
                        loadingText: "正在读取后台任务", refresh: refresh) {
             // 清空任务 is the glass bar's, and it is the only thing this header ever held.
-            LuckySectionHeader(title: DockerView.tasks.title, symbol: DockerView.tasks.symbol) {
+            LuckySectionHeader(title: DockerView.tasks.title, symbol: DockerView.tasks.symbol,
+                               iconRole: DockerView.tasks.iconRole) {
                 DockerCountChip(count: items.count)
             }
         } rows: {
@@ -50,7 +51,8 @@ private struct DockerTaskCard: View {
     var body: some View {
         LuckyCard(spacing: LuckyTheme.Space.m) {
             HStack(spacing: 9) {
-                LuckyIconTile(symbol: DockerView.tasks.symbol, size: 36, glyph: 18)
+                LuckyIconTile(symbol: DockerView.tasks.symbol, size: 36, glyph: 18,
+                              role: DockerView.tasks.iconRole)
                 VStack(alignment: .leading, spacing: LuckyTheme.Space.hair) {
                     Text(title)
                         .font(LuckyTheme.Text.cardTitle)

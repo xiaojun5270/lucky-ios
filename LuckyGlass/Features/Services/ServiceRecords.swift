@@ -1,8 +1,7 @@
 import SwiftUI
 
 /// Presentation metadata for the four service kinds — the `config` map at the top of
-/// `app/services/[kind].tsx`. The glyphs and tones are the ones the 服务 tiles use, so a pushed
-/// screen keeps the colour of the tile the user tapped.
+/// `app/services/[kind].tsx`. Function colours are shared through `LuckyServiceKind.iconRole`.
 extension LuckyServiceKind {
     var title: String {
         switch self {
@@ -28,15 +27,6 @@ extension LuckyServiceKind {
         case .ddns: "arrow.triangle.2.circlepath"
         case .docker: "shippingbox"
         case .ssl: "checkmark.shield"
-        }
-    }
-
-    var tone: LuckyTone {
-        switch self {
-        case .webservice: .brand
-        case .ddns: .info
-        case .docker: .warning
-        case .ssl: .ok
         }
     }
 }
@@ -314,4 +304,3 @@ enum ServiceRecord {
                     isEnabled(item) ? "正常" : "已停用")
     }
 }
-

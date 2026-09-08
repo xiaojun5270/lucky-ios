@@ -137,7 +137,8 @@ struct DockerComposeView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
             LuckySectionHeader(title: DockerView.compose.title,
-                               symbol: DockerView.compose.symbol) {
+                               symbol: DockerView.compose.symbol,
+                               iconRole: DockerView.compose.iconRole) {
                 DockerCountChip(count: items.count)
             }
             ServiceActionButton(title: "扫描项目", symbol: LuckySymbol.search, fill: .tinted,
@@ -174,7 +175,8 @@ private struct DockerComposeCard: View {
 
     private var heading: some View {
         HStack(spacing: 9) {
-            LuckyIconTile(symbol: DockerView.compose.symbol, size: 40, glyph: 20)
+            LuckyIconTile(symbol: DockerView.compose.symbol, size: 40, glyph: 20,
+                          role: DockerView.compose.iconRole)
             VStack(alignment: .leading, spacing: LuckyTheme.Space.hair) {
                 Text(target.name)
                     .font(LuckyTheme.Text.cardTitle)

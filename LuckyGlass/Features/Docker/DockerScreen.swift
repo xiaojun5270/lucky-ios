@@ -48,7 +48,7 @@ struct DockerScreen: View {
 
     @State var containers: [LuckyListItem] = []
     @State var icons: [JSONValue] = []
-    @State var images: [LuckyListItem] = []
+    @State var imageSnapshot = DockerImageSnapshot()
     @State var projects: [LuckyListItem] = []
     @State var networks: [LuckyListItem] = []
     @State var volumes: [LuckyListItem] = []
@@ -238,7 +238,8 @@ extension DockerScreen {
                 selection: viewSelection,
                 segments: DockerView.allCases.map {
                     LuckySegment($0, $0.label, symbol: $0.symbol)
-                }
+                },
+                iconRole: view.iconRole
             )
             if !localError.isEmpty {
                 LuckyErrorCard(message: localError)
