@@ -82,24 +82,34 @@ final class DockerIconLoader {
 final class DockerIconIndex {
     static let shared = DockerIconIndex()
 
-    private var library = -1
-    private var cache: [String: String] = [:]
+    private var items: [LuckyListItem] = []
+    private var library: [JSONValue] = []
+    private var cachedRows: [DockerContainerRow] = []
 
     private init() {}
 
-    /// `key` is the row's stable container key. The library is identified by its size: the endpoint
-    /// serves a fixed catalogue, so the count only moves when the catalogue itself does. It is a
-    /// coarse signature, but a stale hit costs one wrong glyph until the next reload, while
-    /// fingerprinting several hundred JSON trees each pass would cost more than the scan it saves.
-    func icon(key: String, item: LuckyListItem, icons: [JSONValue]) -> String {
-        if icons.count != library {
-            library = icons.count
-            cache.removeAll(keepingCapacity: true)
+    /// Resolves every row as one memoized unit. Statistics change every five seconds; containers
+    /// and the icon catalogue usually do not. Exact value comparison makes a stats-only render an
+    /// immediate cache hit while still invalidating correctly if a label or catalogue entry changes.
+    func rows(items: [LuckyListItem], icons: [JSONValue]) -> [DockerContainerRow] {
+        if items == self.items, icons == library { return cachedRows }
+        var seen = Set<String>()
+        seen.reserveCapacity(items.count)
+        let rows = items.enumerated().map { index, item in
+            var row = DockerContainerRow(item, index)
+            let base = row.identity
+            var suffix = 1
+            while !seen.insert(row.identity).inserted {
+                row.identity = "\(base)#\(suffix)"
+                suffix += 1
+            }
+            row.icon = DockerRecord.containerIcon(item, icons)
+            return row
         }
-        if let hit = cache[key] { return hit }
-        let resolved = DockerRecord.containerIcon(item, icons)
-        cache[key] = resolved
-        return resolved
+        self.items = items
+        library = icons
+        cachedRows = rows
+        return rows
     }
 }
 

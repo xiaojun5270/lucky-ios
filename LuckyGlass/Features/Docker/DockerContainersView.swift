@@ -21,22 +21,11 @@ struct DockerContainersView: View {
     var refresh: @Sendable () async -> Void
     var actions: DockerContainerActions
 
-    /// Every row's derivation, done once for the list instead of once per row per body evaluation.
-    /// The icon-library lookup in particular used to be the most expensive thing on the screen —
-    /// see `DockerIconIndex`, which is what makes running it here cheap on the second pass.
+    /// Every row's derivation is memoized by the container and icon-library values. A statistics
+    /// tick therefore reuses the rows verbatim instead of repeating raw-record parsing or scanning
+    /// the whole icon catalogue.
     private var rows: [DockerContainerRow] {
-        var seen = Set<String>()
-        seen.reserveCapacity(items.count)
-        return items.enumerated().map { entry in
-            var row = DockerContainerRow(entry.element, entry.offset)
-            // `keyOf` falls back to the index, but a daemon that repeats an id would hand two rows
-            // the same identity and SwiftUI would quietly drop one of them. Disambiguate instead.
-            if !seen.insert(row.identity).inserted {
-                row.identity += "#\(entry.offset)"
-            }
-            row.icon = DockerIconIndex.shared.icon(key: row.key, item: entry.element, icons: icons)
-            return row
-        }
+        DockerIconIndex.shared.rows(items: items, icons: icons)
     }
 
     var body: some View {
