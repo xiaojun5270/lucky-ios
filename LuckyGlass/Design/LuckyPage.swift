@@ -54,9 +54,10 @@ struct LuckyPageHero<Trailing: View>: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: LuckyTheme.Space.m) {
-            VStack(alignment: .leading, spacing: LuckyTheme.Space.xs) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text(title)
                     .font(LuckyTheme.Text.hero)
+                    .tracking(-0.4)
                     .foregroundStyle(LuckyTheme.textPrimary)
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)

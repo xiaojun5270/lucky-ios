@@ -15,8 +15,26 @@ struct LuckyCard<Content: View>: View {
     var tone: LuckyTone?
     @ViewBuilder var content: () -> Content
 
+    @Environment(\.colorScheme) private var colorScheme
+
     private var shape: RoundedRectangle {
         RoundedRectangle(cornerRadius: radius, style: .continuous)
+    }
+
+    private var shadowColor: Color {
+        colorScheme == .dark
+            ? LuckyTheme.Elevation.cardDark.color
+            : LuckyTheme.Elevation.cardLight.color
+    }
+    private var shadowRadius: CGFloat {
+        colorScheme == .dark
+            ? LuckyTheme.Elevation.cardDark.radius
+            : LuckyTheme.Elevation.cardLight.radius
+    }
+    private var shadowY: CGFloat {
+        colorScheme == .dark
+            ? LuckyTheme.Elevation.cardDark.y
+            : LuckyTheme.Elevation.cardLight.y
     }
 
     var body: some View {
@@ -25,6 +43,10 @@ struct LuckyCard<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(shape.fill(LuckyTheme.surface))
             .clipShape(shape)
+            // Soft shadow lifts the card off the canvas without competing with content. The
+            // radius and opacity are calibrated per appearance: dark backgrounds need less y-offset
+            // and more radius; light backgrounds need a small drop to suggest paper stacking.
+            .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
             .overlay(
                 shape.strokeBorder(
                     tone?.tint.opacity(0.42) ?? LuckyTheme.hairline,
@@ -226,6 +248,7 @@ struct LuckyMetricTile: View {
                 .foregroundStyle(LuckyTheme.textPrimary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+                .monospacedDigit()
                 .contentTransition(.numericText())
             if let caption, !caption.isEmpty {
                 Text(caption)
@@ -236,6 +259,17 @@ struct LuckyMetricTile: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(LuckyTheme.Space.m)
-        .background(ConcentricRectangle().fill(LuckyTheme.surfaceRaised))
+        .background {
+            // A 3 pt tone-colored strip on the leading edge gives each tile an at-a-glance colour
+            // identity without overpowering the value. The ZStack is clipped to ConcentricRectangle
+            // so the strip inherits the tile's concentric corner radius.
+            ZStack(alignment: .leading) {
+                ConcentricRectangle().fill(LuckyTheme.surfaceRaised)
+                Rectangle()
+                    .fill(tone.tint.opacity(0.72))
+                    .frame(width: 3)
+            }
+            .clipShape(ConcentricRectangle())
+        }
     }
 }

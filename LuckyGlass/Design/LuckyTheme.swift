@@ -98,9 +98,11 @@ enum LuckyTheme {
     // MARK: - Typography
 
     /// A compact system face keeps dense labels quiet; code and paths retain a monospaced face.
+    /// Numerics and display sizes use `.rounded` so digits feel warmer and less mechanical at
+    /// large scale — the difference is most obvious in metric tiles and the page hero.
     enum Text {
-        static let hero = Font.system(size: 28, weight: .bold, design: .default)
-        static let title = Font.system(size: 21, weight: .bold, design: .default)
+        static let hero = Font.system(size: 28, weight: .bold, design: .rounded)
+        static let title = Font.system(size: 21, weight: .bold, design: .rounded)
         static let sectionTitle = Font.system(size: 13, weight: .bold, design: .default)
         static let cardTitle = Font.system(size: 16, weight: .semibold, design: .default)
         static let body = Font.system(size: 15, weight: .regular, design: .default)
@@ -108,13 +110,29 @@ enum LuckyTheme {
         static let caption = Font.system(size: 12, weight: .regular, design: .default)
         static let captionMedium = Font.system(size: 12, weight: .semibold, design: .default)
         static let label = Font.system(size: 13, weight: .medium, design: .default)
-        /// The big number in a metric tile.
-        static let metric = Font.system(size: 26, weight: .bold, design: .default)
-        static let metricSmall = Font.system(size: 19, weight: .bold, design: .default)
+        /// The big number in a metric tile — `.rounded` so the numeral feels at home beside the
+        /// icon tile rather than technical. `.monospacedDigit()` is still applied at the call site.
+        static let metric = Font.system(size: 26, weight: .bold, design: .rounded)
+        static let metricSmall = Font.system(size: 19, weight: .bold, design: .rounded)
         /// JSON, logs and paths. Monospaced digits alone are not enough — these need fixed advance.
         static let code = Font.system(size: 12, weight: .regular, design: .monospaced)
         static let codeSmall = Font.system(size: 11, weight: .regular, design: .monospaced)
-        static let button = Font.system(size: 15, weight: .semibold, design: .default)
+        static let button = Font.system(size: 15, weight: .semibold, design: .rounded)
+    }
+
+    // MARK: - Elevation
+
+    /// Shadow values for the three levels that genuinely float. The card shadow is intentionally
+    /// near-invisible in light mode — it provides depth without competing with content.
+    /// Dark mode needs more radius and less y-offset because dark surfaces disappear behind
+    /// dark shadows; perceived separation comes from the halo, not the drop.
+    enum Elevation {
+        static let cardLight: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) =
+            (.black.opacity(0.055), 14, 0, 3)
+        static let cardDark: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) =
+            (.black.opacity(0.30), 9, 0, 2)
+        static let overlay: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) =
+            (.black.opacity(0.13), 28, 0, 8)
     }
 
     // MARK: - Motion
