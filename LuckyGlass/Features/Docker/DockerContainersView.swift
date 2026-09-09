@@ -21,6 +21,24 @@ struct DockerContainersView: View {
     var refresh: @Sendable () async -> Void
     var actions: DockerContainerActions
 
+    /// Every row's derivation, done once for the list instead of once per row per body evaluation.
+    /// The icon-library lookup in particular used to be the most expensive thing on the screen —
+    /// see `DockerIconIndex`, which is what makes running it here cheap on the second pass.
+    private var rows: [DockerContainerRow] {
+        var seen = Set<String>()
+        seen.reserveCapacity(items.count)
+        return items.enumerated().map { entry in
+            var row = DockerContainerRow(entry.element, entry.offset)
+            // `keyOf` falls back to the index, but a daemon that repeats an id would hand two rows
+            // the same identity and SwiftUI would quietly drop one of them. Disambiguate instead.
+            if !seen.insert(row.identity).inserted {
+                row.identity += "#\(entry.offset)"
+            }
+            row.icon = DockerIconIndex.shared.icon(key: row.key, item: entry.element, icons: icons)
+            return row
+        }
+    }
+
     var body: some View {
         DockerListPane(count: items.count, loading: loading,
                        empty: DockerView.containers.emptyMessage,
@@ -32,9 +50,13 @@ struct DockerContainersView: View {
                 DockerCountChip(count: items.count)
             }
         } rows: {
-            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                DockerContainerCard(row: DockerContainerRow(item, index), icons: icons,
-                                    stats: stats, busy: busy, actions: actions)
+            // Identified by the container itself rather than by its array offset. An offset shifts
+            // for every row below an insertion, so starting or removing one container told SwiftUI
+            // that every row after it was a different row and the whole list was rebuilt.
+            ForEach(rows, id: \.identity) { row in
+                // Each card gets the one statistics row it draws, not the whole table: handing the
+                // dictionary down meant any tick invalidated every card in the list.
+                DockerContainerCard(row: row, stat: row.stats(stats), busy: busy, actions: actions)
             }
         }
     }
@@ -43,18 +65,29 @@ struct DockerContainersView: View {
 // MARK: - 行
 
 /// §10's per-row derivation, done once rather than five times inside the card.
+///
+/// Everything here is resolved in `init` and stored. These used to be computed properties, which on
+/// a `View` struct means they re-run on every body evaluation — the status phrase was being rebuilt
+/// from the raw record sixty times a second while scrolling.
 struct DockerContainerRow {
-    var item: LuckyListItem
     var key: String
+    /// What `ForEach` diffs on. Normally the key; suffixed only if the daemon repeated one.
+    var identity: String
     var state: DockerContainerState
     var name: String
     var displayName: String
+    var status: String
+    /// Filled in by the list, which owns the icon library. Empty means "draw the fallback glyph".
+    var icon = ""
 
     init(_ item: LuckyListItem, _ index: Int) {
-        self.item = item
         let key = DockerRecord.keyOf(item, index)
         self.key = key
-        state = DockerStats.containerState(item)
+        identity = key
+        let state = DockerStats.containerState(item)
+        self.state = state
+        // §25.2 — a paused container is still a running one for every purpose but its own verb.
+        let running = state == .running || state == .paused
         // `key.slice(0, 12)` — a container with no name at all is known by the head of its id.
         let fallback = String(key.prefix(12))
         let name = DockerRecord.pick(item, ["Names", "Name", "name"], fallback)
@@ -62,9 +95,9 @@ struct DockerContainerRow {
         // `name.replace(/^\/+/, "") || name` — a name of nothing but slashes keeps them.
         let bare = String(name.drop { $0 == "/" })
         displayName = bare.isEmpty ? name : bare
+        status = DockerRecord.containerStatus(item, running: running, paused: state == .paused)
     }
 
-    /// §25.2 — a paused container is still a running one for every purpose but its own verb.
     var paused: Bool { state == .paused }
     var running: Bool { state == .running || paused }
 
@@ -72,10 +105,6 @@ struct DockerContainerRow {
     /// are tried. §25.1's map holds every row under each.
     func stats(_ table: [String: DockerStatRow]) -> DockerStatRow? {
         table[key] ?? table[displayName]
-    }
-
-    var status: String {
-        DockerRecord.containerStatus(item, running: running, paused: paused)
     }
 
     var menu: DockerContainerMenu {
@@ -87,8 +116,7 @@ struct DockerContainerRow {
 
 private struct DockerContainerCard: View {
     var row: DockerContainerRow
-    var icons: [JSONValue]
-    var stats: [String: DockerStatRow]
+    var stat: DockerStatRow?
     var busy: Bool
     var actions: DockerContainerActions
 
@@ -101,7 +129,7 @@ private struct DockerContainerCard: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("打开容器 \(row.displayName) 操作菜单")
-            ContainerStatsGrid(stats: row.stats(stats))
+            ContainerStatsGrid(stats: stat)
             LuckyHairline()
             commands
         }
@@ -109,7 +137,7 @@ private struct DockerContainerCard: View {
 
     private var heading: some View {
         HStack(spacing: 11) {
-            ContainerArtwork(item: row.item, icons: icons, running: row.running, size: 48)
+            ContainerArtwork(icon: row.icon, running: row.running, size: 48)
             VStack(alignment: .leading, spacing: LuckyTheme.Space.xs + 2) {
                 Text(row.displayName)
                     .font(.system(size: 15, weight: .heavy))

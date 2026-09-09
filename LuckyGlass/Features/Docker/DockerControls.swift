@@ -70,16 +70,52 @@ final class DockerIconLoader {
     }
 }
 
+/// Memoizes `DockerRecord.containerIcon`, which scores a container against every entry in the
+/// icon library.
+///
+/// That scan is `O(library × terms)` of lowercasing and substring work, and it used to sit behind
+/// a computed property inside `ContainerArtwork` — so a thirty-container list against a
+/// four-hundred-icon library ran tens of thousands of `contains` calls on every body evaluation,
+/// and a body evaluation happens on every five-second stats tick. The answer depends only on the
+/// container record and the library, neither of which changes between those ticks.
+@MainActor
+final class DockerIconIndex {
+    static let shared = DockerIconIndex()
+
+    private var library = -1
+    private var cache: [String: String] = [:]
+
+    private init() {}
+
+    /// `key` is the row's stable container key. The library is identified by its size: the endpoint
+    /// serves a fixed catalogue, so the count only moves when the catalogue itself does. It is a
+    /// coarse signature, but a stale hit costs one wrong glyph until the next reload, while
+    /// fingerprinting several hundred JSON trees each pass would cost more than the scan it saves.
+    func icon(key: String, item: LuckyListItem, icons: [JSONValue]) -> String {
+        if icons.count != library {
+            library = icons.count
+            cache.removeAll(keepingCapacity: true)
+        }
+        if let hit = cache[key] { return hit }
+        let resolved = DockerRecord.containerIcon(item, icons)
+        cache[key] = resolved
+        return resolved
+    }
+}
+
 /// §5.1. Drawn at 48 pt in the containers list, which is the only place it appears.
 struct ContainerArtwork: View {
-    var item: LuckyListItem
-    var icons: [JSONValue]
+    /// The library path, already resolved. Resolution is a scan of the whole library, so it happens
+    /// once per row in `DockerContainersView` rather than once per body evaluation in here.
+    var icon: String
     var running: Bool
     var size: CGFloat = 44
 
     @State private var image: Image?
-
-    private var icon: String { DockerRecord.containerIcon(item, icons) }
+    /// The path `image` was actually loaded for. Without it `resolve` cleared the image on every
+    /// run — including the runs where the path had not moved — so each stats tick flashed the
+    /// fallback glyph and forced a second render pass through the whole list.
+    @State private var loaded: String?
 
     /// `borderRadius: Math.max(10, Math.round(size * 0.26))`
     private var radius: CGFloat { max(10, (size * 0.26).rounded()) }
@@ -102,31 +138,30 @@ struct ContainerArtwork: View {
             }
         }
         .frame(width: size, height: size)
-        .background(background, in: .rect(cornerRadius: radius))
+        .background(LuckyTheme.surfaceRaised, in: .rect(cornerRadius: radius))
         .clipShape(.rect(cornerRadius: radius))
         // `failed` resets whenever the URI changes, which the id does for us.
-        .task(id: icon) { await resolve() }
+        .task(id: icon) { await resolve(icon) }
         .accessibilityHidden(true)
     }
 
-    /// The fallback tints itself by state; the image sits on the plain raised surface.
-    private var background: Color {
-        if image != nil { return LuckyTheme.surfaceRaised }
-        return LuckyTheme.surfaceRaised
-    }
-
-    private func resolve() async {
-        image = nil
-        let path = icon
-        guard !path.isEmpty else { return }
-        if let cached = DockerIconLoader.shared.cached(path) {
-            image = cached
+    private func resolve(_ path: String) async {
+        // A row scrolled off and back on re-runs the task with the same path; so does a re-appear
+        // after a tick. Neither needs to touch the image it is already showing.
+        guard loaded != path else { return }
+        if let hit = DockerIconLoader.shared.cached(path) {
+            image = hit
+            loaded = path
             return
         }
+        image = nil
+        loaded = nil
+        guard !path.isEmpty else { return }
         await DockerIconLoader.shared.load(path)
         // A second row may have finished the fetch while this one waited.
         guard path == icon else { return }
         image = DockerIconLoader.shared.cached(path)
+        loaded = image == nil ? nil : path
     }
 }
 

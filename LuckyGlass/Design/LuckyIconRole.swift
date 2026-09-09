@@ -19,24 +19,30 @@ enum LuckyIconRole: String, CaseIterable, Sendable {
         case .cloudflared, .automation, .edit: Self.orange
         case .frp, .account: Self.berry
         case .system: Self.amber
-        case .storage: Self.brown
+        case .storage: Self.bronze
         case .media: Self.magenta
         case .tools: Self.purple
         case .server, .settings, .logs, .neutral: Self.graphite
         }
     }
 
-    private static let purple = LuckyTheme.dynamic(light: 0x7950BC, dark: 0x8055C2)
-    private static let blue = LuckyTheme.dynamic(light: 0x2563BD, dark: 0x2C68C2)
-    private static let teal = LuckyTheme.dynamic(light: 0x16766D, dark: 0x197B72)
-    private static let green = LuckyTheme.dynamic(light: 0x247B4F, dark: 0x298056)
-    private static let grape = LuckyTheme.dynamic(light: 0x8A4AA3, dark: 0x9151AB)
-    private static let orange = LuckyTheme.dynamic(light: 0xB65F20, dark: 0xB65F20)
-    private static let berry = LuckyTheme.dynamic(light: 0xA14370, dark: 0xA84A78)
-    private static let amber = LuckyTheme.dynamic(light: 0x956619, dark: 0x9A6B20)
-    private static let brown = LuckyTheme.dynamic(light: 0x88633B, dark: 0x906B43)
-    private static let magenta = LuckyTheme.dynamic(light: 0x9B4790, dark: 0xA24F97)
-    private static let graphite = LuckyTheme.dynamic(light: 0x586273, dark: 0x626D7F)
+    /// The plates carry more chroma than the old set, which had drifted muddy — a desaturated
+    /// mid-tone reads as dirty rather than calm, and thirty of them in a list made the whole
+    /// screen look dusty. Every value is still dark enough that a white semibold glyph clears
+    /// 3:1 against it, which is the large-text contrast floor these tiles have to meet.
+    private static let purple = LuckyTheme.dynamic(light: 0x6D4FC7, dark: 0x7B5FD3)
+    private static let blue = LuckyTheme.dynamic(light: 0x2472DE, dark: 0x2F7FE8)
+    private static let teal = LuckyTheme.dynamic(light: 0x0E8C82, dark: 0x12998E)
+    private static let green = LuckyTheme.dynamic(light: 0x1A8F4C, dark: 0x1E9C55)
+    private static let grape = LuckyTheme.dynamic(light: 0x8B3FD4, dark: 0x9750DC)
+    private static let orange = LuckyTheme.dynamic(light: 0xCF6210, dark: 0xD86F1C)
+    private static let berry = LuckyTheme.dynamic(light: 0xC42A6B, dark: 0xCE3A78)
+    private static let amber = LuckyTheme.dynamic(light: 0xB8790E, dark: 0xC28418)
+    /// Storage keeps a warm earth tone so it stays distinct from amber, but as bronze rather
+    /// than the previous flat brown.
+    private static let bronze = LuckyTheme.dynamic(light: 0x96684A, dark: 0xA17455)
+    private static let magenta = LuckyTheme.dynamic(light: 0xB32BAF, dark: 0xBE3ABA)
+    private static let graphite = LuckyTheme.dynamic(light: 0x5B6779, dark: 0x687487)
 
     /// Defaults for unambiguous utility glyphs. A new symbol gets a neutral plate until its
     /// feature supplies a role, rather than silently adding another blue icon.

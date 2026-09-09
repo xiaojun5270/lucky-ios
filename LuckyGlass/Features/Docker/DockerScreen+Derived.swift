@@ -125,60 +125,125 @@ extension DockerScreen {
 
 // MARK: - 容器统计
 
+/// The three answers §25 needs, produced by one walk of the statistics payload instead of four.
+struct DockerStatsDigest {
+    var rows: [DockerStatRow] = []
+    /// §25.1's map — every row under both its key and its name.
+    var byKey: [String: DockerStatRow] = [:]
+    /// §2's gate on the expensive per-container sweep.
+    var liveNeeded = false
+}
+
+/// Memoizes that walk.
+///
+/// `DockerStats.rows` descends seven levels and re-parses every byte string it meets. The four
+/// properties that used to front it each rebuilt the others: asking for the rows evaluated the
+/// gate, the gate counted the cached rows, and the merged payload evaluated the gate a second
+/// time — six to eight full walks for a single body pass, and a body pass happens on every
+/// keystroke in the search field.
+///
+/// The inputs are values, so the memo compares them with `==`. That is a structural walk too, but
+/// it allocates nothing, parses no strings and stops at the first difference, so it costs a
+/// fraction of what it replaces. When a body pass changed something unrelated — the search text, a
+/// sheet, the busy flag — the comparison succeeds and the derivation is skipped outright.
+///
+/// Shared rather than per-screen, as `DockerIconLoader` is: only one Docker screen is ever on
+/// screen, and a digest left behind by a dismissed one is discarded by the first key comparison.
+@MainActor
+final class DockerStatsMemo {
+    static let shared = DockerStatsMemo()
+
+    /// Everything the digest reads. If none of it moved, the answer did not either.
+    struct Inputs: Equatable {
+        var containers: [LuckyListItem]
+        var stats: JSONValue?
+        var live: JSONValue?
+        var progressive: JSONValue?
+        var active: Bool
+        var failed: Bool
+        var succeeded: Bool
+    }
+
+    private var inputs: Inputs?
+    private var digest = DockerStatsDigest()
+
+    private init() {}
+
+    func cached(for inputs: Inputs) -> DockerStatsDigest? {
+        inputs == self.inputs ? digest : nil
+    }
+
+    func store(_ digest: DockerStatsDigest, for inputs: Inputs) {
+        self.digest = digest
+        self.inputs = inputs
+    }
+}
+
 extension DockerScreen {
     var statsContainerItems: [LuckyListItem] { containers }
 
-    /// §25.2 — `paused` counts as running, so a paused container still expects a stats row and its
-    /// absence still triggers the live sweep.
-    var runningContainerCount: Int {
-        statsContainerItems.filter { item in
+    /// The one entry point. `liveStatsNeeded`, `containerStatRows` and `containerStatsByKey` are
+    /// all views onto this, so the six places that ask share a single derivation.
+    var containerStatsDigest: DockerStatsDigest {
+        let inputs = DockerStatsMemo.Inputs(
+            containers: containers,
+            stats: stats,
+            live: liveStats,
+            progressive: progressiveStats,
+            active: statsActive,
+            failed: statsFailed,
+            succeeded: statsSucceeded
+        )
+        let memo = DockerStatsMemo.shared
+        if let hit = memo.cached(for: inputs) { return hit }
+        let digest = Self.statsDigest(inputs)
+        memo.store(digest, for: inputs)
+        return digest
+    }
+
+    /// `dockerStatRows(containerStats.data, …)` — the five-second cached sweep — then §2's gate,
+    /// then, only when the gate opens, the same walk with the live sweep's results merged in.
+    private static func statsDigest(_ inputs: DockerStatsMemo.Inputs) -> DockerStatsDigest {
+        let items = inputs.containers
+        let cached = DockerStats.rows(inputs.stats, containers: items)
+        // §25.2 — `paused` counts as running, so a paused container still expects a stats row and
+        // its absence still triggers the live sweep.
+        let expected = items.reduce(into: 0) { total, item in
             let state = DockerStats.containerState(item)
-            return state == .running || state == .paused
+            if state == .running || state == .paused { total += 1 }
         }
-        .count
-    }
-
-    /// `dockerStatRows(containerStats.data, …)` — the five-second cached sweep on its own.
-    var cachedStatRows: [DockerStatRow] {
-        DockerStats.rows(stats, containers: statsContainerItems)
-    }
-
-    /// §2's gate on the expensive per-container sweep: the cheap bulk endpoint either failed, or
-    /// succeeded while reporting fewer rows than there are containers expected to have one.
-    var liveStatsNeeded: Bool {
-        guard statsActive else { return false }
-        if statsFailed { return true }
-        return statsSucceeded && runningContainerCount > cachedStatRows.count
-    }
-
-    /// The statistics payload normalized to an array. The live branch carries partial results
-    /// while the fallback sweep is still running.
-    var statsSource: JSONValue {
-        let payloads = liveStatsNeeded
-            ? [stats, liveStats, progressiveStats]
-            : [stats]
-        return .array(payloads.compactMap { $0 })
-    }
-
-    /// The cached rows are reused verbatim when the live sweep is not needed — recomputing them
-    /// from `statsSource` would give the same answer, and the original's memo split is what keeps
-    /// the five-second tick from re-walking the payload three times.
-    var containerStatRows: [DockerStatRow] {
-        guard liveStatsNeeded else { return cachedStatRows }
-        return DockerStats.rows(statsSource, containers: statsContainerItems)
-    }
-
-    /// §25.1 — every row is inserted **twice**, under its key and under its name, because the
-    /// container list and the statistics endpoint rarely agree on which of the two they print. A
-    /// row whose key and name collide with another's wins the later write, exactly as `Map` does.
-    var containerStatsByKey: [String: DockerStatRow] {
-        var result: [String: DockerStatRow] = [:]
-        for row in containerStatRows {
-            result[row.key] = row
-            result[row.name] = row
+        // §2: the cheap bulk endpoint either failed, or succeeded while reporting fewer rows than
+        // there are containers expected to have one.
+        var liveNeeded = false
+        if inputs.active {
+            liveNeeded = inputs.failed || (inputs.succeeded && expected > cached.count)
         }
-        return result
+        // The cached rows are reused verbatim when the live sweep is not needed — walking the
+        // merged payload would give the same answer for twice the work, and that memo split is the
+        // original's whole reason for existing.
+        var rows = cached
+        if liveNeeded {
+            // The live branch carries the partials the sweep streams while it is still running.
+            let payloads = [inputs.stats, inputs.live, inputs.progressive].compactMap { $0 }
+            rows = DockerStats.rows(.array(payloads), containers: items)
+        }
+        // §25.1 — every row is inserted **twice**, under its key and under its name, because the
+        // container list and the statistics endpoint rarely agree on which of the two they print. A
+        // row whose key and name collide with another's wins the later write, exactly as `Map` does.
+        var byKey: [String: DockerStatRow] = [:]
+        byKey.reserveCapacity(rows.count * 2)
+        for row in rows {
+            byKey[row.key] = row
+            byKey[row.name] = row
+        }
+        return DockerStatsDigest(rows: rows, byKey: byKey, liveNeeded: liveNeeded)
     }
+
+    var liveStatsNeeded: Bool { containerStatsDigest.liveNeeded }
+
+    var containerStatRows: [DockerStatRow] { containerStatsDigest.rows }
+
+    var containerStatsByKey: [String: DockerStatRow] { containerStatsDigest.byKey }
 }
 
 // MARK: - 轮询门控
