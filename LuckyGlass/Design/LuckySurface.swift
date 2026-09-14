@@ -15,26 +15,8 @@ struct LuckyCard<Content: View>: View {
     var tone: LuckyTone?
     @ViewBuilder var content: () -> Content
 
-    @Environment(\.colorScheme) private var colorScheme
-
     private var shape: RoundedRectangle {
         RoundedRectangle(cornerRadius: radius, style: .continuous)
-    }
-
-    private var shadowColor: Color {
-        colorScheme == .dark
-            ? LuckyTheme.Elevation.cardDark.color
-            : LuckyTheme.Elevation.cardLight.color
-    }
-    private var shadowRadius: CGFloat {
-        colorScheme == .dark
-            ? LuckyTheme.Elevation.cardDark.radius
-            : LuckyTheme.Elevation.cardLight.radius
-    }
-    private var shadowY: CGFloat {
-        colorScheme == .dark
-            ? LuckyTheme.Elevation.cardDark.y
-            : LuckyTheme.Elevation.cardLight.y
     }
 
     var body: some View {
@@ -43,15 +25,15 @@ struct LuckyCard<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(shape.fill(LuckyTheme.surface))
             .clipShape(shape)
-            // Soft shadow lifts the card off the canvas without competing with content. The
-            // radius and opacity are calibrated per appearance: dark backgrounds need less y-offset
-            // and more radius; light backgrounds need a small drop to suggest paper stacking.
-            .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowY)
             .overlay(
                 shape.strokeBorder(
                     tone?.tint.opacity(0.42) ?? LuckyTheme.hairline,
                     lineWidth: LuckyTheme.strokeWidth
                 )
+            )
+            .overlay(
+                shape.inset(by: 1)
+                    .stroke(LuckyTheme.surfaceHighlight.opacity(0.55), lineWidth: 0.5)
             )
             // Lets anything inside ask for `ConcentricRectangle()` and get the right inner radius.
             .containerShape(shape)
@@ -112,12 +94,15 @@ struct LuckySectionHeader<Trailing: View>: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(LuckyTheme.textPrimary)
                     .textCase(nil)
+                    .lineLimit(2)
                 if let subtitle, !subtitle.isEmpty {
                     Text(subtitle)
                         .font(LuckyTheme.Text.caption)
                         .foregroundStyle(LuckyTheme.textTertiary)
+                        .lineLimit(2)
                 }
             }
+            .layoutPriority(1)
             Spacer(minLength: LuckyTheme.Space.s)
             trailing()
         }

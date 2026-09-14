@@ -76,7 +76,8 @@ extension WebSelect {
     /// stroke is drawn over the clipped stack rather than on the rows themselves.
     private var list: some View {
         VStack(spacing: 0) {
-            ForEach(Array(options.enumerated()), id: \.offset) { index, option in
+            ForEach(options.indices, id: \.self) { index in
+                let option = options[index]
                 row(index, option)
             }
         }

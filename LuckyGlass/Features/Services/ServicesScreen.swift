@@ -5,6 +5,7 @@ import SwiftUI
 /// The seven service entry points, grouped by direct management and tunnelling.
 struct ServicesScreen: View {
     @Environment(\.luckyNavigator) private var navigator
+    private static let tunnelKinds = TunnelKind.allCases
 
     var body: some View {
         LuckyPage(spacing: LuckyTheme.Space.section) {
@@ -39,7 +40,8 @@ struct ServicesScreen: View {
                 LuckySectionHeader(title: "内网穿透", subtitle: "隧道与代理",
                                    symbol: "point.3.connected.trianglepath.dotted", iconRole: .tunnels)
                 LuckyCard(padding: 0, spacing: 0) {
-                    ForEach(Array(TunnelKind.allCases.enumerated()), id: \.offset) { index, kind in
+                    ForEach(Self.tunnelKinds.indices, id: \.self) { index in
+                        let kind = Self.tunnelKinds[index]
                         if index > 0 {
                             LuckyHairline()
                                 .padding(.leading, LuckyTheme.Space.cardInset + 38 + LuckyTheme.Space.m)

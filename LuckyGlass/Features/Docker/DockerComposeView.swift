@@ -125,7 +125,8 @@ struct DockerComposeView: View {
                        loadingText: "正在读取 Compose 项目", refresh: refresh) {
             header
         } rows: {
-            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+            ForEach(items.indices, id: \.self) { index in
+                let item = items[index]
                 DockerComposeCard(target: DockerComposeTarget(item, index), busy: busy,
                                   perform: perform)
             }

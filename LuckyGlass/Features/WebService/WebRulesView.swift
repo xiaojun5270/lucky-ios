@@ -40,7 +40,8 @@ struct WebRulesView: View {
                 LuckyEmptyState(symbol: WebPane.rules.symbol, title: "暂无 Web 服务规则")
                     .padding(.vertical, LuckyTheme.Space.xl)
             } else {
-                ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                ForEach(items.indices, id: \.self) { index in
+                    let item = items[index]
                     WebRuleCard(item: item, index: index, total: items.count, expanded: expanded,
                                 busy: busy, actions: actions)
                 }
@@ -223,21 +224,23 @@ extension WebRuleCard {
 extension WebRuleCard {
     /// §12.2 — only for the open rule.
     private var expansion: some View {
-        VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
+        let entries = subs
+        return VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
             LuckyHairline()
             ServiceActionButton(title: "添加子规则", symbol: LuckySymbol.add, tone: .brand,
                                 fill: .tinted, height: 40,
                                 radius: LuckyTheme.Radius.row) {
                 actions.editSub(key, nil)
             }
-            if subs.isEmpty {
+            if entries.isEmpty {
                 Text("暂无子规则")
                     .font(LuckyTheme.Text.caption)
                     .foregroundStyle(LuckyTheme.textTertiary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, LuckyTheme.Space.m)
             } else {
-                ForEach(Array(subs.enumerated()), id: \.offset) { subIndex, sub in
+                ForEach(entries.indices, id: \.self) { subIndex in
+                    let sub = entries[subIndex]
                     WebSubRuleCard(rule: item, sub: sub, index: subIndex, parentKey: key,
                                    parentName: name, busy: busy, actions: actions)
                 }

@@ -90,8 +90,8 @@ struct SslDropdown: View {
 
     private var list: some View {
         VStack(spacing: 0) {
-            ForEach(Array(options.enumerated()), id: \.offset) { pair in
-                row(pair.offset, pair.element)
+            ForEach(options.indices, id: \.self) { index in
+                row(index, options[index])
             }
         }
         .background(shape.fill(LuckyTheme.surface))
@@ -173,8 +173,9 @@ struct SslSyncSection: View {
             if clients.isEmpty {
                 caption("暂无可用同步客户端")
             } else {
-                ForEach(Array(clients.enumerated()), id: \.offset) { pair in
-                    row(pair.element, ServiceRecord.clientKey(pair.element, pair.offset))
+                ForEach(clients.indices, id: \.self) { index in
+                    let client = clients[index]
+                    row(client, ServiceRecord.clientKey(client, index))
                 }
             }
         }

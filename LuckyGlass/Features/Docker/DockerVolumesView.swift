@@ -70,7 +70,8 @@ struct DockerVolumesView: View {
                        loadingText: "正在读取数据卷", refresh: refresh) {
             header
         } rows: {
-            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+            ForEach(items.indices, id: \.self) { index in
+                let item = items[index]
                 DockerVolumeCard(item: item, index: index, busy: busy, perform: perform)
             }
         }

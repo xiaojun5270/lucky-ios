@@ -46,6 +46,7 @@ enum LuckyTheme {
     static let surfaceSunken = dynamic(light: 0xE9EDF3, dark: 0x0B1016)
     static let hairline = dynamic(light: 0xD9DEE7, dark: 0x303947)
     static let separator = dynamic(light: 0xE7EAF0, dark: 0x29313C)
+    static let surfaceHighlight = dynamic(light: 0xFFFFFF, dark: 0x26303D)
 
     static let textPrimary = dynamic(light: 0x151A23, dark: 0xF4F6F8)
     static let textSecondary = dynamic(light: 0x4F5A69, dark: 0xADB7C5)
@@ -118,21 +119,6 @@ enum LuckyTheme {
         static let code = Font.system(size: 12, weight: .regular, design: .monospaced)
         static let codeSmall = Font.system(size: 11, weight: .regular, design: .monospaced)
         static let button = Font.system(size: 15, weight: .semibold, design: .rounded)
-    }
-
-    // MARK: - Elevation
-
-    /// Shadow values for the three levels that genuinely float. The card shadow is intentionally
-    /// near-invisible in light mode — it provides depth without competing with content.
-    /// Dark mode needs more radius and less y-offset because dark surfaces disappear behind
-    /// dark shadows; perceived separation comes from the halo, not the drop.
-    enum Elevation {
-        static let cardLight: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) =
-            (.black.opacity(0.055), 14, 0, 3)
-        static let cardDark: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) =
-            (.black.opacity(0.30), 9, 0, 2)
-        static let overlay: (color: Color, radius: CGFloat, x: CGFloat, y: CGFloat) =
-            (.black.opacity(0.13), 28, 0, 8)
     }
 
     // MARK: - Motion

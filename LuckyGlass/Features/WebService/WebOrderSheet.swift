@@ -52,7 +52,8 @@ extension WebOrderSheet {
     /// rather than boxing them, so the first one has none.
     @ViewBuilder
     private var rows: some View {
-        ForEach(Array(keys.enumerated()), id: \.offset) { index, key in
+        ForEach(keys.indices, id: \.self) { index in
+            let key = keys[index]
             VStack(alignment: .leading, spacing: 0) {
                 if index > 0 {
                     LuckyHairline()

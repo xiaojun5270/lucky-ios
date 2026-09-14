@@ -252,8 +252,8 @@ struct ServiceDetailScreen: View {
                 if !loaded {
                     LuckySkeleton(rows: 4)
                 }
-                ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                    row(item, index)
+                ForEach(items.indices, id: \.self) { index in
+                    row(items[index], index)
                 }
                 if loaded, listFailure.isEmpty, items.isEmpty {
                     LuckyEmptyState(symbol: LuckySymbol.kind(kind), title: "接口未返回列表数据")

@@ -27,7 +27,8 @@ struct WebGroupsView: View {
                 LuckyEmptyState(symbol: WebPane.groups.symbol, title: "暂无分组")
                     .padding(.vertical, LuckyTheme.Space.xl)
             } else {
-                ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                ForEach(items.indices, id: \.self) { index in
+                    let item = items[index]
                     WebGroupCard(item: item, index: index, total: items.count, busy: busy,
                                  move: move, edit: edit, remove: remove)
                 }

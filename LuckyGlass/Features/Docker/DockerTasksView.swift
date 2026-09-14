@@ -20,7 +20,8 @@ struct DockerTasksView: View {
                 DockerCountChip(count: items.count)
             }
         } rows: {
-            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+            ForEach(items.indices, id: \.self) { index in
+                let item = items[index]
                 DockerTaskCard(item: item, index: index, busy: busy,
                                inspect: inspect, remove: remove)
             }

@@ -182,8 +182,8 @@ extension TunnelDetailSheet {
         }
         // The original keys these by name, path and index together; a child list has no identity of
         // its own, so the position is the only stable part of that.
-        ForEach(Array(rules.enumerated()), id: \.offset) { _, child in
-            childCard(collection, child)
+        ForEach(rules.indices, id: \.self) { index in
+            childCard(collection, rules[index])
         }
         if let dnsValue {
             LuckyCard {

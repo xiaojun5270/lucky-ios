@@ -30,7 +30,8 @@ struct WebEditorProxyList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             header
-            ForEach(Array(proxies.enumerated()), id: \.offset) { index, proxy in
+            ForEach(proxies.indices, id: \.self) { index in
+                let proxy = proxies[index]
                 card(index, proxy)
             }
             footer

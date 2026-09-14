@@ -336,8 +336,8 @@ extension TunnelScreen {
                 if !loaded {
                     LuckySkeleton(rows: 4)
                 }
-                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                    row(item)
+                ForEach(items.indices, id: \.self) { index in
+                    row(items[index])
                 }
                 emptyState
             }

@@ -31,6 +31,41 @@ struct DockerImageSnapshot {
     }
 }
 
+/// Caches the serialized search index for Docker lists whose payload is unchanged across view
+/// updates. Container statistics refresh frequently, but they do not change the container record
+/// searched by the user, so rebuilding every JSON string on those ticks only stalls scrolling.
+@MainActor
+final class DockerSearchIndex {
+    static let shared = DockerSearchIndex()
+
+    private struct Snapshot {
+        var items: [LuckyListItem]
+        var text: [String]
+    }
+
+    private var snapshots: [DockerView: Snapshot] = [:]
+
+    private init() {}
+
+    func filter(_ items: [LuckyListItem], in view: DockerView, matching word: String)
+        -> [LuckyListItem] {
+        guard !word.isEmpty else { return items }
+        let snapshot: Snapshot
+        if let cached = snapshots[view], cached.items == items {
+            snapshot = cached
+        } else {
+            snapshot = Snapshot(items: items, text: items.map(DockerRecord.searchText))
+            snapshots[view] = snapshot
+        }
+        var result: [LuckyListItem] = []
+        result.reserveCapacity(items.count)
+        for index in items.indices where snapshot.text[index].contains(word) {
+            result.append(items[index])
+        }
+        return result
+    }
+}
+
 // MARK: - 当前视图
 
 extension DockerScreen {
@@ -75,8 +110,7 @@ extension DockerScreen {
     /// box finds a container by a label value or a mount path just as readily as by its name.
     var filtered: [LuckyListItem] {
         let word = searchWord
-        guard !word.isEmpty else { return source }
-        return source.filter { DockerRecord.searchText($0).contains(word) }
+        return DockerSearchIndex.shared.filter(source, in: view, matching: word)
     }
 }
 

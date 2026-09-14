@@ -45,8 +45,8 @@ struct DockerLogsView: View {
                                iconRole: DockerView.logs.iconRole)
                 .padding(.bottom, LuckyTheme.Space.m)
         } rows: {
-            ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
-                DockerLogRow(line: line, first: index == 0)
+            ForEach(lines.indices, id: \.self) { index in
+                DockerLogRow(line: lines[index], first: index == 0)
             }
         }
     }

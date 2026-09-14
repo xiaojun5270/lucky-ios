@@ -735,7 +735,8 @@ struct StructuredDataView: View {
         guard !items.isEmpty else { return AnyView(hint("暂无项目")) }
         return AnyView(
             VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
-                ForEach(Array(items.prefix(Self.cap).enumerated()), id: \.offset) { index, item in
+                ForEach(items.indices.prefix(Self.cap), id: \.self) { index in
+                    let item = items[index]
                     LuckyInset(padding: 10, spacing: 5) {
                         Text(verbatim: "第 \(index + 1) 项")
                             .font(LuckyTheme.Text.captionMedium)
@@ -782,6 +783,5 @@ struct StructuredDataView: View {
             .frame(maxWidth: .infinity, alignment: .center)
     }
 }
-
 
 

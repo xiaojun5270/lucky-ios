@@ -132,8 +132,8 @@ extension ServiceAdvancedSheet {
                     .font(LuckyTheme.Text.body)
                     .foregroundStyle(LuckyTheme.textSecondary)
             } else {
-                ForEach(Array(order.enumerated()), id: \.offset) { index, key in
-                    orderRow(index, key)
+                ForEach(order.indices, id: \.self) { index in
+                    orderRow(index, order[index])
                 }
             }
         }
@@ -209,8 +209,8 @@ extension ServiceAdvancedSheet {
                     .font(LuckyTheme.Text.body)
                     .foregroundStyle(LuckyTheme.textSecondary)
             } else {
-                ForEach(Array(records.prefix(100).enumerated()), id: \.offset) { index, entry in
-                    recordRow(entry, index)
+                ForEach(records.indices.prefix(100), id: \.self) { index in
+                    recordRow(records[index], index)
                 }
             }
             if records.count > 100 {
@@ -348,8 +348,8 @@ extension ServiceAdvancedSheet {
                 .font(LuckyTheme.Text.body)
                 .foregroundStyle(LuckyTheme.textSecondary)
         } else {
-            ForEach(Array(clients.prefix(100).enumerated()), id: \.offset) { index, client in
-                clientRow(client, index)
+            ForEach(clients.indices.prefix(100), id: \.self) { index in
+                clientRow(clients[index], index)
             }
         }
     }
