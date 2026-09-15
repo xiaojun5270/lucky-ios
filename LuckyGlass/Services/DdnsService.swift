@@ -131,7 +131,7 @@ enum DdnsService {
     @discardableResult
     static func testWebhook(_ key: String, _ value: JSONValue) async throws -> JSONValue {
         let payload = value.record.filter { field, _ in webhookKeys.contains(field) }
-        try await client.fetch(
+        return try await client.fetch(
             "/api/ddns/webhooktest" + LuckyQuery.compact([("key", .string(key))]),
             method: "POST",
             body: .value(.object(payload))
