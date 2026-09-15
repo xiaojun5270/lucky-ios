@@ -199,12 +199,49 @@ enum ServiceRecord {
                     "Name", "name", "Domain", "domain"], String(index))
     }
 
+    static func ddnsRecordDomain(_ item: JSONValue) -> String {
+        let source = child(item, "SyncRecordData")
+        let domainName = pick(item, ["DomainName", "domainName"], "")
+        let subDomain = pick(item, ["SubDomain", "subDomain"], "")
+        let composed: String
+        if !domainName.isEmpty, domainName != "--" {
+            composed = !subDomain.isEmpty && subDomain != "--" && subDomain != "@"
+                ? "\(subDomain).\(domainName)" : domainName
+        } else {
+            composed = ""
+        }
+        return pick(item, ["Domain", "domain", "FQDN", "RecordName", "Name", "name"],
+                    composed.isEmpty ? pick(source, ["fullDomainName"], "") : composed)
+    }
+
+    static func recordEnabled(_ item: JSONValue) -> Bool {
+        if let enabled = item["Enable"]?.boolValue { return enabled }
+        if let disabled = item["Disable"]?.boolValue { return !disabled }
+        return true
+    }
+
+    static func recordResult(_ item: JSONValue) -> String {
+        let latest = item["LastRecord"]?.arrayValue?
+            .map { entry in
+                entry.isRecord ? pick(entry, ["Record", "Value"], "") : entry.asDisplayString
+            }
+            .filter { !$0.isEmpty }
+            .joined(separator: ", ") ?? ""
+        return [pick(item, ["UpdateStatus"], ""), latest, pick(item, ["Message"], "")]
+            .filter { !$0.isEmpty && $0 != "--" }
+            .joined(separator: " · ")
+    }
+
     /// `recordLabel(item, index)` — `domain · type · value`. A literal `--` is dropped along with
     /// the empty parts, so a record that reports nothing falls back to its position.
     static func recordLabel(_ item: JSONValue, _ index: Int) -> String {
-        let domain = pick(item, ["Domain", "domain", "FQDN", "RecordName", "Name", "name"], "记录")
-        let type = pick(item, ["Type", "type", "RecordType", "recordType"], "")
-        let value = pick(item, ["Value", "value", "IPv4", "IPv6", "Address", "address"], "")
+        let source = child(item, "SyncRecordData")
+        let resolvedDomain = ddnsRecordDomain(item)
+        let domain = resolvedDomain.isEmpty ? "记录" : resolvedDomain
+        let type = pick(item, ["Type", "type", "RecordType", "recordType"],
+                        pick(source, ["type"], ""))
+        let value = pick(item, ["Value", "value", "IPv4", "IPv6", "Address", "address"],
+                         pick(source, ["ipv4Address", "ipv6Address", "CNAMEContent", "TXTContent"], ""))
         let label = [domain, type, value]
             .filter { !$0.isEmpty && $0 != "--" }
             .joined(separator: " · ")
@@ -290,10 +327,26 @@ enum ServiceRecord {
         switch kind {
         case .docker: pick(item, ["Image", "image", "ImageName"])
         case .ssl: sslSummary(item)
-        case .ddns: pick(item, ["Domain", "Domains", "DNSProvider", "Provider",
-                                "LastRun", "LastSyncTime"])
+        case .ddns: ddnsSummary(item)
         case .webservice: pick(item, ["BackendURL", "ProxyURL", "Listen", "Domains"])
         }
+    }
+
+    static func ddnsSummary(_ item: JSONValue) -> String {
+        let dns = child(item, "DNS")
+        let provider = pick(dns, ["Name"],
+                            pick(item, ["DNSProvider", "Provider"], "未设置服务商"))
+        let records = recordItems(item)
+        let ipv4 = pick(item, ["Ipv4Addr", "IPv4Addr", "V4Addr"], "")
+        let ipv6 = pick(item, ["Ipv6Addr", "IPv6Addr", "V6Addr"], "")
+        return [
+            provider,
+            "\(records.count) 条记录",
+            ipv4.isEmpty || ipv4 == "--" ? "" : "IPv4 \(ipv4)",
+            ipv6.isEmpty || ipv6 == "--" ? "" : "IPv6 \(ipv6)",
+        ]
+        .filter { !$0.isEmpty }
+        .joined(separator: " · ")
     }
 
     /// The status word: 签发中 while ACME is running, then the module's own field, then the switch

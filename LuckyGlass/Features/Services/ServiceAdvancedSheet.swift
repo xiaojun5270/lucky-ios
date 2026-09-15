@@ -17,6 +17,7 @@ struct ServiceAdvancedSheet: View {
     var reorder: ([String]) async throws -> Void
     var changed: () async -> Void
     var showLogs: () -> Void
+    var editDdnsRecord: (String?) -> Void
 
     @State private var detail: JSONValue?
     @State private var detailFailure = ""
@@ -28,7 +29,6 @@ struct ServiceAdvancedSheet: View {
     @State private var order: [String] = []
     @State private var orderBusy = false
 
-    @State private var option = "enable"
     @State private var ipType = "IPv4"
     @State private var command = ""
     @State private var operationError = ""
@@ -203,7 +203,20 @@ extension ServiceAdvancedSheet {
     /// the original refuses to render them all — it says so in the footnote.
     var recordsCard: some View {
         LuckyCard(spacing: LuckyTheme.Space.s) {
-            advancedHeader("DNS 记录", symbol: "list.number", trailing: "\(records.count) 项")
+            HStack(spacing: LuckyTheme.Space.s) {
+                LuckyIconTile(symbol: "list.number", size: 28, glyph: 12, role: .ddns)
+                Text("DNS 记录")
+                    .font(LuckyTheme.Text.cardTitle)
+                    .foregroundStyle(LuckyTheme.textPrimary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text("\(records.count) 项")
+                    .font(LuckyTheme.Text.caption)
+                    .foregroundStyle(LuckyTheme.textSecondary)
+                ServiceActionButton(title: "添加", symbol: LuckySymbol.add, fill: .soft,
+                                    height: 34, radius: 9, expands: false, disabled: busy) {
+                    editDdnsRecord(nil)
+                }
+            }
             if records.isEmpty {
                 Text("当前任务没有记录")
                     .font(LuckyTheme.Text.body)
@@ -221,45 +234,79 @@ extension ServiceAdvancedSheet {
         }
     }
 
-    /// One record: the label, 上移记录 / 下移记录 / 删除记录, and the shared 选项 field.
-    ///
-    /// The field really is shared — the original binds every row's `TextInput` to the same `option`
-    /// state, so typing in one row types in all of them and 应用选项 applies that one value to
-    /// whichever row was tapped. Kept as written.
     func recordRow(_ entry: JSONValue, _ index: Int) -> some View {
-        VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
+        let key = ServiceRecord.recordKey(entry, index)
+        let active = ServiceRecord.recordEnabled(entry)
+        let latest = ServiceRecord.recordResult(entry)
+        return VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
             if index > 0 { LuckyHairline() }
             HStack(spacing: LuckyTheme.Space.s) {
-                Text(ServiceRecord.recordLabel(entry, index))
-                    .font(LuckyTheme.Text.label)
-                    .foregroundStyle(LuckyTheme.textPrimary)
-                    .lineLimit(2)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                AdvancedIconButton(label: "上移记录", symbol: "arrow.up", size: 32, radius: 8,
-                                   glyph: 15, disabled: index == 0 || busy) {
-                    Task { await moveRecord(index, -1) }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(ServiceRecord.recordLabel(entry, index))
+                        .font(LuckyTheme.Text.label)
+                        .foregroundStyle(LuckyTheme.textPrimary)
+                        .lineLimit(2)
+                    Text(latest.isEmpty ? (active ? "等待同步" : "同步已停用") : latest)
+                        .font(LuckyTheme.Text.codeSmall)
+                        .foregroundStyle(latest.contains("FAILURE")
+                                         ? LuckyTheme.danger
+                                         : (active ? LuckyTheme.success : LuckyTheme.textSecondary))
+                        .lineLimit(2)
                 }
-                AdvancedIconButton(label: "下移记录", symbol: "arrow.down", size: 32, radius: 8,
-                                   glyph: 15, disabled: index == records.count - 1 || busy) {
-                    Task { await moveRecord(index, 1) }
-                }
-                AdvancedIconButton(label: "删除记录", symbol: LuckySymbol.delete,
-                                   color: LuckyTheme.danger, fill: LuckyTheme.dangerSoft,
-                                   size: 32, radius: 8, glyph: 15, disabled: busy) {
-                    confirmRemoveRecord(entry, index)
-                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Toggle("", isOn: Binding(get: { active }, set: { toggleRecord(entry, index, $0) }))
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .tint(LuckyTheme.accent)
+                    .disabled(busy)
+                    .accessibilityLabel(active ? "停用记录" : "启用记录")
             }
-            HStack(spacing: LuckyTheme.Space.s) {
-                AdvancedField(placeholder: "选项，如 enable", text: $option, height: 40,
-                              font: LuckyTheme.Text.caption)
-                ServiceActionButton(title: "应用选项", fill: .soft, height: 40,
-                                    radius: LuckyTheme.Radius.row,
-                                    expands: false, disabled: busy) {
-                    changeRecordOption(entry, index)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: LuckyTheme.Space.s) {
+                    recordMainActions(entry, key)
+                    recordOrderActions(entry, index)
+                }
+                VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
+                    HStack(spacing: LuckyTheme.Space.s) {
+                        recordMainActions(entry, key)
+                    }
+                    HStack(spacing: LuckyTheme.Space.s) {
+                        Spacer(minLength: 0)
+                        recordOrderActions(entry, index)
+                    }
                 }
             }
         }
         .padding(.vertical, 1)
+    }
+
+    @ViewBuilder
+    func recordMainActions(_ entry: JSONValue, _ key: String) -> some View {
+        ServiceActionButton(title: "编辑", symbol: LuckySymbol.edit, fill: .soft,
+                            height: 38, radius: 9, disabled: busy) {
+            editDdnsRecord(key)
+        }
+        ServiceActionButton(title: "复制域名", symbol: LuckySymbol.copy, fill: .soft,
+                            height: 38, radius: 9, disabled: busy) {
+            copyRecordDomain(entry)
+        }
+    }
+
+    @ViewBuilder
+    func recordOrderActions(_ entry: JSONValue, _ index: Int) -> some View {
+        AdvancedIconButton(label: "上移记录", symbol: "arrow.up", size: 32, radius: 8,
+                           glyph: 15, disabled: index == 0 || busy) {
+            Task { await moveRecord(index, -1) }
+        }
+        AdvancedIconButton(label: "下移记录", symbol: "arrow.down", size: 32, radius: 8,
+                           glyph: 15, disabled: index == records.count - 1 || busy) {
+            Task { await moveRecord(index, 1) }
+        }
+        AdvancedIconButton(label: "删除记录", symbol: LuckySymbol.delete,
+                           color: LuckyTheme.danger, fill: LuckyTheme.dangerSoft,
+                           size: 32, radius: 8, glyph: 15, disabled: busy) {
+            confirmRemoveRecord(entry, index)
+        }
     }
 
     /// IP 命令测试. The original's IPv4/IPv6 control is a pressable that *cycles* rather than a
@@ -470,19 +517,34 @@ extension ServiceAdvancedSheet {
         }
     }
 
-    func changeRecordOption(_ entry: JSONValue, _ index: Int) {
+    func toggleRecord(_ entry: JSONValue, _ index: Int, _ enabled: Bool) {
         let key = ServiceRecord.recordKey(entry, index)
-        let value = option.jsTrimmed
-        guard !value.isEmpty else {
-            operationError = "请输入记录选项"
-            return
-        }
         Task {
             await perform("record-option") {
-                try await DdnsService.setRecordOption(taskKey: itemKey, recordKey: key,
-                                                      option: value)
+                try await DdnsService.setRecordEnabled(taskKey: itemKey, recordKey: key,
+                                                       enabled: enabled)
+                if index < records.count {
+                    var next = records
+                    var record = next[index].record
+                    record["Enable"] = .bool(enabled)
+                    record["Disable"] = .bool(!enabled)
+                    next[index] = .object(record)
+                    records = next
+                }
+                return .string(enabled ? "记录已启用" : "记录已停用")
             }
         }
+    }
+
+    func copyRecordDomain(_ entry: JSONValue) {
+        let domain = ServiceRecord.ddnsRecordDomain(entry)
+        guard !domain.isEmpty else {
+            operationError = "当前记录没有可复制的域名"
+            return
+        }
+        LuckyClipboard.copy(domain)
+        operationError = ""
+        operationResult = "已复制：\(domain)"
     }
 
     func testCommand() {
@@ -559,7 +621,8 @@ extension ServiceAdvancedSheet {
         do {
             let payload: JSONValue
             if kind == .ddns {
-                payload = try await DdnsService.task(itemKey)
+                let response = try await DdnsService.task(itemKey)
+                payload = .object(try DdnsService.taskValue(response))
             } else {
                 payload = try await SslService.certificate(itemKey)
             }

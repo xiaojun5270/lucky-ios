@@ -7,6 +7,13 @@ import Foundation
 enum DdnsService {
     private static var client: LuckyClient { .shared }
 
+    private static let webhookKeys = [
+        "WebhookURL", "WebhookMethod", "WebhookHeaders", "WebhookRequestBody",
+        "WebhookProxy", "WebhookProxyAddr", "WebhookProxyUser", "WebhookProxyPassword",
+        "WebhookDisableCallbackSuccessContentCheck", "WebhookSuccessContent",
+        "RetryCount", "RetryInterval",
+    ]
+
     /// `taskScore(value)` — the fields that make a record look like a DDNS task.
     private static let taskKeys = [
         "TaskKey", "taskKey", "DDNSTaskKey", "Key", "key", "TaskName", "taskName",
@@ -26,6 +33,10 @@ enum DdnsService {
 
     static func task(_ key: String) async throws -> JSONValue {
         try await client.fetch("/api/ddns/task/\(LuckyQuery.escape(key))")
+    }
+
+    static func taskValue(_ payload: JSONValue) throws -> JSONObject {
+        try extractedRecord(payload, keys: ["task"])
     }
 
     @discardableResult
@@ -85,6 +96,10 @@ enum DdnsService {
         try await client.fetch("/api/ddns/configure")
     }
 
+    static func configureValue(_ payload: JSONValue) throws -> JSONObject {
+        try extractedRecord(payload, keys: ["ddnsconfigure", "configure"])
+    }
+
     @discardableResult
     static func updateConfigure(_ value: JSONValue) async throws -> JSONValue {
         try await client.fetch("/api/ddns/configure", method: "PUT", body: .value(value))
@@ -103,12 +118,23 @@ enum DdnsService {
         )
     }
 
+    static func testIpRule(iptype: String, netinterface: String, ipreg: String) async throws -> JSONValue {
+        try await client.fetch(
+            "/api/ipregtest" + LuckyQuery.compact([
+                ("iptype", .string(iptype)),
+                ("netinterface", .string(netinterface)),
+                ("ipreg", .string(ipreg)),
+            ])
+        )
+    }
+
     @discardableResult
     static func testWebhook(_ key: String, _ value: JSONValue) async throws -> JSONValue {
+        let payload = value.record.filter { field, _ in webhookKeys.contains(field) }
         try await client.fetch(
             "/api/ddns/webhooktest" + LuckyQuery.compact([("key", .string(key))]),
             method: "POST",
-            body: .value(value)
+            body: .value(.object(payload))
         )
     }
 
@@ -146,6 +172,12 @@ enum DdnsService {
         )
     }
 
+    @discardableResult
+    static func setRecordEnabled(taskKey: String, recordKey: String, enabled: Bool) async throws -> JSONValue {
+        try await setRecordOption(taskKey: taskKey, recordKey: recordKey,
+                                  option: enabled ? "true" : "false")
+    }
+
     // MARK: - Logs
 
     static func logs(pageSize: Int = 100, page: Int = 1) async throws -> JSONValue {
@@ -157,4 +189,26 @@ enum DdnsService {
     static func lastLogs() async throws -> JSONValue {
         try await client.fetch("/api/ddns/lastlogs")
     }
+
+    private static func extractedRecord(_ payload: JSONValue, keys: [String]) throws -> JSONObject {
+        var queue = [payload]
+        var cursor = 0
+        while cursor < queue.count {
+            let current = queue[cursor]
+            cursor += 1
+            guard let object = current.objectValue else { continue }
+            for wanted in keys {
+                guard let match = object.keys.first(where: {
+                    $0.caseInsensitiveCompare(wanted) == .orderedSame
+                }), let found = object[match]?.objectValue else { continue }
+                return found
+            }
+            queue.append(contentsOf: object.values.filter(\.isRecord))
+        }
+        throw DdnsPayloadError()
+    }
+}
+
+private struct DdnsPayloadError: LocalizedError {
+    var errorDescription: String? { "服务端未返回完整 DDNS 配置" }
 }

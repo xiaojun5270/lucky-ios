@@ -266,36 +266,31 @@ private struct WebSubRuleCard: View {
     private var key: String { WebRecord.key(sub, index) }
     private var enabled: Bool { WebRecord.isEnabled(sub) }
 
-    /// `Array.isArray(sub.Domains) ? sub.Domains.join(", ") : ""` — a string `Domains` yields
-    /// nothing here, which is why the row can read `reverseproxy · --` while the URL builder still
-    /// finds an address.
-    private var domains: String {
-        guard let list = sub["Domains"]?.arrayValue else { return "" }
-        return list.map(\.asDisplayString).joined(separator: ", ")
-    }
-
-    /// `pick(sub, ["Remark"], domains || `子规则 ${index + 1}`)`. A `Remark` of `""` is still a
-    /// string, so it wins over the fallback and the card shows no title at all.
     private var name: String {
-        WebRecord.pick(sub, ["Remark"], domains.isEmpty ? "子规则 \(index + 1)" : domains)
+        let remark = WebRecord.pick(sub, ["Remark"]).jsTrimmed
+        return remark.isEmpty ? "子规则 \(index + 1)" : remark
     }
 
-    /// `type` for the file-service test carries a `""` fallback, while the line printed below
-    /// carries `"reverseproxy"` — and `pick` only reaches a fallback when the key is absent or
-    /// holds something other than a string or a number. So `WebServiceType: ""` shows as nothing
-    /// here and still is not a file service.
     private var type: String { WebRecord.pick(sub, ["WebServiceType"]) }
 
     private var fileService: Bool { type.lowercased().contains("file") }
 
-    private var summary: String {
-        let printed = WebRecord.pick(sub, ["WebServiceType"], "reverseproxy")
-        return "\(printed) · \(domains.isEmpty ? "--" : domains)"
+    private var serviceTypeLabel: String {
+        switch type.jsTrimmed.lowercased() {
+        case "", "reverseproxy": "反向代理"
+        case "fileserver": "文件服务"
+        case "redirect": "重定向"
+        case "url": "URL 跳转"
+        case "snirouting": "SNI 路由"
+        case "oauth": "OAuth 认证"
+        default: type
+        }
     }
 
     var body: some View {
-        LuckyInset(padding: LuckyTheme.Space.m, spacing: LuckyTheme.Space.s) {
+        LuckyInset(padding: LuckyTheme.Space.m, spacing: LuckyTheme.Space.m) {
             header
+            LuckyHairline()
             verbs
         }
     }
@@ -303,18 +298,23 @@ private struct WebSubRuleCard: View {
 
 extension WebSubRuleCard {
     private var header: some View {
-        HStack(alignment: .center, spacing: LuckyTheme.Space.s) {
-            LuckyFunctionIcon(symbol: "checkmark.shield", size: 28, glyph: 12,
+        HStack(alignment: .center, spacing: LuckyTheme.Space.m) {
+            LuckyFunctionIcon(symbol: "checkmark.shield", size: 32, glyph: 13,
                               color: enabled ? LuckyTheme.success : LuckyTheme.idle)
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: LuckyTheme.Space.xs) {
                 Text(name)
-                    .font(LuckyTheme.Text.captionMedium)
+                    .font(LuckyTheme.Text.label)
                     .foregroundStyle(LuckyTheme.textPrimary)
                     .lineLimit(1)
-                Text(summary)
-                    .font(LuckyTheme.Text.codeSmall)
-                    .foregroundStyle(LuckyTheme.textSecondary)
-                    .lineLimit(2)
+                Text(serviceTypeLabel)
+                    .font(LuckyTheme.Text.captionMedium)
+                    .foregroundStyle(enabled ? LuckyTheme.success : LuckyTheme.textSecondary)
+                    .padding(.horizontal, LuckyTheme.Space.s)
+                    .padding(.vertical, LuckyTheme.Space.xs)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(enabled ? LuckyTheme.successSoft : LuckyTheme.idleSoft)
+                    )
             }
             Spacer(minLength: 0)
             WebEnableSwitch(isOn: enabled, disabled: busy, name: "启用子规则") { on in
@@ -325,32 +325,12 @@ extension WebSubRuleCard {
     }
 
     private var verbs: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: LuckyTheme.Space.s) {
-                copyAction
-                Spacer(minLength: 0)
-                editActions
-            }
-            VStack(alignment: .leading, spacing: LuckyTheme.Space.s) {
-                copyAction
-                HStack {
-                    Spacer(minLength: 0)
-                    editActions
-                }
-            }
-        }
-    }
-
-    private var copyAction: some View {
-        WebInlineActionButton(title: "复制网址", symbol: LuckySymbol.copy) {
-            actions.copyURL(rule, sub)
-        }
-        .fixedSize()
-    }
-
-    private var editActions: some View {
         HStack(spacing: LuckyTheme.Space.s) {
-            WebInlineActionButton(title: "编辑", symbol: "pencil", prominent: true) {
+            WebInlineActionButton(title: "复制网址", symbol: LuckySymbol.copy, expands: true) {
+                actions.copyURL(rule, sub)
+            }
+            WebInlineActionButton(title: "编辑", symbol: "pencil", prominent: true,
+                                  expands: true) {
                 actions.editSub(parentKey, key)
             }
             Menu {
@@ -375,6 +355,5 @@ extension WebSubRuleCard {
             .buttonStyle(.plain)
             .accessibilityLabel("子规则更多操作")
         }
-        .fixedSize()
     }
 }

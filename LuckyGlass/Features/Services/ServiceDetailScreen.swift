@@ -1,7 +1,6 @@
 import SwiftUI
 
-/// `ServiceEditor` — what a `ServiceFormEditor` is editing: one item of the module's list, or the
-/// module's own settings record.
+/// `ServiceEditor` — one item of a module's list, or the module's own settings record.
 ///
 /// An empty `key` means "create". The original tests `editor.key` for truthiness and an absent key
 /// is `undefined` there, so the empty string carries the same meaning here.
@@ -12,10 +11,13 @@ struct ServiceEditorRequest: Identifiable {
     var title: String
     var value: JSONObject = JSONObject()
     var key: String = ""
+    var openRecord: String?
 
     /// `key={`${editor.type}-${editor.key ?? 'new'}`}` — remounting the editor when the subject
     /// changes is what stops a half-typed record from leaking into the next one.
-    var id: String { "\(target.rawValue)-\(key.isEmpty ? "new" : key)" }
+    var id: String {
+        "\(target.rawValue)-\(key.isEmpty ? "new" : key)-\(openRecord ?? "task")"
+    }
 }
 
 /// `advanced` — the subject of the 高级操作 sheet.
@@ -217,7 +219,7 @@ struct ServiceDetailScreen: View {
             }
             LuckyPillButton(title: "模块设置", symbol: "gearshape.2") { openSettingsEditor() }
             LuckyGlassIconButton(symbol: "list.number",
-                                 label: kind == .ssl ? "证书排序" : "排序和测试工具") {
+                                 label: kind == .ssl ? "证书排序" : "任务排序") {
                 openOrdering()
             }
         } else {
@@ -432,18 +434,35 @@ struct ServiceDetailScreen: View {
         let action = kind == .ddns ? "sync" : (syncSource ? "sync" : "flush")
         let label = kind == .ddns ? "手动同步" : (syncSource ? "同步证书" : "刷新证书")
         let title = kind == .ddns ? "同步" : (syncSource ? "同步" : "刷新")
-        return HStack(spacing: 7) {
-            ServiceActionButton(title: title, symbol: LuckySymbol.restart, fill: .solid,
-                                disabled: pending) {
-                confirmAction(key: key, action: action, label: label)
-            }
-            ServiceActionButton(title: "编辑", symbol: LuckySymbol.edit, fill: .muted,
-                                disabled: pending) {
-                openItemEditor(key: key)
-            }
-            ServiceActionButton(title: "删除", symbol: LuckySymbol.delete, tone: .danger,
-                                fill: .soft, disabled: pending) {
-                confirmRemove(key: key, name: name)
+        return Group {
+            if kind == .ddns {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 7) {
+                    ServiceActionButton(title: title, symbol: LuckySymbol.restart, fill: .solid,
+                                        disabled: pending) {
+                        confirmAction(key: key, action: action, label: label)
+                    }
+                    ServiceActionButton(title: "编辑", symbol: LuckySymbol.edit, fill: .muted,
+                                        disabled: pending) { openItemEditor(key: key) }
+                    ServiceActionButton(title: "复制", symbol: LuckySymbol.copy, fill: .muted,
+                                        disabled: pending) { copyDdnsTask(key: key) }
+                    ServiceActionButton(title: "删除", symbol: LuckySymbol.delete, tone: .danger,
+                                        fill: .soft, disabled: pending) {
+                        confirmRemove(key: key, name: name)
+                    }
+                }
+            } else {
+                HStack(spacing: 7) {
+                    ServiceActionButton(title: title, symbol: LuckySymbol.restart, fill: .solid,
+                                        disabled: pending) {
+                        confirmAction(key: key, action: action, label: label)
+                    }
+                    ServiceActionButton(title: "编辑", symbol: LuckySymbol.edit, fill: .muted,
+                                        disabled: pending) { openItemEditor(key: key) }
+                    ServiceActionButton(title: "删除", symbol: LuckySymbol.delete, tone: .danger,
+                                        fill: .soft, disabled: pending) {
+                        confirmRemove(key: key, name: name)
+                    }
+                }
             }
         }
     }
@@ -453,7 +472,8 @@ struct ServiceDetailScreen: View {
     @ViewBuilder
     private func secondaryVerbs(_ item: LuckyListItem, key: String, name: String) -> some View {
         if kind == .ddns || kind == .ssl {
-            ServiceActionButton(title: "更多操作", symbol: "ellipsis", tone: .idle, fill: .muted,
+            ServiceActionButton(title: kind == .ddns ? "DNS 记录与工具" : "更多操作",
+                                symbol: "ellipsis", tone: .idle, fill: .muted,
                                 height: 38, radius: LuckyTheme.Radius.row) {
                 advanced = ServiceAdvancedRequest(key: key, name: name, item: item)
             }
@@ -495,12 +515,24 @@ struct ServiceDetailScreen: View {
     /// `key={`${editor.type}-${editor.key ?? 'new'}`}` is `ServiceEditorRequest.id`, so
     /// `.sheet(item:)` already remounts the editor whenever the subject changes.
     ///
-    /// An ACME certificate gets the purpose-built editor; everything else — including a
-    /// file-uploaded certificate and both 模块设置 records — gets the generic form.
+    /// DDNS and ACME have purpose-built editors; file certificates and SSL settings keep the
+    /// schema-free form because those payloads vary substantially between Lucky versions.
     @ViewBuilder
     private func editorSheet(_ request: ServiceEditorRequest) -> some View {
         let source = ServiceRecord.pick(.object(request.value), ["AddFrom", "Type"], "file")
-        if kind == .ssl, request.target == .item, source.lowercased() == "acme" {
+        if kind == .ddns, request.target == .item {
+            DdnsTaskEditor(request: request, saving: saving) {
+                editor = nil
+            } save: { value in
+                save(request, value)
+            }
+        } else if kind == .ddns {
+            DdnsSettingsEditor(request: request, saving: saving) {
+                editor = nil
+            } save: { value in
+                save(request, value)
+            }
+        } else if kind == .ssl, request.target == .item, source.lowercased() == "acme" {
             SslAcmeEditor(request: request, busy: saving, syncClients: syncClients) {
                 editor = nil
             } save: { value in
@@ -530,6 +562,10 @@ struct ServiceDetailScreen: View {
             showLogs: {
                 advanced = nil
                 showLogs(key: request.key)
+            },
+            editDdnsRecord: { recordKey in
+                advanced = nil
+                openItemEditor(key: request.key, openRecord: recordKey ?? "new")
             }
         )
     }
@@ -715,8 +751,8 @@ struct ServiceDetailScreen: View {
 
     // MARK: - Opening the editors
 
-    /// 添加任务 / 添加证书. A new DDNS task starts from the three fields the module requires; a new
-    /// certificate goes to the purpose-built ACME sheet instead of an empty form.
+    /// 添加任务 / 添加证书. DDNS starts from the complete server-compatible defaults; a new
+    /// certificate goes to the purpose-built certificate sheet.
     private func openAdd() {
         editorFailure = ""
         if kind == .ssl {
@@ -724,33 +760,51 @@ struct ServiceDetailScreen: View {
         } else {
             editor = ServiceEditorRequest(
                 title: "添加 DDNS 任务",
-                value: JSONObject([
-                    ("TaskName", .string("")),
-                    ("Enable", .bool(true)),
-                    ("Records", .array([])),
-                ])
+                value: DdnsTaskEditor.newTaskValue
             )
         }
     }
 
     /// `editDdnsTask` / `editSslCertificate` — read the record first, because the list payload is a
     /// summary and posting it back would drop every field the list does not carry.
-    private func openItemEditor(key: String) {
+    private func openItemEditor(key: String, openRecord: String? = nil) {
         Task {
             editorFailure = ""
             do {
                 let payload = kind == .ssl
                     ? try await SslService.certificate(key)
                     : try await DdnsService.task(key)
+                let value: JSONObject
+                if kind == .ddns {
+                    value = try DdnsService.taskValue(payload)
+                } else {
+                    value = ServiceRecord.editableValue(payload).record
+                }
                 editor = ServiceEditorRequest(
                     title: kind == .ssl ? "编辑 SSL 证书" : "编辑 DDNS 任务",
-                    value: ServiceRecord.editableValue(payload).record,
-                    key: key
+                    value: value,
+                    key: key,
+                    openRecord: openRecord
                 )
             } catch {
                 guard !error.isCancellation else { return }
                 let fallback = kind == .ssl ? "无法读取 SSL 证书" : "无法读取 DDNS 任务"
                 toast = .failed(error.luckyMessage(fallback))
+            }
+        }
+    }
+
+    private func copyDdnsTask(key: String) {
+        Task {
+            editorFailure = ""
+            do {
+                let payload = try await DdnsService.task(key)
+                let value = try DdnsService.taskValue(payload)
+                editor = ServiceEditorRequest(title: "复制 DDNS 任务",
+                                              value: DdnsTaskEditor.duplicatedValue(value))
+            } catch {
+                guard !error.isCancellation else { return }
+                toast = .failed(error.luckyMessage("无法复制 DDNS 任务"))
             }
         }
     }
@@ -763,10 +817,16 @@ struct ServiceDetailScreen: View {
                 let payload = kind == .ssl
                     ? try await SslService.setting()
                     : try await DdnsService.configure()
+                let value: JSONObject
+                if kind == .ddns {
+                    value = try DdnsService.configureValue(payload)
+                } else {
+                    value = ServiceRecord.editableValue(payload).record
+                }
                 editor = ServiceEditorRequest(
                     target: .settings,
                     title: kind == .ssl ? "SSL 模块设置" : "DDNS 模块设置",
-                    value: ServiceRecord.editableValue(payload).record
+                    value: value
                 )
             } catch {
                 guard !error.isCancellation else { return }

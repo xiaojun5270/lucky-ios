@@ -76,6 +76,7 @@ struct WebInlineActionButton: View {
     var symbol: String
     var tone: LuckyTone = .brand
     var prominent: Bool = false
+    var expands: Bool = false
     var disabled: Bool = false
     var action: () -> Void
 
@@ -97,7 +98,8 @@ struct WebInlineActionButton: View {
             }
             .foregroundStyle(prominent ? Color.white : LuckyTheme.textPrimary)
             .padding(.horizontal, prominent ? 14 : 10)
-            .frame(minHeight: LuckyTheme.Space.touchTarget)
+            .frame(maxWidth: expands ? .infinity : nil,
+                   minHeight: LuckyTheme.Space.touchTarget)
             .background(shape.fill(prominent ? tone.tint : LuckyTheme.surface))
             .overlay(
                 shape.strokeBorder(prominent ? Color.clear : LuckyTheme.hairline,
